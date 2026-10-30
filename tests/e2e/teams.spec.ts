@@ -5,7 +5,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { ageUpTimes, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { ageUpTimes, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, expandGroups, goTab } from './helpers';
 import { sportsLife, type SportsLife } from './sportsFixtures';
 
 
@@ -17,9 +17,10 @@ async function open(page: Page, options: SportsLife): Promise<void> {
 }
 
 const openScreen = async (page: Page) => {
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('sports-screen')).toBeVisible();
+  await expandGroups(page);
 };
 
 test('a team renamed in Settings is the new name in a new life, which keeps its own copy of the settings', async ({ page }) => {
@@ -54,8 +55,9 @@ test('a team renamed in Settings is the new name in a new life, which keeps its 
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
   await ageUpTimes(page, 8);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
+  await expandGroups(page);
   await page.getByTestId('league-soccer').locator('summary').click();
   await expect(page.getByTestId('league-team-chicago_lakefront_fc')).toContainText('Chicago Lakeshore Rovers');
   await expect(page.getByTestId('league-team-chicago_lakefront_fc')).toContainText('Houston');
@@ -90,9 +92,10 @@ test('a player can add a team of their own, which is checked, listed and can be 
 
 test('signing with a team in a city the game does not have yet keeps you in the nearest city and says where the team plays', async ({ page }) => {
   await open(page, { seed: 'e2e-teams-2', pro: true, teamId: 'boston_harbor_lanterns' });
-  await tab(page, 'Job').click();
-  await expect(page.getByTestId('sports-team')).toContainText('Boston Harbor Lanterns');
+  await goTab(page, 'Job');
+  await expect(page.getByTestId('role-sports')).toContainText('Boston Harbor Lanterns');
   await page.getByTestId('sports-open').click();
+  await expandGroups(page);
   await expect(page.getByTestId('team-line')).toContainText('Boston');
   await expect(page.getByTestId('away-line')).toContainText('home games in Boston');
   await expect(page.getByTestId('away-line')).toContainText('You live in New York');

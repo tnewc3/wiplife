@@ -1,3 +1,4 @@
+import { performancePenalty } from './hub/load';
 import { workBlocked } from './migration/query';
 import { effectiveLanguages, meetsLanguageJob } from './languages';
 /**
@@ -354,7 +355,8 @@ export function performanceAim(state: LifeState, def: JobDef, content: ContentBu
 export function reviewPerformance(state: LifeState, def: JobDef, content: ContentBundle): number {
   const p = content.balance.careers.performance;
   const job = state.career.job!;
-  const aim = performanceAim(state, def, content) + (nextFloat(state.rng) * 2 - 1) * p.swing;
+  // C2: the load of every role you carry, and burnout, take from it.
+  const aim = performanceAim(state, def, content) - performancePenalty(state, content) + (nextFloat(state.rng) * 2 - 1) * p.swing;
   return clampInt(job.performance * p.carry + aim * (1 - p.carry), 0, 100);
 }
 

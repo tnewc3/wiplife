@@ -17,7 +17,7 @@ describe("the people's lives report (E3)", () => {
   });
 
   it('measures work, love, trouble, requests and news, with no romance under 18 and no invariant failures', { timeout: 120_000 }, () => {
-    const report = runSimulation(content, { lives: 12, seedPrefix: 'people-report-b10' });
+    const report = runSimulation(content, { lives: 12, seedPrefix: 'people-report-c2' });
     const p = report.people;
     expect(report.invariantFailures).toBe(0);
     expect(p.lives).toBe(12);

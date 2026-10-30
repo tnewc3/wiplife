@@ -5,7 +5,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, playThroughEvents, settle, startRandomLife, tab } from './helpers';
+import { ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, playThroughEvents, settle, startRandomLife, goTab } from './helpers';
 import { sameGenderLife } from './loveFixtures';
 
 const card = (page: Page) => page.getByTestId('interaction-card');
@@ -15,10 +15,10 @@ test('"Find a date" is for adults: it shows on the People tab at 18, costs show 
   // With this seed the character is a woman attracted to men (see people.spec.ts).
   await startRandomLife(page, { testPack: true, seed: 'e2e-love' });
   await ageUpTimes(page, 10);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await expect(page.getByTestId('find-date')).toHaveCount(0);
   await ageUpTimes(page, 8);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
 
   const find = page.getByTestId('find-date');
   await expect(find).toBeVisible();
@@ -37,12 +37,12 @@ test('"Find a date" is for adults: it shows on the People tab at 18, costs show 
   await playThroughEvents(page);
   await expect(eventSheet(page)).toHaveCount(0);
 
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await expect(page.getByTestId('find-date')).toContainText('1 of 4 used');
   // The input survives a reload.
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await expect(page.getByTestId('find-date')).toContainText('1 of 4 used');
   await expectNoHorizontalScroll(page);
 });
@@ -53,7 +53,7 @@ test('a same-gender flirt with a friend: possible with a man you are attracted t
   await loadSavedLife(page, sameGenderLife('e2e-love-fixture'));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   const friends = page.getByRole('list', { name: 'Friends' });
 
   // Ben is not attracted to you: the flirt is offered, and answered with a kind, clear no.

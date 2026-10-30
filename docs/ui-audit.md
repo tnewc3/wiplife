@@ -77,3 +77,15 @@ Actions that are not leisure activities (jobs, school, money, housing, family, t
 - The People tab was a stack of full cards with two bars per person and two large buttons; it is now collapsible groups with one bar per person.
 - A person's page was one scroll of up to eight cards; it is now three tabs.
 - Assets was one scroll of finances, properties and possessions; it is now three tabs.
+
+## C2: the Career hub
+
+| Screen | Before | Now |
+|---|---|---|
+| Job tab | A stack of cards (school, job, ways to work, special careers) | **Career** tab: **You** (one 56px row per role with its key bar and a chevron), the **Schedule** row (load bar), **Find work** (Jobs, Part-time, Gigs, Education) and **Special careers** (Sports, Music, Acting, Social media, Writing & art, Business, Crime). Each row opens the role's own screen over the tab |
+| Schedule | None | A sheet with the total load, burnout, what each role takes and the commitment (holding back, steady, all in) per role, and your skills with their peaks |
+| Sports screen | One long scroll of 14 sections | Tabs **Overview / Season / League / History**. Overview starts with four rows (role with Greatness, team with strength, contract, agent) and the rest in collapsible groups that remember if they are open (position and team, try out or switch, practice, contract and agent, commitment, performance enhancers, retire). League is a table of jerseys and strength bars. History is one compact row per season, a tap shows its summary |
+| Band (was a section of the Fame screen) | Members, rename, recruit, leave, shows and releases mixed into the Fame scroll | Its own screen with tabs **Overview / Members / Releases / Shows**; the Fame screen keeps a single row that opens it |
+| Training | A silent number change | A 2–3 second card (skippable, instant with reduced motion) after practice, training, rehearsal, studying and the gym |
+| Gig work, Business, Time abroad cards | Expandable "ways" rows | Sheets opened from Find work and Special careers. **Time abroad** is a row under Find work |
+| Modeling | Listed in the plan | Not a career in the game (E6b has no modeling path), so there is no row |

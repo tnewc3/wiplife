@@ -38,7 +38,7 @@ export const ageUpButton = (page: Page) => page.getByRole('button', { name: 'Age
 export const gameNav = (page: Page) => page.getByRole('navigation', { name: 'Game sections' });
 /** A main tab by its name: "Job" matches School while you are enrolled; "Work/School" is the old name for the same tab. */
 export const tab = (page: Page, name: 'People' | 'Assets' | 'Activities' | 'Job' | 'Work/School' | 'Money') =>
-  gameNav(page).getByRole('button', { name: name === 'Job' || name === 'Work/School' ? /^(Job|School)$/ : name === 'Money' ? 'Assets' : name, exact: name !== 'Job' && name !== 'Work/School' });
+  gameNav(page).getByRole('button', { name: name === 'Job' || name === 'Work/School' ? /^(Job|School|Career)$/ : name === 'Money' ? 'Assets' : name, exact: name !== 'Job' && name !== 'Work/School' });
 
 /** The life log shows this age as a heading (Home). Age 0 is "Birth". */
 export async function expectAge(page: Page, age: number): Promise<void> {
@@ -58,6 +58,7 @@ export async function openProfile(page: Page): Promise<void> {
 
 /** Back to Home from wherever you are (a page over a tab, a person, a tab). */
 export async function goHome(page: Page): Promise<void> {
+  await closeSheets(page);
   for (let i = 0; i < 4; i++) {
     if (await page.getByRole('button', { name: 'Menu', exact: true }).isVisible()) return;
     const back = page.getByRole('button', { name: /^Back to /, exact: false }).first();
@@ -169,6 +170,7 @@ export async function playThroughEvents(page: Page): Promise<void> {
 
 /** Taps Age Up and plays the year out (events answered with their first choice). */
 export async function ageUp(page: Page): Promise<void> {
+  await closeSheets(page);
   await ageUpButton(page).click();
   await settle(page);
   await playThroughEvents(page);
@@ -313,4 +315,34 @@ export async function passFuneral(page: Page): Promise<void> {
   await expect(page.getByText('The funeral', { exact: true })).toBeVisible();
   await page.getByTestId('funeral-continue').click();
   await expect(page.getByText('In memoriam')).toBeVisible();
+}
+
+/** C2: opens one of the Career tab's rows (its screen opens over the tab): `role-school`, `find-jobs`, `find-gigs`, `find-education`, `find-abroad`, `special-business`, `special-crime`, `special-social`, `sports-open`, `fame-open`. */
+export async function openRow(page: Page, id: string): Promise<void> {
+  await page.getByTestId(id).click();
+}
+
+/** C2: opens every collapsed group of the open screen (the Sports screen's Overview keeps its details in groups). */
+export async function expandGroups(page: Page): Promise<void> {
+  for (;;) {
+    const closed = page.locator('[data-testid^="grp-"] > button[aria-expanded="false"]').first();
+    if ((await closed.count()) === 0) return;
+    await closed.click();
+  }
+}
+
+/** C2: closes screens opened over a tab from the Career tab (sheets that are not an event). */
+export async function closeSheets(page: Page): Promise<void> {
+  for (let i = 0; i < 4; i++) {
+    const sheet = page.locator('[role="dialog"]').filter({ hasNot: page.getByTestId('event-card') }).last();
+    if (!(await sheet.isVisible())) return;
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+  }
+}
+
+/** Goes to a main tab, closing a screen left open over the one before. */
+export async function goTab(page: Page, name: Parameters<typeof tab>[1]): Promise<void> {
+  await closeSheets(page);
+  await tab(page, name).click();
 }

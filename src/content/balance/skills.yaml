@@ -1,0 +1,56 @@
+# C2: skills. Every sport skill, instrument, hobby and bandmate's playing follows these rules:
+# a skill grows a little in each year it is used (slower as it rises, faster with practice,
+# talent and commitment), and after idleYears years untouched it fades a little each year,
+# never below a share of the highest level it ever reached.
+growth:
+  # Points a year of use adds, by the level it is at.
+  year:
+    - { at: 0, x: 6 }
+    - { at: 30, x: 4 }
+    - { at: 60, x: 2.2 }
+    - { at: 85, x: 0.9 }
+    - { at: 100, x: 0 }
+  # A practice session or rehearsal: this share of a year of use.
+  session: 0.35
+  commitment: { back: 0.6, steady: 1, all: 1.4 }
+  talent: 1.4
+  cap: { talent: 100, none: 88 }
+fade:
+  idleYears: 2
+  perYear: 3
+  floor: 0.55
+start: 8
+levels: [10, 25, 45, 70]
+band:
+  pool: { base: 3, perFame: 0.03, max: 6 }
+  # A candidate's skill: base plus weights on your fame, your city's size and your reputation, with a spread.
+  mean: { base: 16, fame: 0.38, city: 0.1, reputation: 0.1, sd: 13 }
+  # The best candidate there can be at your fame: elite players are rare early on.
+  cap:
+    - { at: 0, x: 52 }
+    - { at: 15, x: 64 }
+    - { at: 30, x: 76 }
+    - { at: 50, x: 88 }
+    - { at: 75, x: 100 }
+  ages: { min: 18, spread: 9 }
+  temper: { fiery: 0.2, flaky: 0.18 }
+  rehearsal:
+    year:
+      - { at: 0, x: 7 }
+      - { at: 40, x: 4 }
+      - { at: 70, x: 2 }
+      - { at: 100, x: 0 }
+    # The band playing together does a share of a rehearsal year's work even with none held.
+    baseline: 0.25
+    chemistry: 0.012
+    perSession: 0.2
+  sessions: { back: 4, steady: 10, all: 20 }
+  replace: { affection: -25, others: -4 }
+  strength: { skill: 0.7, chemistry: 0.3 }
+enhancers:
+  minAge: 18
+  form: 6
+  health: 1.5
+  test: { pro: 0.5, college: 0.2, school: 0, youth: 0 }
+  detect: 0.6
+  caught: { fame: 15, mood: 25, reputation: 20 }

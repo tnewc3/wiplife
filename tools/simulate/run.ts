@@ -81,6 +81,7 @@ import { chooseSocialActions, emptySocialReport, formatSocial, rollSocialProfile
 import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
 import { peakRung } from '../../src/engine/fame/query';
 import { AttractionWatcher, attractionTargets, chooseDateActions, emptyAttractionReport, formatAttraction, type AttractionReport } from './attraction';
+import { chooseHubActions, emptyHubReport, formatHub, HubWatcher, hubTargets, rollHubProfile, type HubReport } from './hub';
 import { athleteChoice, chooseSportsActions, emptySportsReport, formatSports, rollAthleteProfile, SportsWatcher, sportsTargets, type SportsReport } from './sports';
 import { chooseSchoolLifeActions, chooseSchoolLifeInteractions, emptySchoolLifeReport, formatSchoolLife, rollSchoolLifeProfile, SchoolLifeWatcher, schoolLifeTargets, type SchoolLifeReport } from './school';
 import { chooseTeenActions, emptyTeenReport, formatTeen, rollTeenProfile, teenTargets, TeenWatcher, type TeenReport } from './teen';
@@ -122,7 +123,7 @@ export interface SimulationOptions {
   country?: CountryId;
 }
 
-export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star' | 'athlete' | 'activities';
+export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star' | 'athlete' | 'activities' | 'hub';
 
 export interface StageYears {
   years: number;
@@ -198,6 +199,8 @@ export interface SimulationReport {
   social: SocialReport;
   /** E6c: sports, measured. */
   sports: SportsReport;
+  /** C2: the Career hub, measured. */
+  hub: HubReport;
   /** B1: romance by attraction, measured. */
   attraction: AttractionReport;
 }
@@ -834,7 +837,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
 
   const recurring = recurringEvents(content);
   // E6a: the criminal player lives as the careful one does (family, interactions), and also in a crew.
-  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' || playerKind === 'athlete' || playerKind === 'activities' ? 'careful' : playerKind;
+  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' || playerKind === 'athlete' || playerKind === 'activities' || playerKind === 'hub' ? 'careful' : playerKind;
   const interactions = emptyInteractionReport(behaves, content);
   const family = emptyFamilyReport();
   const people = emptyPeopleReport();
@@ -858,6 +861,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const fame = emptyFameReport(playerKind, content);
   const social = emptySocialReport(playerKind, content);
   const sports = emptySportsReport(playerKind, content);
+  const hubReport = emptyHubReport(playerKind);
   const attraction = emptyAttractionReport(playerKind);
   const famousAtTarget: number[] = [];
   const peopleTimer = new PipelineTimer(people);
@@ -912,6 +916,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const socialRng = createRng(`${seed}:social`);
     const socialProfile = rollSocialProfile(socialRng);
     const sportsWatcher = new SportsWatcher(sports, content);
+    const hubWatcher = new HubWatcher(hubReport, content);
+    const hubRng = createRng(`${seed}:hub`);
+    const hubProfile = rollHubProfile(hubRng);
     const attractionWatcher = new AttractionWatcher(attraction);
     const dateRng = createRng(`${seed}:dates`);
     const sportsRng = createRng(`${seed}:sports`);
@@ -967,7 +974,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const eventId = l.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? '';
       // Starting an adoption, IVF cycle or surrogacy: the player came here to begin.
       const starts = [...content.registries.family.adoption.start, ...content.registries.family.ivf.start, ...content.registries.family.surrogacy.start];
-      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : playerKind === 'criminal' ? criminalChoice(l, card, rng) : playerKind === 'athlete' ? (athleteChoice(eventId, card.choices, content, athleteProfile) ?? starChoice(l, card, rng)) : playerKind === 'star' ? starChoice(l, card, rng) : carefulChoice(l, card, rng);
+      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : playerKind === 'criminal' ? criminalChoice(l, card, rng) : playerKind === 'athlete' || playerKind === 'hub' ? (athleteChoice(eventId, card.choices, content, athleteProfile) ?? starChoice(l, card, rng)) : playerKind === 'star' ? starChoice(l, card, rng) : carefulChoice(l, card, rng);
       if (illegal.size > 0) {
         legal.illegalChoices.offered++;
         if (illegal.has(id)) legal.illegalChoices.taken++;
@@ -1140,6 +1147,15 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
           sportsWatcher.acted(actionId, beforeAction);
         }
       }
+      // ...and on several careers at once (C2): a sport as a child, a band beside it, rehearsals, how hard to work at each role...
+      if (playerKind === 'hub') {
+        for (const [actionId, params] of chooseHubActions(life, content, hubRng, hubProfile)) {
+          if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+          life = takeLifeAction(life, actionId, params);
+          money.actionsTaken[actionId]++;
+          hubWatcher.acted(actionId, life);
+        }
+      }
       // ...and on their mind (M1)...
       for (const [actionId, params] of careless ? [] : chooseMentalActions(life, content, mentalRng, mentalProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
@@ -1281,6 +1297,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       fameWatcher.observe(yearBefore, life);
       socialWatcher.observe(yearBefore, life);
       sportsWatcher.observe(yearBefore, life);
+      hubWatcher.observe(yearBefore, life);
       attractionWatcher.observe(life);
       possessionsWatcher.observe(yearBefore, life, content);
       pastimesWatcher.observe(yearBefore, life);
@@ -1337,6 +1354,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     fameWatcher.finish(life);
     socialWatcher.finish(life);
     sportsWatcher.finish(life);
+    hubWatcher.finish(life);
     attractionWatcher.finish(life);
     possessionsWatcher.finish(life);
     pastimesWatcher.finish(life);
@@ -1697,6 +1715,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     fame: { ...fame, famousAtTarget },
     social,
     sports,
+    hub: hubReport,
     attraction,
     consistency: {
       violations,
@@ -1849,6 +1868,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatFame(report.fame, content), '  targets (src/content/balance/targets.yaml):', ...fameTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatSocial(report.social, content), '  targets (src/content/balance/targets.yaml):', ...socialTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatSports(report.sports, content), '  targets (src/content/balance/targets.yaml):', ...sportsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatHub(report.hub, content), '  targets (src/content/balance/targets.yaml):', ...hubTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatAttraction(report.attraction), '  targets (src/content/balance/targets.yaml):', ...attractionTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));

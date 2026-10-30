@@ -9,7 +9,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fameLife, type FameLife } from './fameFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, goTab } from './helpers';
 
 
 async function open(page: Page, options: FameLife): Promise<void> {
@@ -20,21 +20,18 @@ async function open(page: Page, options: FameLife): Promise<void> {
 }
 
 const openScreen = async (page: Page) => {
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   await page.getByTestId('fame-open').click();
   await expect(page.getByTestId('fame-screen')).toBeVisible();
 };
 
-test('the Work tab shows where you stand on the ladder in words, and fits a phone', async ({ page }) => {
+test('the Career tab shows your craft with a Fame bar, and fits a phone', async ({ page }) => {
   await open(page, { seed: 'e2e-fame-1' });
-  await tab(page, 'Job').click();
-  const card = page.getByTestId('fame-card');
-  await expect(card).toBeVisible();
-  await expect(page.getByTestId('fame-rung')).toHaveText(/First-release artist/);
-  await expect(page.getByTestId('fame-band')).toHaveText(/Unknown|Local|Rising|Famous|Legendary/);
-  await expect(page.getByTestId('fame-mood')).toHaveText(/Turned on you|Restless|Devoted/);
-  await expect(page.getByTestId('fame-next')).toContainText('Next: signed act');
-  await expect(card).not.toContainText(/\b\d{2,3}\/100\b/);
+  await goTab(page, 'Job');
+  const row = page.getByTestId('role-fame');
+  await expect(row).toBeVisible();
+  await expect(row.getByRole('meter', { name: 'Fame' })).toBeVisible();
+  await expect(page.getByTestId('fame-open')).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 });
@@ -46,7 +43,7 @@ test('the Fame screen shows the ladder, the bars, the agent and what you have re
   await expect(ladder.getByRole('listitem')).toHaveCount(7);
   await expect(ladder.locator('[aria-current="step"]')).toContainText('First-release artist');
   await expect(page.getByTestId('next-music')).toContainText('Get signed by a label');
-  await expect(page.getByRole('meter', { name: 'Fame' })).toBeVisible();
+  await expect(page.getByTestId('fame-screen').getByRole('meter', { name: 'Fame' })).toBeVisible();
   await expect(page.getByRole('meter', { name: 'Public image' })).toBeVisible();
   await expect(page.getByRole('meter', { name: 'Fan mood' })).toBeVisible();
   await expect(page.getByTestId('screen-mood')).toContainText(/fans/);
@@ -84,8 +81,7 @@ test('commitment changes with one tap, and the project step takes the creative c
 
 test('with no career the Fame screen shows the ways in, and starting one puts you on the ladder', async ({ page }) => {
   await open(page, { seed: 'e2e-fame-4', none: true });
-  await tab(page, 'Job').click();
-  await expect(page.getByTestId('fame-prompt')).toBeVisible();
+  await goTab(page, 'Job');
   await page.getByTestId('fame-open').click();
   await expect(page.getByTestId('entry')).toBeVisible();
   await expect(page.getByRole('list', { name: 'Music routes' }).getByRole('listitem')).toHaveCount(4);
@@ -113,8 +109,7 @@ test('a tabloid headline appears in the news feed on the Life tab', async ({ pag
 
 test('a retired star can go back to work', async ({ page }) => {
   await open(page, { seed: 'e2e-fame-7', retired: true });
-  await tab(page, 'Job').click();
-  await expect(page.getByTestId('fame-retired')).toBeVisible();
+  await goTab(page, 'Job');
   await page.getByTestId('fame-open').click();
   await page.getByTestId('return-fame').click();
   await expect(page.getByRole('list', { name: 'Music ladder' })).toBeVisible();

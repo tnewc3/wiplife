@@ -12,6 +12,7 @@ import {
 } from './balance';
 import { actionRegistrySchema, loveRegistrySchema, relationshipsBalanceSchema } from './relationships';
 import { careersBalanceSchema, jobSchema, workRegistrySchema } from './careers';
+import { hubTextSchema, skillsBalanceSchema } from './hub';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
 import { citySchema } from './city';
 import { countriesBalanceSchema, countrySchema } from './country';
@@ -45,6 +46,7 @@ import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRe
 
 export * from './balance';
 export * from './careers';
+export * from './hub';
 export * from './character';
 export * from './city';
 export * from './country';
@@ -148,6 +150,7 @@ export const singletonTypes = {
   'balance/economy': economyBalanceSchema,
   'balance/education': educationBalanceSchema,
   'balance/careers': careersBalanceSchema,
+  'balance/skills': skillsBalanceSchema,
   'balance/health': healthBalanceSchema,
   'balance/legal': legalBalanceSchema,
   'balance/discovery': discoveryBalanceSchema,
@@ -195,6 +198,7 @@ export const singletonTypes = {
   'text/school': schoolTextSchema,
   'text/crime': crimeTextSchema,
   'text/fame': fameTextSchema,
+  'text/hub': hubTextSchema,
   'text/sports': sportsTextSchema,
   'text/social': socialTextSchema,
   'registries/memories': memoryRegistrySchema,
@@ -288,6 +292,7 @@ export const contentBundleSchema = z.strictObject({
     economy: economyBalanceSchema,
     education: educationBalanceSchema,
     careers: careersBalanceSchema,
+    skills: skillsBalanceSchema,
     health: healthBalanceSchema,
     legal: legalBalanceSchema,
     discovery: discoveryBalanceSchema,
@@ -336,6 +341,7 @@ export const contentBundleSchema = z.strictObject({
     school: schoolTextSchema,
     crime: crimeTextSchema,
     fame: fameTextSchema,
+    hub: hubTextSchema,
     sports: sportsTextSchema,
     social: socialTextSchema,
   }),

@@ -183,6 +183,7 @@ function applySelf(draft: LifeState, payload: EditPayload, content: ContentBundl
   // Moving first: a move ends a job, and a job named in the same edit is the one in the new city.
   if (payload.cityId !== undefined) applyCity(draft, payload.cityId, content);
   if (payload.work) applyJob(draft, payload.work, content);
+  if (payload.career) applyCareer(draft, payload.career, content);
 }
 
 function applyValues(draft: LifeState, payload: EditPayload): void {
@@ -421,4 +422,47 @@ function applyPersonWork(draft: LifeState, person: Person, payload: EditPayload,
   }
   // A person who had no summary of their life yet gets one only when the edit changed something.
   if (person.life === undefined && (before.occupation !== person.occupation || before.wealth !== person.wealthLevel || !same(life, base))) person.life = life;
+}
+
+/** C2: sports, music and fame edits. Each goes through the same checks as every edit (rules.ts, then the invariants). */
+function applyCareer(draft: LifeState, career: NonNullable<EditPayload['career']>, content: ContentBundle): void {
+  const f = draft.fame;
+  const s = career.sports;
+  if (s && draft.sports.sport !== null) {
+    const path = f.paths[draft.sports.sport];
+    if (path) {
+      if (s.greatness !== undefined) put(path, 'craft', s.greatness);
+      for (const [id, level] of Object.entries(s.skills ?? {})) {
+        path.skills = { ...(path.skills ?? {}), [id]: level };
+        draft.hub.marks[`${draft.sports.sport}.${id}`] = { peak: Math.max(draft.hub.marks[`${draft.sports.sport}.${id}`]?.peak ?? 0, level), last: draft.currentYear };
+      }
+    }
+    if (s.position !== undefined) put(draft.sports, 'position', s.position);
+    if (s.salary !== undefined && draft.sports.contract) put(draft.sports.contract, 'salary', s.salary);
+    if (s.history === 'clear') draft.sports.seasons = [];
+  }
+  const m = career.music;
+  if (m && f.band) {
+    const path = f.paths[f.band.path];
+    if (m.buzz !== undefined && path) put(path, 'fame', m.buzz);
+    if (m.chemistry !== undefined) put(f.band, 'chemistry', m.chemistry);
+    for (const edit of m.members ?? []) {
+      const member = f.band.members.find((x) => x.id === edit.id);
+      if (!member) continue;
+      put(member, 'skill', edit.skill);
+      draft.hub.marks[`member.${member.id}`] = { peak: Math.max(draft.hub.marks[`member.${member.id}`]?.peak ?? 0, edit.skill), last: draft.currentYear };
+    }
+  }
+  if (m?.releases === 'clear') f.projects = [];
+  const e = career.fame;
+  if (e && f.main !== null) {
+    const path = f.paths[f.main];
+    if (e.fame !== undefined && path) put(path, 'fame', e.fame);
+    if (e.image !== undefined) put(f, 'image', e.image);
+    if (e.fans !== undefined) put(f, 'fans', e.fans);
+    if (e.mood !== undefined) put(f, 'mood', e.mood);
+    if (e.agent !== undefined) f.agent = e.agent === null ? null : { agentId: e.agent, since: draft.currentYear };
+    if (e.contract === 'end') f.contract = null;
+  }
+  void content;
 }

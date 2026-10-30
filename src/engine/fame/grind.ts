@@ -19,6 +19,7 @@
  *
  * Numbers: balance/fame.yaml practice, shows and tours.
  */
+import { pathSkillKey, touchMark } from '../hub/skills';
 import type { ContentBundle, FameInstrumentDef, FamePathDef, FameSkillDef, FameVenueDef } from '../../content/schemas';
 import { curveAt } from '../curve';
 import { wholeDollars } from '../finance';
@@ -115,6 +116,8 @@ export function practise(state: LifeState, pathId: Id, skillId: Id, content: Con
   const gain = practiceGain(state, pathId, skillId, content, multiplier);
   const g = grindNow(state);
   path.skills = { ...(path.skills ?? {}), [skillId]: Math.round((skillLevel(path, skillId, content) + gain) * 10) / 10 };
+  // C2: practice counts as a use of the skill (its peak and last year).
+  touchMark(state, pathSkillKey(pathId, skillId), path.skills[skillId]!);
   const q = content.balance.fame.quality;
   const craftCap = hasTalentFor(state, def) ? q.craftCap.talent : q.craftCap.none;
   if (path.craft < craftCap) path.craft = Math.min(craftCap, Math.round((path.craft + gain * craftShare) * 10) / 10);
@@ -159,6 +162,8 @@ export function setInstrument(state: LifeState, instrumentId: Id, content: Conte
   if (f.instrument !== null && skill && path.skills?.[skill.id] !== undefined) {
     const p = content.balance.fame.practice;
     path.skills = { ...path.skills, [skill.id]: Math.round(Math.max(p.start, path.skills[skill.id]! * p.switchKeep) * 10) / 10 };
+    // C2: a different instrument is a different skill: its peak starts again from what you keep.
+    state.hub.marks[pathSkillKey(f.main!, skill.id)] = { peak: path.skills[skill.id]!, last: state.currentYear };
   }
   f.instrument = instrumentId;
   // In a band, you now play it (unless you are the singer).

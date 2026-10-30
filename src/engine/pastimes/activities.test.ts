@@ -244,30 +244,33 @@ describe('hobbies', () => {
   it('grows skill with practice, sets the flags, and gains shrink with repeats in a year', () => {
     let life = player('a1-hobby', 20);
     life = settle(act(life, 'play_the_guitar'));
-    const first = life.hobbies.play_the_guitar!.skill;
+    const first = life.hub.skills['hobby.play_the_guitar']!.level;
     expect(first).toBeGreaterThan(0);
     expect(life.flags.practiced_play_the_guitar).toBe(true);
-    const a = life.hobbies.play_the_guitar!.skill;
+    const a = life.hub.skills['hobby.play_the_guitar']!.level;
     life = settle(act(life, 'play_the_guitar'));
     life = settle(act(life, 'play_the_guitar'));
     life = settle(act(life, 'play_the_guitar'));
-    expect(life.hobbies.play_the_guitar!.skill).toBeGreaterThan(a);
+    expect(life.hub.skills['hobby.play_the_guitar']!.level).toBeGreaterThan(a);
     expect(life.hobbies.play_the_guitar!.sessions).toBe(4);
-    expect(life.hobbies.play_the_guitar!.skill).toBeLessThan(4 * first + 1);
+    expect(life.hub.skills['hobby.play_the_guitar']!.level).toBeLessThan(4 * first + 1);
     expect(checkInvariants(life, content)).toEqual([]);
   });
   it('fades each year without practice, and reports a level', () => {
     const life = produce(player('a1-fade', 30), (d) => {
-      d.hobbies.paint_or_draw = { skill: 60, year: d.currentYear - 4, sessions: 9 };
+      d.hobbies.paint_or_draw = { year: d.currentYear - 4, sessions: 9 };
+      d.hub.skills['hobby.paint_or_draw'] = { level: 60, peak: 60, last: d.currentYear - 4 };
     });
-    expect(hobbySkill(life, 'paint_or_draw', content)).toBe(60 - 3 * content.balance.activities.hobbies.decay);
+    // C2: nothing fades until the second idle year; the year step fades it by the shared rules.
+    expect(hobbySkill(life, 'paint_or_draw', content)).toBe(60);
     expect(hobbySkill(life, 'play_chess', content)).toBe(0);
     expect(hobbyLevel(0, content)).toBe(0);
     expect(hobbyLevel(100, content)).toBe(content.balance.activities.hobbies.levels.length);
   });
   it('sets the skilled flag once skill reaches the level, which events about your craft can require', () => {
     const life = produce(player('a1-skilled', 30), (d) => {
-      d.hobbies.write_stories = { skill: content.balance.activities.hobbies.skilledAt - 1, year: d.currentYear, sessions: 8 };
+      d.hobbies.write_stories = { year: d.currentYear, sessions: 8 };
+      d.hub.skills['hobby.write_stories'] = { level: content.balance.activities.hobbies.skilledAt - 1, peak: content.balance.activities.hobbies.skilledAt - 1, last: d.currentYear };
     });
     let after = life;
     for (let i = 0; i < 4 && !after.flags.skilled_write_stories; i++) after = settle(act(after, 'write_stories'));
@@ -277,7 +280,8 @@ describe('hobbies', () => {
     const gifted = produce(player('a1-talent', 20), (d) => {
       d.character.hidden.talent = 'music';
       d.character.hidden.talentDiscovered = false;
-      d.hobbies.play_the_guitar = { skill: 70, year: d.currentYear, sessions: 30 };
+      d.hobbies.play_the_guitar = { year: d.currentYear, sessions: 30 };
+      d.hub.skills['hobby.play_the_guitar'] = { level: 70, peak: 70, last: d.currentYear };
     });
     let found: LifeState | null = null;
     let life = gifted;
@@ -293,7 +297,8 @@ describe('hobbies', () => {
   });
   it('shows hobbies in the tab with the skill of each', () => {
     const life = produce(player('a1-view', 20), (d) => {
-      d.hobbies.play_chess = { skill: 35, year: d.currentYear, sessions: 5 };
+      d.hobbies.play_chess = { year: d.currentYear, sessions: 5 };
+      d.hub.skills['hobby.play_chess'] = { level: 35, peak: 35, last: d.currentYear };
     });
     const hub = getActivityTabView(life, content).categories.flatMap((c) => c.sections.flatMap((x) => x.activities)).find((a) => a.id === 'hobbies')!;
     expect(hub.options.length).toBe(9);

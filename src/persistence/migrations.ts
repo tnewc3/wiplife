@@ -1,3 +1,4 @@
+import { emptyHub } from '../engine/hub/query';
 import { reconcileHeadcount } from '../engine/business/crew';
 import { craftRole, managerRole } from '../engine/business/headcount';
 import { defaultLines, forecastFromCustomers } from '../engine/business/products';
@@ -612,7 +613,48 @@ export const migrations: readonly Migration[] = [
       "meaning (each option's own count), and an activity of the new tab starts counting for itself from now on. Heir replay snapshots are upgraded the same way.",
     migrate: upgradeHobbiesData,
   },
+  {
+    from: 39,
+    description:
+      'C2: the Career hub. A life gains a hub record: no commitments set (every role is steady), no load or burnout yet, no enhancers. Hobby skills move ' +
+      "onto the shared skills system (each hobby's skill, its peak and the year it was last practiced); the skills of a sport or an art and your bandmates' " +
+      'playing keep their levels where they were and get a peak (their level now) and a last use (this year), so nothing fades the moment the save loads. ' +
+      'Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeHubData,
+  },
 ];
+
+/** C2: the hub record a save from before the Career hub lacks, and the hobby skills moved into it. */
+function upgradeHubData(data: unknown): unknown {
+  if (!isRecord(data) || !isRecord(data.character)) return data;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeHubData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  const year = typeof data.currentYear === 'number' ? data.currentYear : 0;
+  const hub = emptyHub();
+  const hobbies: Record<string, unknown> = {};
+  if (isRecord(data.hobbies)) {
+    for (const [id, h] of Object.entries(data.hobbies)) {
+      if (!isRecord(h)) continue;
+      const level = typeof h.skill === 'number' ? h.skill : 0;
+      const last = typeof h.year === 'number' ? h.year : year;
+      hub.skills[`hobby.${id}`] = { level, peak: level, last };
+      hobbies[id] = { year: last, sessions: typeof h.sessions === 'number' ? h.sessions : 1 };
+    }
+  }
+  if (isRecord(data.fame) && isRecord(data.fame.paths)) {
+    for (const [pathId, path] of Object.entries(data.fame.paths)) {
+      if (!isRecord(path) || !isRecord(path.skills)) continue;
+      for (const [skillId, level] of Object.entries(path.skills)) if (typeof level === 'number') hub.marks[`${pathId}.${skillId}`] = { peak: level, last: year };
+    }
+    const band = data.fame.band;
+    if (isRecord(band) && Array.isArray(band.members)) {
+      for (const m of band.members) if (isRecord(m) && typeof m.id === 'string' && typeof m.skill === 'number') hub.marks[`member.${m.id}`] = { peak: m.skill, last: year };
+    }
+  }
+  return { ...data, ...(inputLog !== undefined ? { inputLog } : {}), hobbies: isRecord(data.hobbies) ? hobbies : data.hobbies, hub };
+}
 
 /** The reach at which a curve of reach to fame gives this fame (the inverse of curveAt, which is increasing). */
 function reachForFame(points: readonly { at: number; x: number }[], fame: number): number {

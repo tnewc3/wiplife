@@ -47,7 +47,8 @@ export function pastimesFailures(state: LifeState, content: ContentBundle): stri
     const def = content.pastimes[id];
     if (!def?.hobby) fail(`hobbies names "${id}", which is not a hobby`);
     else if (h.year - state.birthYear < def.minAge) fail(`hobby "${id}" was practiced before the minimum age ${def.minAge}`);
-    if (h.skill < 0 || h.skill > 100 || h.year > state.currentYear || h.sessions < 1) fail(`hobby "${id}" has an impossible record`);
+    const skill = state.hub.skills[`hobby.${id}`];
+    if (!skill || skill.level < 0 || skill.level > 100 || h.year > state.currentYear || h.sessions < 1) fail(`hobby "${id}" has an impossible record`);
   }
   if (p.receipts.length > content.balance.pastimes.receipts) fail('more receipts are kept than the balance allows');
   // Batch 2b: the names you had before a legal name change.

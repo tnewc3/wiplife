@@ -22,7 +22,7 @@ import { buyHome, joinableParent, moveInCost, moveTo, purchaseQuote, refreshHous
 import { afterMove } from '../career';
 import { canGig } from '../systems/career';
 import { writeFromGroup } from '../systems/history';
-import type { BodyType, LifeState, WillShare } from '../types';
+import type { BodyType, LifeState, RoleId, WillShare } from '../types';
 import { CAREER_ACTION_IDS, CAREER_ACTIONS } from './career';
 import { EDUCATION_ACTION_IDS, EDUCATION_ACTIONS } from './education';
 import { SCHOOL_ACTION_IDS, SCHOOL_ACTIONS } from './school';
@@ -40,6 +40,7 @@ import { LATER_ACTION_IDS, LATER_ACTIONS } from './later';
 import { BELONGING_ACTION_IDS, BELONGING_ACTIONS } from './belonging';
 import { LOVE_ACTION_IDS, LOVE_ACTIONS } from './love';
 import { PASTIME_ACTION_IDS, PASTIME_ACTIONS } from './pastimes';
+import { HUB_ACTION_IDS, HUB_ACTIONS } from './hub';
 import { BUSINESS_ACTION_IDS, BUSINESS_ACTIONS, type BusinessActionParams } from './business';
 import type { WishesInput } from '../later/terminal';
 import type { SetupChange } from '../sports/setup';
@@ -49,7 +50,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...LANGUAGE_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...LANGUAGE_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS, ...HUB_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'set_body', 'write_will'];
@@ -179,6 +180,9 @@ export interface LifeActionParams {
   last?: string;
   consentId?: string;
   look?: string;
+  /** C2: a role of the Career hub, and the index of a candidate at an audition. */
+  roleId?: RoleId;
+  index?: number;
 }
 
 export interface LifeActionRule {
@@ -373,6 +377,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...BUSINESS_ACTIONS,
   ...LOVE_ACTIONS,
   ...PASTIME_ACTIONS,
+  ...HUB_ACTIONS,
 };
 
 /** True when the action can be taken now with these (validated) parameters. In prison, only a few can. */

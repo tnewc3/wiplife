@@ -4,7 +4,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, playThroughEvents, settle, tab } from './helpers';
+import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, playThroughEvents, settle, openRow, goTab } from './helpers';
 import { chicagoLife, examLife, familyStayLife, newlywedLife, withSpanishFriend } from './languageTravelFixtures';
 import type { LifeState } from '../../src/engine/types';
 
@@ -19,7 +19,7 @@ async function open(page: Page, life: LifeState): Promise<void> {
 test('practice a language with a native speaker you know: skill and the tie both grow, and it survives a reload', async ({ page }) => {
   test.setTimeout(120_000);
   await open(page, withSpanishFriend(chicagoLife('practice-phone')));
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Friends' }).getByRole('button').first().click();
   await expect(page.getByTestId('person-name')).toContainText('Lucía');
   const before = await page.getByTestId('person-line').textContent();
@@ -93,7 +93,8 @@ test('take a honeymoon with the spouse you married: priced, paid with a receipt,
 test('bring a partner and children on a working stay abroad: priced per person, they move with you and come home with you', async ({ page }) => {
   test.setTimeout(180_000);
   await open(page, familyStayLife());
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await page.getByLabel('Work destination').selectOption('london');
   await page.getByLabel('Length or route').selectOption('working_holiday');
   // Children at home keep a solo stay from starting.
@@ -112,12 +113,13 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await expect(page.getByTestId('work-family')).toContainText('Your family is with you.');
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await expect(page.getByTestId('work-family')).toBeVisible();
   for (let i = 0; i < 2; i++) { await page.getByRole('button', { name: 'Age up', exact: true }).click(); await settle(page); await playThroughEvents(page); }
   await expect(page.getByTestId('work-residence')).toHaveCount(0);
   await openPage(page, 'properties');
   await expect(page.getByTestId('housing-line')).toContainText('Chicago');
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await expect(page.getByRole('list', { name: 'Love' })).toContainText('Sam Spouse');
 });

@@ -5,7 +5,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, expandGroups, goTab } from './helpers';
 import { easiestCamp, grindLife, type GrindLife } from './sportsGrindFixtures';
 
 
@@ -19,9 +19,10 @@ async function open(page: Page, options: GrindLife): Promise<ReturnType<typeof g
 }
 
 const openSports = async (page: Page) => {
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('sports-screen')).toBeVisible();
+  await expandGroups(page);
 };
 
 test('you choose a school team to try out for, play the scrimmage as an event and make the team', async ({ page }) => {
@@ -44,6 +45,7 @@ test('you choose a school team to try out for, play the scrimmage as an event an
   await page.getByRole('button', { name: 'Dive on everything' }).click();
   await expect(page.getByTestId('event-outcome')).toContainText(/You made|took you|kept you/);
   await page.getByRole('button', { name: 'Continue' }).click();
+  await expandGroups(page);
   // The sports career starts on the school team: one record with your teams and clubs.
   await expect(page.getByTestId('team-line')).toContainText(/school team/i);
   await expect(page.getByTestId('tryout-history')).toContainText(/made /);
@@ -53,9 +55,9 @@ test('you choose a school team to try out for, play the scrimmage as an event an
 
 test('you can train without a team at a gym, and the session budget and the cost are in front of you', async ({ page }) => {
   await open(page, { seed: 'e2e-grind-2', kind: 'teamless' });
-  await tab(page, 'Job').click();
-  await expect(page.getByTestId('sports-teamless')).toBeVisible();
+  await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
+  await expandGroups(page);
   await expect(page.getByTestId('training')).toBeVisible();
   await expect(page.getByTestId('session-budget')).toContainText('8 of 8 sessions left');
   // No team: training with it is not an option, the gym is.
@@ -78,9 +80,9 @@ test('you can train without a team at a gym, and the session budget and the cost
 
 test('a program’s athletic scholarship is accepted from the Sports screen, with its share of tuition', async ({ page }) => {
   await open(page, { seed: 'e2e-grind-3', kind: 'senior' });
-  await tab(page, 'Job').click();
-  await expect(page.getByTestId('sports-offers')).toContainText('offers');
+  await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
+  await expandGroups(page);
   const section = page.getByTestId('scholarships');
   await expect(section).toContainText('athletic scholarship');
   await expect(page.getByTestId('offer-elite')).toContainText('85%');

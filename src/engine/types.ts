@@ -1313,6 +1313,63 @@ export interface LifeState {
   hobbies: Record<Id, HobbyState>;
   /** Batch 8: your accounts on the platforms (Instagram, TikTok and the rest), this year's posts, what they earned and what has happened to them. */
   social: SocialState;
+  /** C2: the Career hub: skills, the time each role takes, total load and burnout, performance enhancers and a band's audition pool. */
+  hub: HubState;
+}
+
+/** C2: how much of yourself you give a role. */
+export type CommitLevel = 'back' | 'steady' | 'all';
+
+/** C2: the roles that take your time (each has a cost by commitment in balance/careers.yaml hub). */
+export type RoleId = 'school' | 'job' | 'gig' | 'sports' | 'fame' | 'band' | 'business' | 'crime' | 'social';
+
+/** C2: a skill that lives in the hub (a hobby): where it stands, the highest it has been, and the last year it was used. */
+export interface SkillRecord {
+  level: number;
+  peak: number;
+  last: number;
+}
+
+/** C2: the peak and last use of a skill whose level lives elsewhere (a path's skill, a bandmate's). */
+export interface SkillMark {
+  peak: number;
+  last: number;
+}
+
+/** C2: a person who came to an audition. */
+export interface BandCandidate {
+  part: Id;
+  /** 0–100. */
+  skill: number;
+  age: number;
+  temper: 'steady' | 'fiery' | 'flaky';
+}
+
+export interface HubState {
+  /** Hobby skills by `hobby.<activity id>`. */
+  skills: Record<string, SkillRecord>;
+  /** Peaks and last use for the skills of fame paths (`<path>.<skill>`) and bandmates (`member.<person id>`). */
+  marks: Record<string, SkillMark>;
+  /** How hard you work at each role (a role not listed is steady). */
+  commit: Partial<Record<RoleId, CommitLevel>>;
+  /** The total load of the year just begun, and how much of it each role took. */
+  load: number;
+  shares: Partial<Record<RoleId, number>>;
+  /** General burnout (0–100): it builds when the load stays above what you can carry, and eases when it doesn't. */
+  burnout: number;
+  /** The last time something gave under the load, and what. */
+  gave: { year: number; what: 'grades' | 'job' | 'bench' | 'band' } | null;
+  /** Years in which the load was over what you can carry, and the highest load seen (for reports). */
+  overYears: number;
+  peakLoad: number;
+  /** Performance enhancers (sports): whether you take them, since when, and the tests and suspensions. */
+  enhancers: { on: boolean; since: number; years: number; tests: number; positives: number };
+  /** The audition pool for the band: who came, for which part and the year. Cleared by the next year. */
+  pool: { year: number; part: Id; candidates: BandCandidate[] } | null;
+  /** Rehearsals with the band this year (the year they were held in). */
+  rehearsals: { year: number; count: number };
+  /** Totals for reports. */
+  totals: { rehearsals: number; auditions: number; hired: number; sportSwitches: number; relieved: number };
 }
 
 /** Batch 2a: what an activity did, as the Activities screen shows it: the words, the money and (as numbers the screen turns into words) the stats that moved. */
@@ -1441,7 +1498,7 @@ export interface SocialState {
 
 /** A1: a hobby you have taken up. */
 export interface HobbyState {
-  skill: number;
+  /** The last year it was practiced (the skill itself is in `hub.skills`, `hobby.<id>`). */
   year: number;
   /** Times practiced, over the life. */
   sessions: number;
@@ -1985,6 +2042,8 @@ export interface BandMember {
   /** 0–100. */
   skill: number;
   since: number;
+  /** C2: how they get along (from the audition they came from). */
+  temper?: 'steady' | 'fiery' | 'flaky';
 }
 
 /** Batch 4: the band you are in. */

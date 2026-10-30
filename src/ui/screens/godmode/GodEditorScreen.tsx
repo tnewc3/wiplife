@@ -28,11 +28,12 @@ import {
   refusalSentence,
   TRAIT_LABELS,
   WEALTH_LABELS,
+  GOD_CAREER_LABELS,
 } from '../../labels';
 import { Group, DollarField, RemoveButton, Row, Select, Toggle } from './controls';
 import { changeCount, cloneView, toPayload } from './draft';
 
-type GroupId = 'name' | 'identity' | 'latent' | 'looks' | 'stats' | 'personality' | 'values' | 'health' | 'relationship' | 'work' | 'city' | 'faith' | 'languages' | 'citizenships' | 'money' | 'age';
+type GroupId = 'name' | 'identity' | 'latent' | 'looks' | 'stats' | 'personality' | 'values' | 'health' | 'relationship' | 'work' | 'city' | 'faith' | 'languages' | 'citizenships' | 'money' | 'age' | 'career';
 
 /** The group each payload area belongs to (refusals point at it). */
 const GROUP_OF: Record<string, GroupId> = {
@@ -56,6 +57,7 @@ const GROUP_OF: Record<string, GroupId> = {
   citizenships: 'citizenships',
   money: 'money',
   birthYear: 'age',
+  career: 'career',
 };
 
 const GROUP_TITLES: Record<GroupId, string> = {
@@ -75,6 +77,7 @@ const GROUP_TITLES: Record<GroupId, string> = {
   citizenships: GOD_AREA_LABELS.citizenships!,
   money: GOD_AREA_LABELS.money!,
   age: GOD_AREA_LABELS.birthYear!,
+  career: GOD_AREA_LABELS.career!,
 };
 
 const KIND_CHOICES = ['friend', 'acquaintance', 'partner', 'fiance', 'spouse', 'ex'] as const;
@@ -463,6 +466,50 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
         )}
         <SingleChoice label={base.self ? GOD_FIELD_LABELS.familyWealth : GOD_FIELD_LABELS.wealth} value={v.wealth} columns={2} choices={(Object.keys(WEALTH_LABELS) as FamilyWealth[]).map((w) => ({ value: w, label: WEALTH_LABELS[w] }))} onChange={(w) => up((d) => (d.wealth = w))} />
       </Group>
+
+      {v.career && (v.career.sports || v.career.music || v.career.fame) && (
+        <Group {...groupProps('career')}>
+          {v.career.sports && (
+            <Row testId="god-career-sports">
+              <p className="font-semibold">{GOD_CAREER_LABELS.sports}: {v.career.sports.sport}</p>
+              <Select label={GOD_CAREER_LABELS.position} value={v.career.sports.position} options={v.career.sports.positions.map((p) => ({ value: p.id, label: p.label }))} onChange={(x) => up((d) => (d.career!.sports!.position = x))} />
+              <ScoreSlider label={GOD_CAREER_LABELS.greatness} value={v.career.sports.greatness} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.sports!.greatness = x))} />
+              {v.career.sports.skills.map((k, i) => (
+                <ScoreSlider key={k.id} label={k.label} value={k.level} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.sports!.skills[i]!.level = x))} />
+              ))}
+              {v.career.sports.salary !== null && <DollarField label={GOD_CAREER_LABELS.salary} value={v.career.sports.salary} format={(n) => money(n)} onChange={(x) => up((d) => (d.career!.sports!.salary = x))} />}
+              {v.career.sports.seasons > 0 && <Toggle label={GOD_CAREER_LABELS.clearHistory} checked={v.career.sports.clearHistory} onChange={(x) => up((d) => (d.career!.sports!.clearHistory = x))} />}
+            </Row>
+          )}
+          {v.career.music && (
+            <Row testId="god-career-music">
+              <p className="font-semibold">{GOD_CAREER_LABELS.music}: {v.career.music.band}</p>
+              <ScoreSlider label={GOD_CAREER_LABELS.buzz} value={v.career.music.buzz} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.music!.buzz = x))} />
+              <ScoreSlider label={GOD_CAREER_LABELS.chemistry} value={v.career.music.chemistry} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.music!.chemistry = x))} />
+              {v.career.music.members.map((m, i) => (
+                <ScoreSlider key={m.id} label={`${m.name} · ${m.part}`} value={m.skill} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.music!.members[i]!.skill = x))} />
+              ))}
+              {v.career.music.releases > 0 && <Toggle label={GOD_CAREER_LABELS.clearReleases} checked={v.career.music.clearReleases} onChange={(x) => up((d) => (d.career!.music!.clearReleases = x))} />}
+            </Row>
+          )}
+          {v.career.fame && (
+            <Row testId="god-career-fame">
+              <p className="font-semibold">{GOD_CAREER_LABELS.fame}: {v.career.fame.path}</p>
+              <ScoreSlider label={GOD_CAREER_LABELS.fame_} value={v.career.fame.fame} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.fame!.fame = x))} />
+              <ScoreSlider label={GOD_CAREER_LABELS.image} value={v.career.fame.image} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.fame!.image = x))} />
+              <ScoreSlider label={GOD_CAREER_LABELS.mood} value={v.career.fame.mood} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.fame!.mood = x))} />
+              <DollarField label={GOD_CAREER_LABELS.fans} value={v.career.fame.fans} format={(n) => String(n)} onChange={(x) => up((d) => (d.career!.fame!.fans = Math.max(0, x)))} />
+              <Select
+                label={GOD_CAREER_LABELS.agent}
+                value={v.career.fame.agent ?? NO_VALUE}
+                options={[{ value: NO_VALUE, label: GOD_CAREER_LABELS.noAgent }, ...sortedBy(Object.values(content.fameAgents), (a) => a.name).map((a) => ({ value: a.id, label: a.name }))]}
+                onChange={(x) => up((d) => (d.career!.fame!.agent = x === NO_VALUE ? null : x))}
+              />
+              {v.career.fame.hasContract && <Toggle label={GOD_CAREER_LABELS.endContract} checked={v.career.fame.endContract} onChange={(x) => up((d) => (d.career!.fame!.endContract = x))} />}
+            </Row>
+          )}
+        </Group>
+      )}
 
       <Group {...groupProps('city')}>
         <p data-testid="god-city">{content.cities[v.cityId]?.name ?? v.cityId}</p>

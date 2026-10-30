@@ -7,7 +7,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, goTab } from './helpers';
 import { webLife } from './webFixtures';
 
 const OPEN = { testPack: true };
@@ -20,7 +20,7 @@ async function openFixture(page: Page): Promise<void> {
 }
 
 async function openPerson(page: Page, list: 'Siblings' | 'Parents' | 'Friends', name: RegExp): Promise<void> {
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: list }).getByRole('button', { name }).click();
 }
 

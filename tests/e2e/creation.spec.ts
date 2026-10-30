@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ageUp, createCustomLife, expectAge, goHome, openPage, passAgeGate, tab, type CustomLifeData } from './helpers';
+import { ageUp, createCustomLife, expectAge, goHome, openPage, passAgeGate, type CustomLifeData, goTab } from './helpers';
 
 async function homeName(page: Page): Promise<string> {
   return (await page.getByTestId('character-name').textContent())?.trim() ?? '';
@@ -20,7 +20,7 @@ test('a random life starts in one tap, in under a second', async ({ page }) => {
   await expect(meters).toHaveCount(4);
   await expect(page.getByTestId('stat-panel')).toContainText(/\d+%/);
   await expect(page.getByText('Your story starts here.')).toBeVisible();
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   const parents = page.getByRole('list', { name: 'Parents' }).getByRole('listitem');
   expect(await parents.count()).toBeGreaterThanOrEqual(1);
 });
@@ -30,7 +30,7 @@ test('the life can be continued after closing and reopening', async ({ page }) =
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
   const name = await homeName(page);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   const family = await page.getByRole('list', { name: 'Parents' }).innerText();
 
   await page.reload();
@@ -38,7 +38,7 @@ test('the life can be continued after closing and reopening', async ({ page }) =
   await expect(page.getByText(`${name} · Newborn`)).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
   expect(await homeName(page)).toBe(name);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   expect(await page.getByRole('list', { name: 'Parents' }).innerText()).toBe(family);
 });
 
@@ -65,7 +65,7 @@ test('a custom life uses every choice and persists', async ({ page }) => {
   await page.getByRole('button', { name: 'Profile', exact: true }).click();
   await expect(page.getByTestId('profile-identity')).toContainText('she/her/hers');
   await page.keyboard.press('Escape');
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   // One parent, two siblings and (C1) the parent's two parents.
   await expect(page.getByRole('list', { name: 'Parents' }).getByRole('listitem')).toHaveCount(1);
   await expect(page.getByRole('list', { name: 'Siblings' }).getByRole('listitem')).toHaveCount(2);

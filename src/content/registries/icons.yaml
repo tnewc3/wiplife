@@ -63,3 +63,16 @@ icons:
   ring: { fluent: Ring }
   compass: { fluent: Compass }
   books: { fluent: Books }
+  basketball: { fluent: Basketball }
+  guitar: { fluent: Guitar }
+  musical_note: { fluent: Musical note }
+  clapper_board: { fluent: Clapper board }
+  camera: { fluent: Camera }
+  mobile_phone: { fluent: Mobile phone }
+  memo: { fluent: Memo }
+  office_building: { fluent: Office building }
+  sunglasses: { fluent: Sunglasses }
+  alarm_clock: { fluent: Alarm clock }
+  syringe: { fluent: Syringe }
+  microphone: { fluent: Microphone }
+  drum: { fluent: Drum }

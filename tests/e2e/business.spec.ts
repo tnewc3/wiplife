@@ -6,7 +6,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { ageUp, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { ageUp, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, openRow, goTab } from './helpers';
 import { businessLife, type BusinessLife } from './businessFixtures';
 
 
@@ -15,7 +15,8 @@ async function open(page: Page, options: BusinessLife): Promise<void> {
   await loadSavedLife(page, businessLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'special-business');
 }
 
 test('the Work tab offers a business, and starting a café with savings works', async ({ page }) => {
@@ -65,7 +66,8 @@ test('a year of trading shows the report in words and numbers, and the Money tab
   await open(page, { seed: 'e2e-biz-3', started: true });
   await expect(page.getByTestId('business-summary')).toContainText('The Grey Heron');
   await ageUp(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'special-business');
   await page.getByTestId('business-open').click();
   const panel = page.locator('[data-testid^="business-b"]').first();
   await expect(panel).toContainText('The Grey Heron');
@@ -76,7 +78,7 @@ test('a year of trading shows the report in words and numbers, and the Money tab
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.keyboard.press('Escape');
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByTestId('business-money')).toContainText('The Grey Heron');
   await expect(page.getByTestId('business-money')).toContainText('Your share is worth');
 });
@@ -151,7 +153,8 @@ test('the products tab sets a line’s price and order level, and next year show
   await expectTouchTargets(page);
   await page.keyboard.press('Escape');
   await ageUp(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'special-business');
   await page.getByTestId('business-open').click();
   await page.getByTestId(`tab-${id}-products`).click();
   await expect(page.getByTestId(`line-last-${id}-coffee`)).toContainText('Last year');

@@ -30,7 +30,7 @@ import {
   STYLE_LABELS,
   fansLabel,
 } from '../../labels';
-import { BandSection } from './BandSection';
+import { BandScreen } from './BandScreen';
 import { GrindSection } from './GrindSection';
 import { ProjectSheet } from './ProjectSheet';
 
@@ -82,6 +82,7 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
   const act = useAppStore((s) => s.takeLifeAction);
   const busy = useAppStore((s) => s.aging);
   const [project, setProject] = useState(false);
+  const [bandOpen, setBandOpen] = useState(false);
   const [confirm, setConfirm] = useState<'break' | 'retire' | null>(null);
   const disabled = busy || !view.between;
   const main = view.paths[0];
@@ -172,7 +173,14 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
                   )}
                 </div>
               </Section>
-              {(view.band !== null || view.formBlock !== 'path') && <BandSection life={life} view={view} disabled={disabled} />}
+              {(view.band !== null || view.formBlock !== 'path') && (
+                <Section title="Your band" testId="band-entry">
+                  <p className="mt-1 text-sm text-muted">{view.band ? `${view.band.name}: members, rehearsals, releases and shows.` : 'Form a band, or take up an offer from one in your city.'}</p>
+                  <Button variant="secondary" block className="mt-2" onClick={() => setBandOpen(true)} data-testid="band-open">
+                    {view.band ? 'Open the band' : 'Start or join a band'}
+                  </Button>
+                </Section>
+              )}
               <GrindSection view={view} disabled={disabled} />
               <Section title="Agent and contract" testId="business">
                 <p className="mt-1" data-testid="agent-line">
@@ -388,6 +396,7 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
           )}
         </div>
       </Sheet>
+      <BandScreen life={life} open={bandOpen} onClose={() => setBandOpen(false)} />
       {view.active && <ProjectSheet life={life} paths={view.paths} open={project} onClose={() => setProject(false)} />}
       <ConfirmSheet
         open={confirm === 'break'}
