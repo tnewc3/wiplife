@@ -36,7 +36,7 @@ describe('team settings', () => {
     await db.settings.put({ key: 'app', value: { ageConfirmed: true, theme: 'dark', persistRequested: true, installPromptShown: false } as never });
     expect(migrateSettings({ ageConfirmed: true })).toMatchObject({ version: SETTINGS_VERSION, teams: emptySetup(), ageConfirmed: true });
     const loaded = await loadSettings(db);
-    expect(loaded).toEqual({ ageConfirmed: true, theme: 'dark', persistRequested: true, installPromptShown: false, teams: emptySetup(), godMode: false });
+    expect(loaded).toEqual({ ageConfirmed: true, theme: 'dark', persistRequested: true, installPromptShown: false, teams: emptySetup(), godMode: false, openGroups: {} });
     // The next write puts the current version in the row.
     await updateSettings(db, { theme: 'light' });
     const row = await db.settings.get('app');

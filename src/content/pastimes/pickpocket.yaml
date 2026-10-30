@@ -8,6 +8,7 @@ companion: none
 cost: nothing
 profile: crime_petty
 yearlyLimit: 3
+hub: crime
 tiers:
   great:
     text:

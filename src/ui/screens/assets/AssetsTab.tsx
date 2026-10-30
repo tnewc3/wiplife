@@ -1,34 +1,26 @@
-import { ChevronRight } from 'lucide-react';
 import { content } from '../../../content';
 import { canPlanEstate, getBelongingsView, getCharacterSummary } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
-import { Card } from '../../components/Card';
-import { StatBar } from '../../components/StatBar';
+import { ListRow, RowList } from '../../components/ListRow';
+import { MiniBar } from '../../components/MiniBar';
+import { SectionHeader } from '../../components/SectionHeader';
+import { SegmentedTabs } from '../../components/SegmentedTabs';
 import { housingLine, money } from '../../labels';
 import { MoneyTab } from '../money/MoneyTab';
 
-function LinkRow({ title, detail, onClick, testId }: { title: string; detail: string; onClick: () => void; testId?: string }) {
-  return (
-    <button type="button" onClick={onClick} data-testid={testId} className="flex min-h-14 w-full items-center gap-3 rounded-2xl border border-border bg-surface-2 px-4 text-left active:bg-surface">
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="font-display text-base font-semibold">{title}</span>
-        <span className="text-sm break-words text-muted">{detail}</span>
-      </span>
-      <ChevronRight aria-hidden="true" size={20} className="shrink-0 text-muted" />
-    </button>
-  );
-}
-
 /**
- * The Assets tab (U1): your finances (the ledger, lifestyle, debts, a business's and crime's money), then your properties,
- * your possessions with their condition, and your will.
+ * The Assets tab (U2): in-screen tabs instead of one long page. Money is your finances (the ledger, lifestyle, debts, a
+ * business's and crime's money); Home is where you live and your vacation homes; Things is your possessions with their
+ * condition, the shops, and your will.
  */
 export function AssetsTab({ life }: { life: LifeState }) {
   const openHome = useAppStore((s) => s.openHome);
   const openBelongings = useAppStore((s) => s.openBelongings);
   const openWill = useAppStore((s) => s.openWill);
   const openActivity = useAppStore((s) => s.openActivity);
+  const section = useAppStore((s) => s.assetsSection);
+  const setSection = useAppStore((s) => s.setAssetsSection);
   const belongings = getBelongingsView(life, content);
   const summary = getCharacterSummary(life, content);
   const adult = canPlanEstate(life, content);
@@ -37,57 +29,55 @@ export function AssetsTab({ life }: { life: LifeState }) {
     ...belongings.vacationHomes.map((h) => ({ id: h.id, name: `Vacation home in ${h.city}`, condition: h.condition })),
   ];
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="font-display text-lg font-semibold">Finances</h2>
-      <MoneyTab life={life} />
-      <h2 className="font-display text-lg font-semibold">Properties</h2>
-      <Card className="flex flex-col gap-3" role="region" aria-label="Properties">
-        <p data-testid="assets-housing-line">{housingLine(summary.housing, summary.cityName)}</p>
-        {belongings.vacationHomes.length > 0 && (
-          <ul className="flex flex-col gap-2" aria-label="Vacation homes">
+    <div className="flex flex-col gap-3">
+      <SegmentedTabs
+        label="Assets"
+        value={section}
+        onChange={setSection}
+        tabs={[
+          { id: 'money', label: 'Money', testId: 'assets-tab-money' },
+          { id: 'home', label: 'Home', testId: 'assets-tab-home' },
+          { id: 'things', label: 'Things', testId: 'assets-tab-things' },
+        ]}
+      />
+      {section === 'money' && <MoneyTab life={life} />}
+      {section === 'home' && (
+        <section aria-label="Properties" className="flex flex-col gap-2">
+          <p className="px-1" data-testid="assets-housing-line">
+            {housingLine(summary.housing, summary.cityName)}
+          </p>
+          <RowList label="Properties">
             {belongings.vacationHomes.map((h) => (
-              <li key={h.id}>
-                <StatBar label={`Vacation home in ${h.city} · ${money(h.value)}`} value={h.condition} />
-              </li>
+              <ListRow key={h.id} title={`Vacation home in ${h.city}`} subtitle={money(h.value)} value={<MiniBar label={`Condition of the vacation home in ${h.city}`} value={h.condition} />} />
             ))}
-          </ul>
-        )}
-        <LinkRow title="Properties" detail="Rent, move, buy or sell a home" onClick={openHome} testId="assets-properties" />
-      </Card>
-      <h2 className="font-display text-lg font-semibold">Possessions</h2>
-      <Card className="flex flex-col gap-3" role="region" aria-label="Possessions">
-        {items.length === 0 && belongings.valuables.length === 0 && belongings.pets.length === 0 ? (
-          <p className="text-muted">You don’t own a vehicle, a valuable or a pet yet.</p>
-        ) : (
-          <>
-            {items.length > 0 && (
-              <ul className="flex flex-col gap-2" aria-label="Condition of what you own">
-                {items.map((i) => (
-                  <li key={i.id}>
-                    <StatBar label={i.name} value={i.condition} />
-                  </li>
-                ))}
-              </ul>
-            )}
-            {belongings.valuables.length > 0 && (
-              <ul className="flex flex-col divide-y divide-border" aria-label="Valuables">
-                {belongings.valuables.map((v) => (
-                  <li key={v.id} className="flex justify-between gap-3 py-1.5">
-                    <span className="min-w-0 break-words">{v.name}</span>
-                    <span className="shrink-0 tabular-nums text-muted">{money(v.value)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-        <LinkRow title="Possessions" detail="Vehicles, valuables, pets, insurance and renovations" onClick={openBelongings} testId="assets-possessions" />
-        <LinkRow title="Go shopping" detail="Clothes, accessories, hats and treats" onClick={() => openActivity('shopping')} testId="assets-go-shopping" />
-      </Card>
-      {adult && (
+            <ListRow title="Properties" subtitle="Rent, move, buy or sell a home" ending="chevron" onClick={openHome} testId="assets-properties" />
+          </RowList>
+        </section>
+      )}
+      {section === 'things' && (
         <>
-          <h2 className="font-display text-lg font-semibold">Estate</h2>
-          <LinkRow title="Your will" detail="Say who gets what when you are gone" onClick={openWill} testId="assets-will" />
+          <section aria-label="Possessions" className="flex flex-col gap-2">
+            <SectionHeader>Possessions</SectionHeader>
+            {items.length === 0 && belongings.valuables.length === 0 && belongings.pets.length === 0 && <p className="px-1 text-muted">You don’t own a vehicle, a valuable or a pet yet.</p>}
+            <RowList label="Possessions">
+              {items.map((i) => (
+                <ListRow key={i.id} title={i.name} value={<MiniBar label={`Condition of ${i.name}`} value={i.condition} />} />
+              ))}
+              {belongings.valuables.map((v) => (
+                <ListRow key={v.id} title={v.name} value={money(v.value)} />
+              ))}
+              <ListRow title="Possessions" subtitle="Vehicles, valuables, pets, insurance and renovations" ending="chevron" onClick={openBelongings} testId="assets-possessions" />
+              <ListRow title="Go shopping" subtitle="Clothes, accessories, hats and treats" ending="dots" onClick={() => openActivity('shopping')} onMore={() => openActivity('shopping')} moreLabel="Open the stores" testId="assets-go-shopping" />
+            </RowList>
+          </section>
+          {adult && (
+            <section aria-label="Estate" className="flex flex-col gap-2">
+              <SectionHeader>Estate</SectionHeader>
+              <RowList label="Estate">
+                <ListRow title="Your will" subtitle="Say who gets what when you are gone" ending="chevron" onClick={openWill} testId="assets-will" />
+              </RowList>
+            </section>
+          )}
         </>
       )}
     </div>

@@ -1,0 +1,58 @@
+id: check_into_rehab
+category: recovery
+label: "Check into rehab"
+blurb: "A stay away from it all, to get clean."
+minAge: 18
+inPerson: true
+companion: none
+cost: rehab_stay
+profile: steady
+yearlyLimit: 2
+hub: rehab
+requires: { health: { conditions: [alcohol_addiction, drug_addiction, gambling_addiction] } }
+tiers:
+  great:
+    text:
+      - "Weeks of structure, of early mornings and honest talk, and something loosens its grip. You leave with a plan and a counselor you trust."
+      - "The first week is the worst. By the last, you can see the person you were before, and you think you can get back to them."
+    effects:
+      - { type: stat, key: health, delta: 6 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: discipline, delta: 3 }
+      - { type: stat, key: happiness, delta: 3 }
+    extras:
+      - chance: rehab_progress
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: -35 }
+          - { type: health, conditionId: drug_addiction, severity: -35 }
+          - { type: health, conditionId: gambling_addiction, severity: -35 }
+        note: "The grip loosens. You are not cured, but you are free enough to begin."
+  good:
+    text:
+      - "A hard stay and a useful one. You leave clean, shaky and determined."
+      - "You complete the program. The cravings come back at night, but you have tools to face them now."
+    effects:
+      - { type: stat, key: health, delta: 4 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: discipline, delta: 2 }
+    extras:
+      - chance: rehab_progress
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: -35 }
+          - { type: health, conditionId: drug_addiction, severity: -35 }
+          - { type: health, conditionId: gambling_addiction, severity: -35 }
+        note: "The grip loosens. You are not cured, but you are free enough to begin."
+  neutral:
+    text:
+      - "You get through the days but not much into them. You leave not much changed, and a little wiser about what it takes."
+      - "The program is solid, but your mind is elsewhere. You finish the stay and wonder if it took."
+    effects:
+      - { type: stat, key: health, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "You leave on day nine, furious and ashamed. The door stays open, the counselor says, whenever you are ready."
+      - "A stay that goes badly: you fight the staff, resent the rules and walk out before the end."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: stat, key: happiness, delta: -2 }

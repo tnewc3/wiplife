@@ -1,0 +1,41 @@
+id: buy_a_private_island
+category: luxury
+label: "Buy a private island"
+blurb: "A palm-fringed island with a dock, a house and no neighbors."
+minAge: 18
+inPerson: true
+companion: none
+cost: private_island
+profile: luxury
+yearlyLimit: 1
+hub: lux_islands
+buys: private_island
+tiers:
+  great:
+    text:
+      - "You step onto the dock and the whole island is yours: white sand, warm water and a silence you could drink. {cost}, and the best deed you will ever sign."
+      - "The caretaker hands you the keys and a basket of fruit. {cost}, and a world of your own."
+    effects:
+      - { type: stat, key: happiness, delta: 8 }
+      - { type: stat, key: confidence, delta: 3 }
+      - { type: stat, key: stress, delta: -5 }
+  good:
+    text:
+      - "A small, lovely island with a sound house. {cost}, and a place to get away from everything."
+      - "The first evening on your own beach is perfect. {cost}, and no regrets."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: stress, delta: -3 }
+  neutral:
+    text:
+      - "The island is lovely, and so is the list of repairs. {cost}, and a lot of work to do."
+      - "It is quiet, beautiful and a long boat ride from anything. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "A storm strips the roof the first month, and the supply boat is late. {cost}, and a hard lesson in living at sea."
+      - "The island turns out to have a dispute over its shore rights. {cost}, and a stack of lawyers."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 4 }

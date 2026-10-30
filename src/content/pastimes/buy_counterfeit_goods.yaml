@@ -8,6 +8,7 @@ companion: none
 cost: counterfeit_goods
 profile: market_goods
 yearlyLimit: 2
+hub: black_market
 tiers:
   great:
     text:

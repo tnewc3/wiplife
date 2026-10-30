@@ -1,0 +1,33 @@
+id: go_to_the_er
+category: health
+label: "Go to the emergency room"
+blurb: "When something is badly wrong."
+minAge: 0
+inPerson: true
+companion: none
+cost: er_visit
+profile: steady
+yearlyLimit: 4
+hub: er
+requires: { stat: health, lt: 70 }
+tiers:
+  good:
+    text:
+      - "A nurse takes one look at you and moves you to the front. By the end of the night the worst is dealt with and you are told to rest."
+      - "The waiting room is full, but the staff are quick and kind. You leave with the problem treated and a page of instructions."
+    effects:
+      - { type: stat, key: health, delta: 6 }
+      - { type: stat, key: stress, delta: -1 }
+  neutral:
+    text:
+      - "Hours on a plastic chair, a quick look and a handful of advice. Nothing was seriously wrong, and you are relieved to hear it."
+      - "The doctor on shift says it is not as bad as it felt. You go home with a sheet of instructions and a long night behind you."
+    effects:
+      - { type: stat, key: health, delta: 2 }
+  bad:
+    text:
+      - "A long wait, a short visit and an answer that does not settle anything. You go home no better, and worried."
+      - "The night is a blur of corridors and forms. You are treated, but the fright stays with you for weeks."
+    effects:
+      - { type: stat, key: health, delta: 1 }
+      - { type: stat, key: stress, delta: 3 }

@@ -26,9 +26,10 @@ export function hubOf(def: PastimeDef, content: ContentBundle): ActivityHub | un
   return def.hub === undefined ? undefined : content.registries.activities.activities.find((a) => a.id === def.hub);
 }
 
-/** The key under which this option's repeats are counted for the year: its activity's, or its own. */
-export function repeatKey(def: PastimeDef): string {
-  return def.hub !== undefined ? `hub:${def.hub}` : def.id;
+/** The key under which this option's repeats are counted for the year: its activity's (when the activity's options share their returns), or its own. */
+export function repeatKey(def: PastimeDef, content: ContentBundle): string {
+  const hub = hubOf(def, content);
+  return hub?.sharedRepeats ? `hub:${hub.id}` : def.id;
 }
 
 /** How many times you did anything of this activity this year (`counts` belongs to this year only). */
@@ -37,9 +38,9 @@ export function hubCount(state: LifeState, hubId: Id): number {
 }
 
 /** Earlier times this year that count against this option's returns. */
-export function repeatsOf(state: LifeState, def: PastimeDef): number {
+export function repeatsOf(state: LifeState, def: PastimeDef, content: ContentBundle): number {
   if (state.pastimes.year !== state.currentYear) return 0;
-  return state.pastimes.counts[repeatKey(def)] ?? 0;
+  return state.pastimes.counts[repeatKey(def, content)] ?? 0;
 }
 
 /** Every option of an activity that exists, in a fixed order. */

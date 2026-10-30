@@ -8,6 +8,7 @@ companion: none
 cost: sailboat
 profile: luxury
 yearlyLimit: 1
+hub: lux_boats
 buys: sailboat
 tiers:
   great:

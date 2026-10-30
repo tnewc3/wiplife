@@ -38,6 +38,39 @@ The icons on event cards, stat bars and in the People list (`public/icons`) are 
 | `public/icons/anxious_face_with_sweat.svg` | Anxious face with sweat |
 | `public/icons/headstone.svg` | Headstone |
 | `public/icons/rocket.svg` | Rocket |
+| `public/icons/mountain.svg` | Mountain |
+| `public/icons/hiking_boot.svg` | Hiking boot |
+| `public/icons/fishing_pole.svg` | Fishing pole |
+| `public/icons/camping.svg` | Camping |
+| `public/icons/bird.svg` | Bird |
+| `public/icons/water_wave.svg` | Water wave |
+| `public/icons/sport_utility_vehicle.svg` | Sport utility vehicle |
+| `public/icons/person_walking.svg` | Person walking (Default) |
+| `public/icons/person_lotus.svg` | Person in lotus position (Default) |
+| `public/icons/ambulance.svg` | Ambulance |
+| `public/icons/tooth.svg` | Tooth |
+| `public/icons/eyes.svg` | Eyes |
+| `public/icons/herb.svg` | Herb |
+| `public/icons/drop_of_blood.svg` | Drop of blood |
+| `public/icons/hospital.svg` | Hospital |
+| `public/icons/crown.svg` | Crown |
+| `public/icons/lotus.svg` | Lotus |
+| `public/icons/top_hat.svg` | Top hat |
+| `public/icons/heart_with_ribbon.svg` | Heart with ribbon |
+| `public/icons/gem_stone.svg` | Gem stone |
+| `public/icons/beach_with_umbrella.svg` | Beach with umbrella |
+| `public/icons/busts_in_silhouette.svg` | Busts in silhouette |
+| `public/icons/place_of_worship.svg` | Place of worship |
+| `public/icons/reminder_ribbon.svg` | Reminder ribbon |
+| `public/icons/money_with_wings.svg` | Money with wings |
+| `public/icons/shopping_bags.svg` | Shopping bags |
+| `public/icons/sailboat.svg` | Sailboat |
+| `public/icons/small_airplane.svg` | Small airplane |
+| `public/icons/desert_island.svg` | Desert island |
+| `public/icons/racing_car.svg` | Racing car |
+| `public/icons/ring.svg` | Ring |
+| `public/icons/compass.svg` | Compass |
+| `public/icons/books.svg` | Books |
 
 ## Interface icons
 

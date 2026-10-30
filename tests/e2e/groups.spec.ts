@@ -7,7 +7,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, openHubActivity, openPage, passAgeGate, settle } from './helpers';
 import { aClubOf, groupsLife, type GroupsLife } from './groupsFixtures';
 
 
@@ -19,13 +19,22 @@ async function open(page: Page, options: GroupsLife): Promise<void> {
   await openPage(page, 'groups');
 }
 
-test('Groups lists your faith and the groups of your city and fits a phone', async ({ page }) => {
+test('Faith shows your faith and Groups lists the clubs of your city, and both fit a phone', async ({ page }) => {
   await open(page, { seed: 'e2e-groups-1' });
-  await expect(page.getByTestId('groups-your-faith')).toContainText('Buddhism');
-  await expect(page.getByTestId('groups-screen')).toContainText('You don’t belong to any group yet.');
+  // Clubs: nothing joined yet, so it opens on what you can join.
   await expect(page.getByTestId('groups-club')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Clubs and hobby groups', level: 1 })).toBeVisible();
+  await page.getByTestId('groups-tab-yours').click();
+  await expect(page.getByTestId('groups-screen')).toContainText('You don’t belong to any group yet.');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
+  // Faith is its own section of Activities, not part of People.
+  await openHubActivity(page, 'faith_yours');
+  await expect(page.getByTestId('groups-your-faith')).toContainText('Buddhism');
+  await expectNoHorizontalScroll(page);
+  await expectTouchTargets(page);
+  await page.getByTestId('groups-tab-join').click();
+  await expect(page.getByTestId('groups-faith')).toBeVisible();
 });
 
 test('you can join a club, see your role, change how committed you are, and leave', async ({ page }) => {

@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { content } from '../../../content';
-import { GROUP_TYPES, type Commitment } from '../../../content/schemas';
+import type { Commitment, GroupType } from '../../../content/schemas';
 import { getBelongingView, type GroupView, type MembershipView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { CollapsibleGroup } from '../../components/CollapsibleGroup';
+import { ListRow, RowList } from '../../components/ListRow';
+import { SectionHeader } from '../../components/SectionHeader';
+import { SegmentedTabs } from '../../components/SegmentedTabs';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
-import { GROUP_COMMITMENT_BLURBS, GROUP_COMMITMENT_LABELS, FAITH_STRENGTH_WORDS, GROUPS_TITLES, GROUP_TYPE_LABELS, hoursLine, GROUP_JOIN_BLOCK_LABELS, money, RISE_NEEDS_LABELS, roleLine, VALUE_LABELS } from '../../labels';
+import { GROUPS_FOCUS_TITLES, GROUPS_TAB_LABELS, GROUP_COMMITMENT_BLURBS, GROUP_COMMITMENT_LABELS, FAITH_STRENGTH_WORDS, GROUPS_TITLES, GROUP_TYPE_LABELS, hoursLine, GROUP_JOIN_BLOCK_LABELS, money, RISE_NEEDS_LABELS, roleLine, VALUE_LABELS } from '../../labels';
 
 /** What a group is like, from its own traits. */
 function TraitLine({ group }: { group: GroupView }) {
@@ -109,17 +113,23 @@ function MembershipCard({ m, canAct, busy, onCommit, onLeave, onPerson }: { m: M
 }
 
 /**
- * More → Groups (W2): the clubs, congregations, causes and civic groups of your
- * city: the ones you belong to (your role, your standing, the people there) and
- * the ones you could join, your faith and what you value. Joining, leaving and
- * how committed you are take effect at once, between years.
+ * Activities → Groups and Activities → Faith (W2, moved here from People by U2). One page, opened on the part you chose: clubs
+ * and hobby groups, volunteering and causes, neighborhood and civic groups, your faith community, or other faiths to explore.
+ * Tabs: Yours (the groups of that kind you belong to: your role, your standing, the people there) and Join (the ones of your
+ * city you could join). Joining, leaving and how committed you are take effect at once, between years.
  */
 export function GroupsScreen({ life }: { life: LifeState }) {
   const view = getBelongingView(life, content);
+  const focus = useAppStore((s) => s.groupsFocus);
   const busy = useAppStore((s) => s.aging);
   const act = useAppStore((s) => s.takeLifeAction);
   const openPerson = useAppStore((s) => s.openPerson);
   const setTab = useAppStore((s) => s.setTab);
+  const type: GroupType = focus === 'faith' || focus === 'faith_explore' ? 'faith' : focus;
+  const faith = type === 'faith';
+  const mine = view.memberships.filter((m) => m.group.type === type);
+  const available = view.available[type];
+  const [section, setSection] = useState<'yours' | 'join'>(focus === 'faith_explore' ? 'join' : focus === 'faith' || mine.length > 0 ? 'yours' : 'join');
   const [picked, setPicked] = useState<GroupView | null>(null);
   const [leaving, setLeaving] = useState<MembershipView | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -131,93 +141,97 @@ export function GroupsScreen({ life }: { life: LifeState }) {
     if (!picked) return;
     const name = picked.name;
     setPicked(null);
-    void act('join_group', { groupId: picked.id, level }).then(() => setMessage(`You joined ${name}.`));
+    void act('join_group', { groupId: picked.id, level }).then(() => {
+      setMessage(`You joined ${name}.`);
+      setSection('yours');
+    });
   };
   return (
-    <div className="flex flex-col gap-4" data-testid="groups-screen">
-      <Card data-testid="groups-summary">
-        <h3 className="text-lg font-bold">{GROUPS_TITLES.faith}</h3>
-        <p data-testid="groups-your-faith">
-          {view.faith.name}
-          {view.faith.id !== null ? ` · ${FAITH_STRENGTH_WORDS[view.faith.word]}` : ''}
-        </p>
-        {view.faith.id !== null && <StatBar label="Belief" value={view.faith.strength} />}
-        <h3 className="mt-3 text-lg font-bold">{GROUPS_TITLES.values}</h3>
-        <div className="mt-1 grid grid-cols-1 gap-2" role="group" aria-label="Values">
-          {view.values.map((v) => (
-            <StatBar key={v.id} label={VALUE_LABELS[v.id]!.name} value={v.level} kind="plain" />
-          ))}
-        </div>
-        <p className="mt-3 text-sm text-muted">
-          {GROUPS_TITLES.week}: {view.hours} · {GROUPS_TITLES.cost.toLowerCase()}: {money(view.cost)}
-        </p>
-      </Card>
+    <div className="flex flex-col gap-3" data-testid="groups-screen">
+      <SegmentedTabs
+        label={GROUPS_FOCUS_TITLES[focus]}
+        value={section}
+        onChange={setSection}
+        tabs={[
+          { id: 'yours', label: `${GROUPS_TAB_LABELS.yours} (${mine.length})`, testId: 'groups-tab-yours' },
+          { id: 'join', label: faith ? GROUPS_TAB_LABELS.explore : GROUPS_TAB_LABELS.join, testId: 'groups-tab-join' },
+        ]}
+      />
       {message && (
         <p role="status" className="text-sm font-semibold">
           {message}
         </p>
       )}
-      <section aria-labelledby="groups-yours" className="flex flex-col gap-3">
-        <h3 id="groups-yours" className="text-lg font-bold">
-          {GROUPS_TITLES.yours}
-        </h3>
-        {view.memberships.length === 0 && <p className="text-muted">{GROUPS_TITLES.none}</p>}
-        {view.memberships.map((m) => (
-          <MembershipCard
-            key={m.group.id}
-            m={m}
-            canAct={view.canAct}
-            busy={busy}
-            onPerson={seePerson}
-            onCommit={(level) => void act('set_group_commitment', { groupId: m.group.id, level })}
-            onLeave={() => setLeaving(m)}
-          />
-        ))}
-      </section>
-      <section aria-labelledby="groups-available" className="flex flex-col gap-3">
-        <h3 id="groups-available" className="text-lg font-bold">
-          {GROUPS_TITLES.available}: {view.city}
-        </h3>
-        {GROUP_TYPES.map((type) =>
-          view.available[type].length === 0 ? null : (
-            <div key={type} data-testid={`groups-${type}`}>
-              <h4 className="mb-1 font-semibold">{GROUP_TYPE_LABELS[type]}</h4>
-              <ul className="flex flex-col gap-2">
-                {view.available[type].map((g) => (
-                  <li key={g.id}>
-                    <button
-                      type="button"
-                      className="flex min-h-11 w-full flex-col rounded-xl border border-border bg-surface px-3 py-2 text-left disabled:opacity-60"
-                      data-testid={`group-${g.id}`}
-                      onClick={() => setPicked(g)}
-                    >
-                      <span className="font-semibold break-words [overflow-wrap:anywhere]">{g.name}</span>
-                      <span className="text-sm text-muted">
-                        {g.kind}
-                        {g.religion ? ` · ${g.religion}${g.tradition ? `, ${g.tradition}` : ''}` : ''}
-                        {g.block !== null ? ` · ${GROUP_JOIN_BLOCK_LABELS[g.block]}` : ''}
-                      </span>
-                      <TraitLine group={g} />
-                    </button>
+
+      {section === 'yours' && (
+        <>
+          {faith && (
+            <Card data-testid="groups-summary">
+              <h3 className="text-lg font-bold">{GROUPS_TITLES.faith}</h3>
+              <p data-testid="groups-your-faith">
+                {view.faith.name}
+                {view.faith.id !== null ? ` · ${FAITH_STRENGTH_WORDS[view.faith.word]}` : ''}
+              </p>
+              {view.faith.id !== null && <StatBar label="Belief" value={view.faith.strength} />}
+              <h3 className="mt-3 text-lg font-bold">{GROUPS_TITLES.values}</h3>
+              <div className="mt-1 grid grid-cols-1 gap-2" role="group" aria-label="Values">
+                {view.values.map((v) => (
+                  <StatBar key={v.id} label={VALUE_LABELS[v.id]!.name} value={v.level} kind="plain" />
+                ))}
+              </div>
+              <p className="mt-3 text-sm text-muted">
+                {GROUPS_TITLES.week}: {view.hours} · {GROUPS_TITLES.cost.toLowerCase()}: {money(view.cost)}
+              </p>
+            </Card>
+          )}
+          {mine.length === 0 && <p className="px-1 text-muted">{GROUPS_TITLES.none}</p>}
+          {mine.map((m) => (
+            <MembershipCard
+              key={m.group.id}
+              m={m}
+              canAct={view.canAct}
+              busy={busy}
+              onPerson={seePerson}
+              onCommit={(level) => void act('set_group_commitment', { groupId: m.group.id, level })}
+              onLeave={() => setLeaving(m)}
+            />
+          ))}
+          {view.past.length > 0 && !faith && (
+            <CollapsibleGroup id="groups.past" title={GROUPS_TITLES.past} count={view.past.length} defaultOpen={false}>
+              <ul className="flex flex-col divide-y divide-border">
+                {view.past.map((p, i) => (
+                  <li key={i} className="py-2 text-sm">
+                    {p.name} · {p.fromYear}–{p.toYear}
                   </li>
                 ))}
               </ul>
-            </div>
-          ),
-        )}
-      </section>
-      {view.past.length > 0 && (
-        <section aria-labelledby="groups-past">
-          <h3 id="groups-past" className="mb-1 text-lg font-bold">
-            {GROUPS_TITLES.past}
-          </h3>
-          <ul className="flex flex-col divide-y divide-border">
-            {view.past.map((p, i) => (
-              <li key={i} className="py-2 text-sm">
-                {p.name} · {p.fromYear}–{p.toYear}
-              </li>
-            ))}
-          </ul>
+            </CollapsibleGroup>
+          )}
+        </>
+      )}
+
+      {section === 'join' && (
+        <section aria-label={`${GROUPS_TITLES.available}: ${view.city}`} data-testid={`groups-${type}`}>
+          <SectionHeader>{`${GROUPS_TITLES.available}: ${view.city}`}</SectionHeader>
+          {available.length === 0 ? (
+            <p className="px-1 text-muted">Nothing of this kind to join in {view.city}.</p>
+          ) : (
+            <RowList label={GROUP_TYPE_LABELS[type]}>
+              {available.map((g) => (
+                <ListRow
+                  key={g.id}
+                  title={g.name}
+                  subtitle={`${g.kind}${g.religion ? ` · ${g.religion}${g.tradition ? `, ${g.tradition}` : ''}` : ''}${g.block !== null ? ` · ${GROUP_JOIN_BLOCK_LABELS[g.block]}` : ''}`}
+                  ending="dots"
+                  moreLabel={`About ${g.name}`}
+                  muted={g.block !== null}
+                  onClick={() => setPicked(g)}
+                  onMore={() => setPicked(g)}
+                  testId={`group-${g.id}`}
+                />
+              ))}
+            </RowList>
+          )}
         </section>
       )}
       <JoinSheet group={picked} open={picked !== null} onClose={() => setPicked(null)} busy={busy} canAct={view.canAct} onJoin={join} />

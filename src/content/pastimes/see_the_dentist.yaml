@@ -1,0 +1,39 @@
+id: see_the_dentist
+category: health
+label: "See the dentist"
+blurb: "A cleaning and a look at your teeth."
+minAge: 3
+inPerson: true
+companion: none
+cost: dentist_visit
+profile: steady
+yearlyLimit: 3
+hub: dentist
+tiers:
+  great:
+    text:
+      - "Not a single cavity, a gleaming polish and a compliment from the hygienist. You smile all the way home."
+      - "The dentist is pleased. Your teeth are in great shape and the chair is almost pleasant."
+    effects:
+      - { type: stat, key: health, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "A thorough cleaning and a clean bill for your teeth. The scraping is not pleasant, but it is over."
+      - "The hygienist finds nothing worrying and sends you off with a free toothbrush."
+    effects:
+      - { type: stat, key: health, delta: 2 }
+  neutral:
+    text:
+      - "A cleaning, a lecture on flossing and a promise to do better. Routine."
+      - "Fifteen minutes in the chair and a reminder card for next time."
+    effects:
+      - { type: stat, key: health, delta: 1 }
+  bad:
+    text:
+      - "Two cavities and a lecture about sugar. You book a follow-up and leave with a numb mouth and a sore pride."
+      - "The drill is every bit as bad as you remembered. The tooth is fixed, but you wince for days."
+    effects:
+      - { type: stat, key: health, delta: 1 }
+      - { type: stat, key: stress, delta: 2 }

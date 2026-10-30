@@ -9,6 +9,7 @@ companion: none
 cost: lawyer_neighbor
 quality: true
 yearlyLimit: 1
+hub: lawsuits
 requires: { all: [{ not: { flag: sued_neighbor } }, { home: { kind: [owned, renting] } }] }
 evidence:
   - { flag: neighbor_dispute }

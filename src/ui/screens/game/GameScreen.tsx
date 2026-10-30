@@ -8,7 +8,7 @@ import { EventSheet } from '../../components/EventSheet';
 import { GameNav } from '../../components/GameNav';
 import { InteractionCard } from '../../components/InteractionCard';
 import { LegalBanner } from '../../components/LegalBanner';
-import { TAB_LABELS } from '../../labels';
+import { ACTIVITY_TAB_LABELS, GROUPS_FOCUS_TITLES, TAB_LABELS } from '../../labels';
 import { ActivitiesTab } from '../activities/ActivitiesTab';
 import { ActivitySheet } from '../activities/ActivitySheet';
 import { AssetsTab } from '../assets/AssetsTab';
@@ -24,7 +24,6 @@ import { HealthScreen } from '../more/HealthScreen';
 import { HousingScreen } from '../more/HousingScreen';
 import { LaterScreen } from '../more/LaterScreen';
 import { MigrationScreen } from '../more/MigrationScreen';
-import { ActivitiesScreen } from '../more/ActivitiesScreen';
 import { SocialScreen } from '../more/SocialScreen';
 import { TeenScreen } from '../more/TeenScreen';
 import { TravelScreen } from '../more/TravelScreen';
@@ -44,9 +43,7 @@ const PAGE_TITLES = {
   will: 'Your will',
   later: 'Later life',
   belongings: 'Possessions',
-  groups: 'Groups',
   teen: 'Teen years',
-  pastimes: 'Leisure and self',
   social: 'Social media',
 } as const;
 
@@ -69,6 +66,9 @@ export function GameScreen({ life }: { life: LifeState }) {
   const closePerson = useAppStore((s) => s.closePerson);
   const moreView = useAppStore((s) => s.moreView);
   const closeHome = useAppStore((s) => s.closeHome);
+  const groupsFocus = useAppStore((s) => s.groupsFocus);
+  const activityCategory = useAppStore((s) => s.activityCategory);
+  const openActivityCategory = useAppStore((s) => s.openActivityCategory);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const enrolled = getCharacterSummary(life, content).school !== null;
@@ -78,8 +78,11 @@ export function GameScreen({ life }: { life: LifeState }) {
   const pet = tab === 'people' && personId !== null && life.possessions.items.some((p) => p.id === personId && p.kind === 'pet') ? personId : null;
 
   let header;
+  // U2: the category of the Activities hub that is open (a page opened from it returns to it).
+  const category = tab === 'activities' ? content.registries.activities.categories.find((c) => c.id === activityCategory) : undefined;
   if (person || pet) header = <PageHeader title="People" onBack={closePerson} backLabel="Back to People" />;
-  else if (moreView) header = <PageHeader title={PAGE_TITLES[moreView]} onBack={closeHome} backLabel={`Back to ${tabTitle(tab)}`} />;
+  else if (moreView) header = <PageHeader title={moreView === 'groups' ? GROUPS_FOCUS_TITLES[groupsFocus] : PAGE_TITLES[moreView]} onBack={closeHome} backLabel={`Back to ${category?.label ?? tabTitle(tab)}`} />;
+  else if (category) header = <PageHeader title={category.label} onBack={() => openActivityCategory(null)} backLabel={ACTIVITY_TAB_LABELS.backToList} />;
   else if (tab === 'home') header = <HomeHeader life={life} onMenu={() => setMenuOpen(true)} onProfile={() => setProfileOpen(true)} />;
   else header = <PageHeader title={tabTitle(tab)} onBack={() => setTab('home')} backLabel="Back to Home" />;
   const home = tab === 'home' && !moreView && !person && !pet;
@@ -96,7 +99,6 @@ export function GameScreen({ life }: { life: LifeState }) {
       belongings: <BelongingsScreen life={life} />,
       groups: <GroupsScreen life={life} />,
       teen: <TeenScreen life={life} />,
-      pastimes: <ActivitiesScreen life={life} />,
       social: <SocialScreen life={life} />,
     }[moreView]
   ) : tab === 'home' ? (

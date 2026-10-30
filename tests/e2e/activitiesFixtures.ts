@@ -46,7 +46,7 @@ export function activitiesLife(options: ActivitiesLife): LifeState {
     d.lifetime = { happinessTotal: d.character.stats.happiness * age, years: age };
     d.finances.savings = options.savings ?? 40_000;
     d.finances.lastLedger = { year: d.currentYear - 1, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 90_000 };
-    d.housing = { kind: 'renting', cityId: d.character.cityId, annualCost: 0, since: d.currentYear - 3 };
+    d.housing = age < 18 ? { kind: 'with_parents', cityId: d.character.cityId, annualCost: 0, since: d.birthYear } : { kind: 'renting', cityId: d.character.cityId, annualCost: 0, since: d.currentYear - 3 };
     if (options.vice !== undefined) d.character.hidden.vice = options.vice;
     for (const flag of options.flags ?? []) d.flags[flag] = true;
   });

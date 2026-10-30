@@ -1,0 +1,43 @@
+id: book_a_luxury_spa_week
+category: salon_spa
+label: "Book a week at a luxury spa"
+blurb: "A week of being looked after."
+minAge: 18
+inPerson: true
+companion: none
+cost: luxury_spa
+profile: pamper
+yearlyLimit: 4
+hub: luxury_spa
+tiers:
+  great:
+    text:
+      - "Seven days of massage, steam, silence and sea air. You come home ten years younger and wonder why you waited. The week costs {cost}."
+      - "Every tension in your body is found and unknotted. You sleep nine hours a night and wake without an alarm. {cost}, and worth it."
+    effects:
+      - { type: stat, key: stress, delta: -8 }
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: health, delta: 2 }
+  good:
+    text:
+      - "A week of treatments and slow meals. You leave rested and glowing, {cost} lighter."
+      - "The spa runs on a schedule of baths and naps and long walks. You come home restored, for {cost}."
+    effects:
+      - { type: stat, key: stress, delta: -6 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: looks, delta: 1 }
+  neutral:
+    text:
+      - "The treatments are fine and the food is small. You are relaxed, if not transformed, and {cost} poorer."
+      - "A pleasant, quiet week. You wonder, a little, whether {cost} could have bought more."
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "The spa is under renovation, the neighbor's music leaks through the wall, and the massage is bad. Costly, at {cost}, and no use at all."
+      - "You spend a week in a robe, bored, and {cost} poorer. You come home more tired than you left."
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+      - { type: stat, key: happiness, delta: -2 }

@@ -9,6 +9,7 @@ companionKinds: [partner, friend, family]
 cost: picnic
 profile: outdoor
 yearlyLimit: 6
+hub: garden
 tiers:
   great:
     text:
@@ -19,7 +20,7 @@ tiers:
       - "{companion.name} has packed all your favorites. You laugh, eat too much, and nap in the sun."
     effects:
       - { type: stat, key: happiness, delta: 4 }
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -5 }
     companion: { affection: 5, trust: 2 }
     extras:
       - chance: allergy
@@ -36,7 +37,7 @@ tiers:
       - "A simple, easy picnic with {companion.name}."
     effects:
       - { type: stat, key: happiness, delta: 2 }
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -4 }
     companion: { affection: 3, trust: 1 }
     extras:
       - chance: allergy
@@ -52,7 +53,7 @@ tiers:
       - "You and {companion.name} eat, chat, and head home. {cost}."
       - "An easy hour with {companion.name}, ants and all."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -2 }
     companion: { affection: 1, trust: 0 }
     extras:
       - chance: allergy

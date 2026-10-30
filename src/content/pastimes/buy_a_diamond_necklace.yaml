@@ -1,0 +1,42 @@
+id: buy_a_diamond_necklace
+category: luxury
+label: "Buy a diamond necklace"
+blurb: "A rope of white stones, set by hand."
+minAge: 18
+inPerson: true
+companion: none
+cost: diamond_necklace
+profile: luxury
+yearlyLimit: 1
+hub: lux_jewelry
+buys: diamond_necklace
+tiers:
+  great:
+    text:
+      - "The jeweler lays it across black velvet and the whole shop goes quiet. {cost}, and you will never see another stone like it."
+      - "It clasps at your neck as if it had always been there. You pay {cost} without a flicker."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 3 }
+      - { type: stat, key: looks, delta: 2 }
+  good:
+    text:
+      - "A beautiful piece, signed and certified. {cost}, and a keepsake for life."
+      - "You walk out wearing it, the box in your bag. {cost}, and no regrets."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  neutral:
+    text:
+      - "It is lovely, and so is the price: {cost}. You are not sure it suits you."
+      - "The necklace is fine. You spent {cost} and feel mostly relieved to be done choosing."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "Soon after, a friend points out the clasp is loose, and the jeweler is rude about it. {cost}, and a sour taste."
+      - "You find the same piece cheaper online. {cost} was too much, and you know it."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }

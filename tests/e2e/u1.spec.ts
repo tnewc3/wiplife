@@ -5,6 +5,7 @@
  * the Activities tab.
  */
 import { expect, test, type Page } from '@playwright/test';
+import { activitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
 import {
   ageUpButton,
@@ -167,33 +168,42 @@ test('an event card with an icon and a meter shows both, and the outcome shows m
   await expect(sheet.locator('img[src$="icons/calendar.svg"]')).toBeVisible();
 });
 
-test('Assets holds finances, properties and possessions; Activities lists its groups and what else exists', async ({ page }) => {
+test('Assets has in-screen tabs for money, home and things', async ({ page }) => {
   await startRandomLife(page, PACK);
   await tab(page, 'Assets').click();
   await expect(page.getByRole('heading', { name: 'Assets', level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Finances' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Properties' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Possessions' })).toBeVisible();
+  await expect(page.getByRole('tablist', { name: 'Assets' })).toBeVisible();
+  await expect(page.getByTestId('savings')).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
+  await page.getByTestId('assets-tab-home').click();
+  await expect(page.getByTestId('assets-housing-line')).toBeVisible();
   await page.getByTestId('assets-properties').click();
   await expect(page.getByRole('heading', { name: 'Properties', level: 1 })).toBeVisible();
   await page.getByRole('button', { name: 'Back to Assets' }).click();
+  await page.getByTestId('assets-tab-things').click();
   await page.getByTestId('assets-possessions').click();
   await expect(page.getByRole('heading', { name: 'Possessions', level: 1 })).toBeVisible();
   await page.getByRole('button', { name: 'Back to Assets' }).click();
 
+});
+
+test('Activities is a hub of categories, and Plan a trip is in Leisure → Vacation', async ({ page }) => {
+  await passAgeGate(page, { testPack: true });
+  await loadSavedLife(page, activitiesLife({ seed: 'e2e-u1-hub', age: 30 }));
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await settle(page);
   await tab(page, 'Activities').click();
-  await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
-  for (const group of ['mind_body', 'social', 'money_luck', 'leisure']) await expect(page.getByTestId(`activities-group-${group}`)).toBeVisible();
-  await expect(page.getByTestId('activities-pastimes')).toBeVisible();
-  await expect(page.getByTestId('activities-travel')).toBeVisible();
+  for (const id of ['health', 'mind_body', 'outdoors', 'social_love', 'groups', 'faith', 'leisure', 'money_luck']) await expect(page.getByTestId(`activities-category-${id}`)).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
-  await page.getByTestId('activities-travel').click();
+  // Plan a trip is in Leisure → Vacation.
+  await page.getByTestId('activities-category-leisure').click();
+  await page.getByTestId('activity-hub-vacation').click();
+  await page.getByTestId('activity-plan-trip').click();
   await expect(page.getByRole('heading', { name: 'Plan a trip', level: 1 })).toBeVisible();
-  await page.getByRole('button', { name: 'Back to Activities' }).click();
-  await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
+  await page.getByRole('button', { name: 'Back to Leisure' }).click();
+  await expect(page.getByTestId('activity-hub-vacation')).toBeVisible();
 });
 
 test('People: groups, late relationships with a memorial mark, and Spend time with everyone as a group interaction', async ({ page }) => {
@@ -204,7 +214,8 @@ test('People: groups, late relationships with a memorial mark, and Spend time wi
   await expect(page.getByRole('list', { name: 'Friends' })).toContainText('Marcus');
   await expect(page.getByRole('list', { name: 'Other family' })).toHaveCount(0);
   const late = page.getByTestId('people-late');
-  await expect(late.getByRole('heading', { name: 'Late relationships' })).toBeVisible();
+  // Late relationships is a collapsible group that starts closed (U2); open it.
+  await late.getByRole('button', { name: /Late relationships/ }).click();
   await expect(late).toContainText('Dolores');
   await expect(late).toContainText('Died 3 years ago');
   await expect(late.getByTestId('memorial-icon')).toHaveCount(1);

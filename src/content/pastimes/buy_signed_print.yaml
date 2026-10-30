@@ -8,6 +8,7 @@ companion: none
 cost: signed_print
 profile: luxury
 yearlyLimit: 1
+hub: fine_goods
 buys: signed_print
 tiers:
   great:

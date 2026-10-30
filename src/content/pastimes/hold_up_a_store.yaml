@@ -8,6 +8,7 @@ companion: none
 cost: nothing
 profile: crime_serious
 yearlyLimit: 1
+hub: crime
 tiers:
   great:
     text:

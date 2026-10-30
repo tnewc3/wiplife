@@ -9,6 +9,7 @@ cost: liposuction
 profile: surgery
 quality: true
 yearlyLimit: 1
+hub: cosmetic
 tiers:
   great:
     text:

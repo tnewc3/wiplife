@@ -1,0 +1,41 @@
+id: go_off_roading
+category: outdoor
+label: "Go off-roading"
+blurb: "Dirt, mud and a vehicle that can take it."
+minAge: 18
+inPerson: true
+companion: none
+cost: offroad
+profile: outdoor
+yearlyLimit: 4
+hub: offroad
+requires: { belongings: { vehicles: { gte: 1 } } }
+tiers:
+  great:
+    text:
+      - "The trail climbs, drops and climbs, and your vehicle takes every bit of it. At the top the whole county is laid out below you."
+      - "Mud to the windows, a creek crossing, and not a single wrong turn. You are filthy, grinning and exactly where you want to be."
+    effects:
+      - { type: stat, key: stress, delta: -5 }
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "A day of ruts and ridges, with the engine working hard and you working harder. You sleep like a stone."
+      - "The trail is rough and the weather holds. A good day, and a muddy vehicle to show for it."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 2 }
+  neutral:
+    text:
+      - "The trail is closed halfway, and you spend the day on the easy part. It is still better than the office."
+      - "Some bumps, some dust, some waiting behind another group. Fine."
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+  bad:
+    text:
+      - "You misjudge a ditch and spend three hours getting out of it. Your back hurts for days."
+      - "A bad bounce, a loud noise from underneath and a long tow home. It is a rough day."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: health, delta: -2 }

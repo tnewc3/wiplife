@@ -51,7 +51,7 @@ import { vehiclesOf } from '../possessions/query';
 import { addValuable } from '../possessions/valuables';
 import type { Id, LifeState, PastimeReceipt } from '../types';
 import { definedTiers, pastimePrice, type PastimeChoice } from './query';
-import { applyLook, practiceHobby, repeatKey, repeatsOf } from './activities';
+import { applyLook, practiceHobby, repeatsOf } from './activities';
 import { EXPOSED_CATEGORIES, FAKE_ID_FLAG, evidenceCount, exposure, fakeIdUsable, loanOffer, nameAfter, rollAmount } from './risk';
 
 /** The role the companion plays in an activity's effects and wording. */
@@ -159,8 +159,8 @@ function keepReceipt(state: LifeState, def: PastimeDef, tier: OutcomeTier, text:
   const person = companion ? state.people[companion.id] : undefined;
   if (companion && person) receipt.companion = { id: companion.id, name: person.name.first, affection: companion.affection };
   state.pastimes.counts[def.id] = (state.pastimes.counts[def.id] ?? 0) + 1;
-  // A1: and against the activity of the Activities tab it is an option of.
-  if (def.hub !== undefined) state.pastimes.counts[repeatKey(def)] = (state.pastimes.counts[repeatKey(def)] ?? 0) + 1;
+  // A1: and against the activity of the Activities tab it is an option of (its yearly limit, and its repeats when its options share them).
+  if (def.hub !== undefined) state.pastimes.counts[`hub:${def.hub}`] = (state.pastimes.counts[`hub:${def.hub}`] ?? 0) + 1;
   state.pastimes.receipts.push(receipt);
   const keep = content.balance.pastimes.receipts;
   if (state.pastimes.receipts.length > keep) state.pastimes.receipts = state.pastimes.receipts.slice(-keep);
@@ -178,7 +178,7 @@ export function performPastime(state: LifeState, def: PastimeDef, input: Pastime
   if (state.pastimes.year !== year) state.pastimes = { year, counts: {}, receipts: [] };
   if (def.mechanic === 'loan') return performLoan(state, def, content);
   if (def.mechanic === 'name') return performName(state, def, input, content);
-  const repeats = repeatsOf(state, def);
+  const repeats = repeatsOf(state, def, content);
   const before = snapshot(state);
   const usedFakeId = fakeIdUsable(state, def, content);
 

@@ -1,0 +1,41 @@
+id: buy_a_yacht
+category: luxury
+label: "Buy a yacht"
+blurb: "A crewed motor yacht with a master cabin and a tender."
+minAge: 18
+inPerson: true
+companion: none
+cost: yacht
+profile: luxury
+yearlyLimit: 1
+hub: lux_boats
+buys: yacht
+tiers:
+  great:
+    text:
+      - "The crew lines the deck as you step aboard. Leaving the harbor at sunset, with the whole coast turning gold, you understand what {cost} was for."
+      - "A cabin of polished wood, a crew who knows your coffee, and a horizon that belongs to you. {cost}, and a dream come true."
+    effects:
+      - { type: stat, key: happiness, delta: 7 }
+      - { type: stat, key: confidence, delta: 3 }
+      - { type: stat, key: stress, delta: -3 }
+  good:
+    text:
+      - "The sea trial is flawless and the captain is charming. {cost}, and a summer of weekends ahead."
+      - "You name the boat and break a bottle on the bow. {cost}, and a splendid new home away from home."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: confidence, delta: 2 }
+  neutral:
+    text:
+      - "The yacht is beautiful, and surprisingly hard to dock. {cost}, and a captain's salary to think about."
+      - "A big boat, a bigger list of things it needs. {cost} was just the start."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "The survey misses a problem in the engine room, and the first voyage ends under tow. {cost}, and a very long list."
+      - "Seasick on the first day, and the guests are worse. {cost}, and a dock with a boat that no one wants to board."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 3 }

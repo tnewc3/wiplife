@@ -35,6 +35,7 @@ test("a person's page shows their job, partner, children, city and troubles", as
   await openFixture(page);
   await tab(page, 'People').click();
   await page.getByRole('list', { name: 'Friends' }).getByRole('button', { name: /Marcus/ }).click();
+  await page.getByTestId('person-tab-overview').click();
   const life = page.getByTestId('their-life');
   await expect(life.getByRole('heading', { name: "Marcus's life" })).toBeVisible();
   await expect(page.getByTestId('life-work')).toContainText('No job right now');
@@ -51,6 +52,7 @@ test("a person's page shows their job, partner, children, city and troubles", as
   // Someone with nothing going on says so.
   await page.getByRole('button', { name: 'Back to People' }).click();
   await page.getByRole('list', { name: 'Friends' }).getByRole('button', { name: /Jo/ }).click();
+  await page.getByTestId('person-tab-overview').click();
   await expect(page.getByTestId('life-partner')).toHaveCount(0);
   await expect(page.getByTestId('life-children')).toContainText('None');
   await expect(page.getByTestId('life-troubles')).toContainText('None right now');
@@ -93,5 +95,6 @@ test('a year brings news and a funeral request, counted among the year\'s events
   await expect(page.getByTestId('news-card')).toContainText(/[Rr]etired/);
   await tab(page, 'People').click();
   await page.getByRole('list', { name: 'Siblings' }).getByRole('button', { name: /Rae/ }).click();
+  await page.getByTestId('person-tab-overview').click();
   await expect(page.getByTestId('life-work')).toContainText('Retired');
 });

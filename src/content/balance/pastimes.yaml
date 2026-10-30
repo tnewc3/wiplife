@@ -70,6 +70,31 @@ costs:
   signed_print: 3200
   oil_painting: 14000
   sailboat: 38000
+  # U2: the Luxury shops.
+  diamond_necklace: 52000
+  grand_tourer: 185000
+  hypercar: 1900000
+  yacht: 2400000
+  private_jet: 8500000
+  private_island: 4800000
+  # U2: outdoors, health, recovery and the Luxury activities.
+  birdwatch: 0
+  swim: 10
+  offroad: 120
+  outdoor_gear: 260
+  er_visit: 900
+  eye_exam: 120
+  dentist_visit: 160
+  alt_medicine: 90
+  blood_donation: 0
+  support_group: 0
+  rehab_stay: 9000
+  counseling: 110
+  journal: 0
+  vip_event: 4500
+  luxury_spa: 5500
+  private_society: 12000
+  charity: 25000
   # Love.
   speed_dating: 40
   matchmaker: 450
@@ -183,6 +208,12 @@ chances:
   hangover:
     base: 0.3
     repeat: 1.1
+  # U2: recovery. A support group helps now and then; a stay in rehab usually does.
+  recovery_progress:
+    base: 0.35
+    repeat: 0.85
+  rehab_progress:
+    base: 0.8
   meet_someone:
     base: 0.5
     factors:

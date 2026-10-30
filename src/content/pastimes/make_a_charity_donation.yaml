@@ -1,0 +1,40 @@
+id: make_a_charity_donation
+category: social
+label: "Make a charity donation"
+blurb: "Give big, to something that matters."
+minAge: 18
+inPerson: true
+companion: none
+cost: charity
+profile: luxury
+yearlyLimit: 4
+hub: charity
+tiers:
+  great:
+    text:
+      - "You hand over {cost} to a cause you believe in, and the director's eyes fill. A year from now there will be a building with your name on it, and a few hundred kids who got a start."
+      - "Your gift of {cost} lands at exactly the right moment. You walk out lighter than you've felt in years."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+  good:
+    text:
+      - "You give {cost} to a good cause, and get a handwritten note and a warm glow."
+      - "Your donation of {cost} is put to work, and you visit the project. It is moving and you are glad."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -1 }
+  neutral:
+    text:
+      - "You give {cost}, get a receipt and an invitation to a gala. It's a gift, quietly."
+      - "A cheque for {cost} goes out, and you feel that you have done your part."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "The charity turns out to spend most of {cost} on fundraising. You are embarrassed that you didn't look into it first."
+      - "You give {cost}, and then read that the cause is in a scandal. You wish you had done more homework."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }

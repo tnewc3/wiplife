@@ -1,0 +1,39 @@
+id: join_a_grief_circle
+category: recovery
+label: "Join a grief circle"
+blurb: "A room of people carrying someone they lost."
+minAge: 12
+inPerson: true
+companion: none
+cost: support_group
+profile: calm
+yearlyLimit: 6
+hub: counseling
+tiers:
+  great:
+    text:
+      - "You say the name out loud for the first time in months. Someone nods, and someone passes the tissues. You leave lighter, and less alone."
+      - "The circle holds all of it: the anger, the jokes, the long silences. You go home and sleep through the night."
+    effects:
+      - { type: stat, key: stress, delta: -5 }
+      - { type: stat, key: happiness, delta: 3 }
+  good:
+    text:
+      - "You listen more than you speak, and hearing the others helps. It is a small, real relief."
+      - "A quiet hour in a warm room. Grief is still grief, but it is shared."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "You sit at the edge of the circle and say nothing. Being there is enough, for now."
+      - "The facilitator is kind, and the stories are heavy. You leave in a daze."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "Someone else's story lands too close, and you leave early, shaking."
+      - "You are not ready. You sit in the car and watch the door for a long time."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: stat, key: happiness, delta: -1 }

@@ -8,6 +8,7 @@ companion: none
 cost: fake_id
 profile: market_papers
 yearlyLimit: 1
+hub: black_market
 requires: { not: { flag: fake_id } }
 tiers:
   great:

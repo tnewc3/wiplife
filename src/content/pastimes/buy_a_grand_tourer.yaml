@@ -1,0 +1,41 @@
+id: buy_a_grand_tourer
+category: luxury
+label: "Buy a grand tourer"
+blurb: "A hand-built coupe with a long hood and a quiet cabin."
+minAge: 18
+inPerson: true
+companion: none
+cost: grand_tourer
+profile: luxury
+yearlyLimit: 1
+hub: lux_cars
+buys: grand_tourer
+tiers:
+  great:
+    text:
+      - "The door closes with a sound like a vault. On the first open road, the engine settles into a hum and the miles fall away. {cost}, and the best money you have spent."
+      - "You collect the keys from a man in white gloves. {cost}, and a car that makes every drive an occasion."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 3 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "Leather, walnut and a hush at any speed. {cost}, and an easy ride home."
+      - "A splendid car, delivered with a bow. {cost}, and a very good day."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 2 }
+  neutral:
+    text:
+      - "It drives beautifully, and it has a lot of screens to learn. {cost} for a very quiet commute."
+      - "The car is magnificent and so is the insurance. {cost}, and a list of new rules."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "A warning light on the first week, a technician flown in from three states away. {cost}, and a long wait."
+      - "The car is gorgeous, and the garage door is a quarter inch too narrow. {cost}, and an awkward evening."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }

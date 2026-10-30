@@ -95,12 +95,13 @@ export interface PastimeProfile {
 
 /** The hobbies there are, in a fixed order (every option of the Hobbies activity). */
 const HOBBY_IDS = ['play_the_guitar', 'paint_or_draw', 'write_stories', 'bake_something', 'build_with_wood', 'play_chess', 'practice_dance', 'practice_public_speaking', 'shoot_hoops'];
-const HUB_IDS = ['gym', 'meditate', 'read', 'nightlife', 'dating', 'parties', 'lottery', 'casino', 'shopping', 'vacation', 'salon', 'hobbies'];
+// The activities this player picks from (the risky ones, crime, loans, the black market and lawsuits, are the criminal's and the careless player's). U2 added the outdoors, health and mind & body ones.
+const HUB_IDS = ['gym', 'meditate', 'read', 'nightlife', 'dating', 'parties', 'lottery', 'casino', 'shopping', 'vacation', 'salon', 'hobbies', 'walk', 'yoga', 'hike', 'fish', 'camp', 'birdwatch', 'swim', 'garden', 'eyes', 'dentist', 'counseling', 'movies'];
 
 export function rollPastimeProfile(rng: RngState): PastimeProfile {
   const w = () => 0.3 + 1.4 * nextFloat(rng);
   return {
-    interests: { mind_body: w(), salon_spa: w(), surgery: 0.3, shopping: w(), movies: w() * 1.2, nightlife: w(), outdoor: w(), luxury: 0.3, love: 1, social: w(), hobby: w(), crime: 0, black_market: 0, gambling: 0, lawsuits: 0, identity: 0, loans: 0 },
+    interests: { mind_body: w(), health: w(), recovery: 0.3, salon_spa: w(), surgery: 0.3, shopping: w(), movies: w() * 1.2, nightlife: w(), outdoor: w(), luxury: 0.3, love: 1, social: w(), hobby: w(), crime: 0, black_market: 0, gambling: 0, lawsuits: 0, identity: 0, loans: 0 },
     vain: chance(rng, 0.18),
     collector: chance(rng, 0.2),
     hubs: Object.fromEntries(HUB_IDS.map((id) => [id, w()])),
@@ -194,7 +195,7 @@ export function choosePastimePlans(life: LifeState, content: ContentBundle, rng:
 /** A1: the player who uses the Activities tab: a few activities a year, picked by interest, their options chosen as the tab offers them, and a hobby kept up. */
 function chooseActivityPlans(life: LifeState, content: ContentBundle, rng: RngState, profile: PastimeProfile): PastimePlan[] {
   const view = getActivityTabView(life, content);
-  const open = view.groups.flatMap((g) => g.activities).filter((a) => a.block === null && a.options.length > 0);
+  const open = view.categories.flatMap((c) => c.sections.flatMap((x) => x.activities)).filter((a) => a.block === null && a.options.length > 0 && profile.hubs[a.id] !== undefined);
   const row = POLICY.tab.perYear.find((r) => life.character.age <= r.upTo)!;
   let n = 0;
   for (let i = 0; i < row.max; i++) if (chance(rng, row.p)) n++;
@@ -215,7 +216,7 @@ function chooseActivityPlans(life: LifeState, content: ContentBundle, rng: RngSt
     return price > life.finances.savings * POLICY.tab.affordShare ? null : plan;
   };
   for (let i = 0; i < n && open.length > 0; i++) {
-    const hub = weightedPick(rng, open.map((a) => [a, profile.hubs[a.id] ?? 1] as [(typeof open)[number], number]));
+    const hub = weightedPick(rng, open.map((a) => [a, profile.hubs[a.id]!] as [(typeof open)[number], number]));
     if (hub.id === 'casino' && !chance(rng, POLICY.tab.casino)) continue;
     if (hub.id === 'lottery' && !chance(rng, POLICY.tab.lottery)) continue;
     if (hub.kind === 'hobbies') {
@@ -365,7 +366,7 @@ export class PastimesWatcher {
     const { content, r } = this;
     const def = content.pastimes[plan.pastimeId]!;
     const before = life;
-    const repeats = repeatsOf(before, def);
+    const repeats = repeatsOf(before, def, content);
     const opened = act(life);
     const receipt = opened.pastimes.receipts.at(-1)!;
     const pendingIds = opened.pending.map((p) => p.eventId);

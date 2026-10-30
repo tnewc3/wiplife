@@ -1,0 +1,39 @@
+id: get_an_eye_exam
+category: health
+label: "Get an eye exam"
+blurb: "A chart, a bright light and a new prescription, maybe."
+minAge: 3
+inPerson: true
+companion: none
+cost: eye_exam
+profile: steady
+yearlyLimit: 3
+hub: eyes
+tiers:
+  great:
+    text:
+      - "The optician finds the exact lens that sharpens the world, and the leaves on the trees are suddenly individual. You didn't know you were missing so much."
+      - "Your eyes are healthy and your vision is better than you feared. You walk out into the light, delighted."
+    effects:
+      - { type: stat, key: health, delta: 2 }
+      - { type: stat, key: happiness, delta: 3 }
+  good:
+    text:
+      - "A thorough exam and a clean report. Your eyes are in good shape."
+      - "The optician adjusts a few lenses and the chart comes into focus. A simple, reassuring visit."
+    effects:
+      - { type: stat, key: health, delta: 1 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "The usual chart, the usual puff of air, and the usual advice to take more breaks from screens."
+      - "A routine check. Nothing new, nothing wrong."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "The optician finds the early signs of a problem and tells you to keep an eye on it. You do worry about it afterward."
+      - "Your sight has slipped and the new prescription is stronger than you wanted. It is a small blow."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }

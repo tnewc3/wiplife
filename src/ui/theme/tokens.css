@@ -1,5 +1,5 @@
 /*
- * Design tokens (docs/portraits-and-ui.md, U1). Components use the Tailwind names defined in index.css
+ * Design tokens (docs/portraits-and-ui.md, U1; density rules U2). Components use the Tailwind names defined in index.css
  * (bg-bg, text-muted, bg-accent...), never raw colors, so both themes stay in sync. Dark is the default;
  * data-theme on <html> is set from Settings ("system" follows the device). Every text/background pair
  * here is checked for WCAG AA in tools/contrast.test.ts.
@@ -33,6 +33,10 @@
   --wl-tone-dark: #ff5d6c;
   --wl-scrim: rgb(5 6 10 / 0.7);
   --wl-radius: 1.25rem;
+  /* Gold: the accent of the Luxury hub (U2). */
+  --wl-gold: #f0cf74;
+  --wl-gold-surface: #2e2713;
+  --wl-gold-border: #8a7230;
   /* Event category banners: the fill, with the ink written on it. */
   --wl-cat-ink: #12141c;
   --wl-cat-family: #ffb86b;
@@ -82,6 +86,9 @@
   --wl-tone-serious: #4a3bc9;
   --wl-tone-dark: #c42a3b;
   --wl-scrim: rgb(20 22 31 / 0.5);
+  --wl-gold: #6b4e00;
+  --wl-gold-surface: #fbf1d0;
+  --wl-gold-border: #8f6c12;
   --wl-cat-ink: #ffffff;
   --wl-cat-family: #b45309;
   --wl-cat-love: #be185d;
@@ -129,6 +136,25 @@
     --wl-tone-serious: #4a3bc9;
     --wl-tone-dark: #c42a3b;
     --wl-scrim: rgb(20 22 31 / 0.5);
+    --wl-gold: #6b4e00;
+    --wl-gold-surface: #fbf1d0;
+    --wl-gold-border: #8f6c12;
     color-scheme: light;
   }
+}
+
+/*
+ * Density rules (U2, docs/careers-crime-and-ui.md; the same rules are in AGENTS.md). Sizes, not colors, so one block serves both themes.
+ *   - A list row is --wl-row-h (56px; never below the 44px touch target): a --wl-row-icon (28px) icon, a 16px title, a one-line 13px subtitle.
+ *   - A row that opens a new screen ends in a chevron; a row with a quick action sheet ends in a three-dots button (--wl-touch wide).
+ *   - A sticky section header is --wl-section-h (28px).
+ *   - A screen with more than two sections or about 12 rows uses in-screen tabs (a segmented control) or collapsible groups that remember if they are open.
+ *   - Actions and confirmations are bottom sheets. At most two levels of menus below a tab.
+ *   - A row shows its key value inline (a bar, a price, "$15/hour").
+ */
+:root {
+  --wl-touch: 2.75rem;
+  --wl-row-h: 3.5rem;
+  --wl-row-icon: 28px;
+  --wl-section-h: 1.75rem;
 }

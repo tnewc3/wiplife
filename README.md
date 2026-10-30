@@ -5,6 +5,7 @@ A free, mobile-first life simulator that runs entirely on the player's device. E
 - Game design: [docs/design.md](docs/design.md)
 - Architecture, data model and roadmap: [docs/technical.md](docs/technical.md)
 - Rules for coding AIs: [AGENTS.md](AGENTS.md)
+- What the UI tightening changed, screen by screen: [docs/ui-audit.md](docs/ui-audit.md)
 - Playable game: https://wiplife.pages.dev (hosted on Cloudflare Pages)
 
 ## Commands
@@ -23,7 +24,7 @@ Requires Node 22.22+ or 24.15+ (see `.nvmrc`).
 | `npm run lint` | ESLint, including the engine boundary rules |
 | `npm run typecheck` | TypeScript for the app, the engine (without DOM types) and the Node tools |
 | `npm test` | Unit tests (Vitest), including a 2,500-life lifespan and invariant test (4 shards of 625 lives); the nightly workflow runs 10,000 as 16 shards of 625 (`LIFESPAN_LIVES=10000 npx vitest run src/engine/lifespan`) and a 10,000-life simulation as four parallel jobs of 2,500. `tools/simulate/golden.test.ts` replays fixed-seed lives and compares them whole with `golden.json`: a change meant only to speed things up must leave it unchanged (`GOLDEN_UPDATE=1` rewrites it when a rule or content change moves the lives on purpose) |
-| `npm run test:e2e` | End-to-end tests at phone size (Playwright; builds and serves the app first) |
+| `npm run test:e2e` | End-to-end tests at phone size (Playwright; builds and serves the app first). `SCREENSHOTS=1 npx playwright test u2Screenshots` also writes the 390×844 screenshots of the U2 screens to `docs/screenshots/u2` |
 | `npm run check` | Lint, typecheck, unit tests and build |
 
 First-time Playwright setup: `npx playwright install chromium`.

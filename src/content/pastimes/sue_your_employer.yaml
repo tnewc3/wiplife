@@ -9,6 +9,7 @@ companion: none
 cost: lawyer_employer
 quality: true
 yearlyLimit: 1
+hub: lawsuits
 requires: { not: { flag: sued_employer } }
 evidence:
   - { career: { lostWithin: 3 } }

@@ -8,14 +8,14 @@ companion: none
 cost: yoga_class
 profile: calm
 yearlyLimit: 6
-hub: meditate
+hub: yoga
 tiers:
   great:
     text:
       - "For one long minute at the end, lying flat, your mind goes completely quiet. You walk out lighter than you walked in."
       - "The teacher talks you through a pose you thought you could not hold, and you hold it."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -5 }
       - { type: stat, key: fitness, delta: 1 }
       - { type: stat, key: happiness, delta: 3 }
       - { type: stat, key: discipline, delta: 1 }
@@ -24,7 +24,7 @@ tiers:
       - "You stretch, you breathe, and the knots in your shoulders let go a little."
       - "A calm, slow hour. You leave feeling looser than you came."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -4 }
       - { type: stat, key: fitness, delta: 1 }
       - { type: stat, key: happiness, delta: 1 }
   neutral:
@@ -32,7 +32,7 @@ tiers:
       - "You spend half the class wondering whether you are doing it right. It is fine."
       - "The class goes by. You are a little more flexible and a little self-conscious."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -2 }
   bad:
     text:
       - "You wobble out of every pose and the person next to you is very, very good. You leave embarrassed."

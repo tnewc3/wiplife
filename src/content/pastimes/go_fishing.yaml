@@ -9,6 +9,7 @@ companionKinds: [partner, friend, family]
 cost: fishing
 profile: outdoor
 yearlyLimit: 5
+hub: fish
 tiers:
   great:
     text:
@@ -19,7 +20,7 @@ tiers:
       - "{companion.name} lands a big one, and you cheer as loud as anyone has ever cheered over a fish."
     effects:
       - { type: stat, key: happiness, delta: 4 }
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -5 }
       - { type: stat, key: smarts, delta: 1 }
     companion: { affection: 5, trust: 2 }
     extras:
@@ -37,7 +38,7 @@ tiers:
       - "A good day on the water with {companion.name}. {cost}."
     effects:
       - { type: stat, key: happiness, delta: 2 }
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -4 }
       - { type: stat, key: smarts, delta: 1 }
     companion: { affection: 3, trust: 1 }
     extras:
@@ -54,7 +55,7 @@ tiers:
       - "You and {companion.name} sit on the bank and catch up. The fish do not join the conversation."
       - "No fish, but a good day with {companion.name}."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -2 }
     companion: { affection: 1, trust: 0 }
     extras:
       - chance: outdoor_mishap

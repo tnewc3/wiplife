@@ -62,8 +62,10 @@ test('try for a baby, pregnancy on Home, a birth, the child’s page, parenting 
   await ageUpTimes(page, 2);
   await tab(page, 'People').click();
   await page.getByRole('list', { name: 'Children' }).getByRole('button').first().click();
+  await page.getByTestId('person-tab-overview').click();
   await expect(page.getByTestId('child-origin')).toContainText('Your child');
   await expect(page.getByTestId('parenting-style')).toContainText(/You’ve been/);
+  await page.getByTestId('person-tab-interact').click();
   await page.getByTestId('interact-button').click();
   const sheet = page.getByTestId('interact-sheet');
   await expect(sheet.getByRole('heading', { name: 'Parenting' })).toBeVisible();

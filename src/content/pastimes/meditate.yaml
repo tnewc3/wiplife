@@ -15,7 +15,7 @@ tiers:
       - "For a few minutes, everything lets go. You open your eyes feeling like you slept for a week."
       - "Something shifts in your chest. The worry is still there, but it is smaller and farther away."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -5 }
       - { type: stat, key: happiness, delta: 3 }
       - { type: stat, key: discipline, delta: 1 }
   good:
@@ -23,14 +23,14 @@ tiers:
       - "You sit, you breathe, you wander off a hundred times and come back a hundred times. It helps."
       - "Twenty quiet minutes. The day looks less sharp afterward."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -4 }
       - { type: stat, key: happiness, delta: 1 }
   neutral:
     text:
       - "Your mind will not settle, but you stay on the cushion anyway."
       - "You mostly think about dinner. It is still a pause in the day."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -2 }
   bad:
     text:
       - "Sitting alone with your thoughts turns out to be the opposite of relaxing. You get up restless and on edge."

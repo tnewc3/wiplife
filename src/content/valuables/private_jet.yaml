@@ -1,0 +1,4 @@
+id: private_jet
+name: "private jet"
+blurb: "A small jet with your name on the registration."
+class: aircraft

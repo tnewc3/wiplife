@@ -1,0 +1,55 @@
+id: go_to_a_support_group
+category: recovery
+label: "Go to a support group"
+blurb: "Folding chairs, bad coffee and people who understand."
+minAge: 18
+inPerson: true
+companion: none
+cost: support_group
+profile: steady
+yearlyLimit: 10
+hub: support_group
+requires: { health: { conditions: [alcohol_addiction, drug_addiction, gambling_addiction] } }
+tiers:
+  great:
+    text:
+      - "Tonight you speak, for the first time, about the worst of it. Nobody flinches. When you sit down, a stranger squeezes your hand."
+      - "The circle holds you up when you couldn't do it alone. You leave feeling you might actually make it."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: discipline, delta: 2 }
+    extras:
+      - chance: recovery_progress
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: -10 }
+          - { type: health, conditionId: drug_addiction, severity: -10 }
+          - { type: health, conditionId: gambling_addiction, severity: -10 }
+        note: "Another week, another step. The craving is a little quieter than it was."
+  good:
+    text:
+      - "You sit, you listen and you say a few words. Hearing other people's stories makes you feel less alone."
+      - "A hard hour, and a good one. You leave with a phone number and a plan for the week."
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: discipline, delta: 1 }
+    extras:
+      - chance: recovery_progress
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: -10 }
+          - { type: health, conditionId: drug_addiction, severity: -10 }
+          - { type: health, conditionId: gambling_addiction, severity: -10 }
+        note: "Another week, another step. The craving is a little quieter than it was."
+  neutral:
+    text:
+      - "You mostly listen and say nothing. Still, you came, and that is the hardest part."
+      - "The meeting runs long and your mind wanders. You go anyway, and you will be back next week."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "The stories hit too close to home, and you leave early, shaking. Some nights are like that."
+      - "You sit in your car outside for an hour and never go in. Tomorrow, maybe."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: stat, key: happiness, delta: -1 }

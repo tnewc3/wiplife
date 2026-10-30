@@ -9,6 +9,7 @@ companion: none
 cost: lawyer_doctor
 quality: true
 yearlyLimit: 1
+hub: lawsuits
 requires: { not: { flag: sued_doctor } }
 evidence:
   - { health: { conditions: [surgical_complication] } }

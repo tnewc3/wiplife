@@ -1,4 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { expect, type Page } from '@playwright/test';
+import { parse } from 'yaml';
 
 export interface OpenOptions {
   /** The next new life uses this seed (test builds only). */
@@ -78,25 +80,36 @@ export type PageKey =
   | 'will'
   | 'family'
   | 'groups'
-  | 'pastimes'
   | 'social'
   | 'trip'
   | 'migration'
   | 'teen';
 
 const MENU_ITEMS: Partial<Record<PageKey, string>> = { settings: 'menu-settings', lifeHistory: 'menu-life-history', archive: 'menu-archive', title: 'menu-title', newLife: 'menu-new-life' };
-const TAB_PAGES: Partial<Record<PageKey, [Parameters<typeof tab>[1], string]>> = {
-  properties: ['Assets', 'assets-properties'],
-  possessions: ['Assets', 'assets-possessions'],
-  will: ['Assets', 'assets-will'],
+/** Which category of the Activities hub (U2) holds each activity, read from the registry itself, so the tests follow the content. */
+const HUB_CATEGORY: Record<string, string> = Object.fromEntries(
+  (parse(readFileSync(new URL('../../src/content/registries/activities.yaml', import.meta.url), 'utf8')) as { activities: { id: string; category: string }[] }).activities.map((a) => [a.id, a.category]),
+);
+
+/** Opens an activity of the Activities hub: the tab, its category, then the activity (a sheet of options, or the page it links to). */
+export async function openHubActivity(page: Page, hubId: string): Promise<void> {
+  const category = HUB_CATEGORY[hubId];
+  if (!category) throw new Error(`no category for activity ${hubId}`);
+  await goHome(page);
+  await tab(page, 'Activities').click();
+  await page.getByTestId(`activities-category-${category}`).click();
+  await page.getByTestId(`activity-hub-${hubId}`).click();
+}
+
+/** Where a page lives: the tab, what to tap there, and (Assets) the in-screen tab that holds it. */
+const TAB_PAGES: Partial<Record<PageKey, [Parameters<typeof tab>[1], string, string?]>> = {
+  properties: ['Assets', 'assets-properties', 'assets-tab-home'],
+  possessions: ['Assets', 'assets-possessions', 'assets-tab-things'],
+  will: ['Assets', 'assets-will', 'assets-tab-things'],
   family: ['People', 'people-family-planning'],
-  groups: ['People', 'people-groups'],
-  pastimes: ['Activities', 'activities-pastimes'],
-  social: ['Activities', 'activities-social'],
-  trip: ['Activities', 'activities-travel'],
-  migration: ['Activities', 'activities-migration'],
-  teen: ['Activities', 'activities-teen'],
 };
+/** Pages reached through an activity of the hub. */
+const HUB_PAGES: Partial<Record<PageKey, string>> = { groups: 'clubs', social: 'social_media', migration: 'migration', teen: 'teen_years' };
 
 /** Opens a page from Home: the menu for Settings and Life history, the profile for Health, the tab it lives under for the rest. */
 export async function openPage(page: Page, key: PageKey): Promise<void> {
@@ -113,8 +126,16 @@ export async function openPage(page: Page, key: PageKey): Promise<void> {
     else await page.getByTestId('profile-later').click();
     return;
   }
-  const [tabName, testId] = TAB_PAGES[key]!;
+  const hub = HUB_PAGES[key];
+  if (hub) return openHubActivity(page, hub);
+  if (key === 'trip') {
+    await openHubActivity(page, 'vacation');
+    await page.getByTestId('activity-plan-trip').click();
+    return;
+  }
+  const [tabName, testId, inner] = TAB_PAGES[key]!;
   await tab(page, tabName).click();
+  if (inner) await page.getByTestId(inner).click();
   await page.getByTestId(testId).click();
 }
 export const eventSheet = (page: Page) => page.getByRole('dialog').filter({ has: page.getByTestId('event-card') });

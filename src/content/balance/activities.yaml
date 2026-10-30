@@ -10,6 +10,11 @@ returns:
   badRise: 0.25
   floor: 0.1
 
+# U2: the net worth at which a category of the Activities hub appears (US prices; the engine scales them to the price level
+# of the country you live in). Luxury: VIP nights, private societies and the finest things money buys.
+thresholds:
+  luxury: 500000
+
 hobbies:
   # Skill is 0 to 100. These are where the levels begin: beginner, amateur, skilled, expert.
   levels: [10, 25, 45, 70]

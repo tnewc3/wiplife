@@ -1,28 +1,109 @@
-# The Activities tab (A1): the groups, and the activities in them. An activity of kind `options` lists the leisure
-# definitions of src/content/pastimes that name it as their `hub`. icon is an id of registries/icons.yaml.
-groups:
-  - { id: featured, label: Featured }
-  - { id: mind_body, label: Mind & body }
-  - { id: social, label: Social }
-  - { id: money_luck, label: Money & luck }
-  - { id: leisure, label: Leisure }
+# The Activities hub (A1, rebuilt by U2): the categories of the Activities tab, and the activities in them. A category opens
+# a submenu of its activities, split into an Activities and a Shopping section (`section`, Activities by default). An
+# activity of kind `options` lists the leisure definitions of src/content/pastimes that name it as their `hub`; a `link`
+# opens a page that already does the job (groups, faith, therapy, ...). icon is an id of registries/icons.yaml.
+#
+# A category shows only when it applies: it is old enough (`minAge`), rich enough (`needs`: a net worth threshold of
+# balance/activities.yaml), and has an activity for you. An activity that is closed to you is greyed out with the reason,
+# or hidden (`hideWhenNothing`). `sharedRepeats: false` is for an activity that gathers unrelated options (crime, loans):
+# each option keeps its own repeats, and `limit` is only a cap on the lot.
+categories:
+  - { id: featured, label: Featured, icon: rocket, subtitle: "Do your own thing.", minAge: 8 }
+  - { id: health, label: Health, icon: stethoscope, subtitle: "Doctors, specialists, therapy and donating." }
+  - { id: recovery, label: Recovery, icon: reminder_ribbon, subtitle: "Support groups, rehab and counseling.", minAge: 12 }
+  - { id: mind_body, label: Mind & body, icon: person_lotus, subtitle: "Gym, walks, meditation, yoga and reading." }
+  - { id: outdoors, label: Outdoors, icon: mountain, subtitle: "Trails, water, camping and gear.", minAge: 4 }
+  - { id: social_love, label: Social & love, icon: two_hearts, subtitle: "Dates, nights out, parties and the feed.", minAge: 5 }
+  - { id: groups, label: Groups, icon: busts_in_silhouette, subtitle: "Clubs, causes and your neighborhood.", minAge: 5 }
+  - { id: faith, label: Faith, icon: place_of_worship, subtitle: "Your community, and other faiths to explore.", minAge: 5 }
+  - { id: leisure, label: Leisure, icon: beach_with_umbrella, subtitle: "Trips, spa days, hobbies, movies and pets." }
+  - { id: money_luck, label: Money & luck, icon: money_bag, subtitle: "Lottery, casino, loans and the shops.", minAge: 5 }
+  - { id: black_market, label: Black market, icon: money_with_wings, subtitle: "Cash, no questions, and the trouble that follows.", minAge: 16 }
+  - { id: crime, label: Crime, icon: police_car_light, subtitle: "Every one has a price, and a record.", minAge: 13 }
+  - { id: legal, label: Law & life, icon: compass, subtitle: "Lawsuits, names, moving abroad and the teen years." }
+  - { id: luxury, label: Luxury, icon: gem_stone, subtitle: "VIP nights, private societies and the finest things money buys.", minAge: 18, needs: luxury, accent: gold }
 
 activities:
-  - { id: own_thing, group: featured, label: Do your own thing, subtitle: "Describe what you want to do, and see what happens.", icon: rocket, kind: own_thing, minAge: 8, limit: 12 }
+  # ---------------------------------------------------------------- Featured
+  - { id: own_thing, category: featured, label: Do your own thing, subtitle: "Describe what you want to do, and see what happens.", icon: rocket, kind: own_thing, minAge: 8, limit: 12 }
 
-  - { id: gym, group: mind_body, label: Gym, subtitle: "Light or hard workouts, classes and runs.", icon: flexed_biceps, kind: options, minAge: 8, limit: 14 }
-  - { id: meditate, group: mind_body, label: Meditate, subtitle: "Quiet time to lower the stress.", icon: sparkles, kind: options, minAge: 8, limit: 14 }
-  - { id: read, group: mind_body, label: Read, subtitle: "The library, a novel or something hard.", icon: light_bulb, kind: options, minAge: 6, limit: 14 }
-  - { id: doctor, group: mind_body, label: Doctor, subtitle: "A check-up, treatment, and where to find therapy.", icon: stethoscope, kind: doctor, minAge: 0, limit: 1 }
+  # ---------------------------------------------------------------- Health
+  - { id: doctor, category: health, label: Doctor, subtitle: "A check-up and treatment.", icon: stethoscope, kind: doctor, minAge: 0, limit: 1 }
+  - { id: er, category: health, label: Emergency room, subtitle: "When something is badly wrong.", icon: ambulance, kind: options, minAge: 0, limit: 4 }
+  - { id: eyes, category: health, label: Eye doctor, subtitle: "An exam, and glasses if you need them.", icon: eyes, kind: options, minAge: 3, limit: 3 }
+  - { id: dentist, category: health, label: Dentist, subtitle: "A cleaning and a look at your teeth.", icon: tooth, kind: options, minAge: 3, limit: 3 }
+  - { id: therapist, category: health, label: Therapist, subtitle: "Talk to someone about your mind.", icon: brain, kind: link, opens: therapy, minAge: 8, limit: 1 }
+  - { id: alt_medicine, category: health, label: Alternative medicine, subtitle: "Herbs, needles and a long chat.", icon: herb, kind: options, minAge: 12, limit: 4 }
+  - { id: donate, category: health, label: Donate blood or plasma, subtitle: "An hour in a chair, for someone you will never meet.", icon: drop_of_blood, kind: options, minAge: 16, limit: 3 }
+  - { id: cosmetic, category: health, label: Cosmetic surgeon, subtitle: "Plastic surgery. Adults only; the price and the risk are real.", icon: sparkles, kind: options, minAge: 18, limit: 12, adultsOnly: true, sharedRepeats: false }
 
-  - { id: nightlife, group: social, label: Nightlife, subtitle: "Bars, clubs, karaoke and live shows.", icon: fire, kind: options, minAge: 18, limit: 12, adultsOnly: true }
-  - { id: dating, group: social, label: Dating, subtitle: "Find someone. Adults only.", icon: two_hearts, kind: options, minAge: 18, limit: 10, adultsOnly: true }
-  - { id: parties, group: social, label: Parties, subtitle: "Host one, or go to one.", icon: speech_balloon, kind: options, minAge: 5, limit: 10 }
+  # ---------------------------------------------------------------- Recovery
+  - { id: support_group, category: recovery, label: Support group, subtitle: "Folding chairs, bad coffee and people who understand.", icon: handshake, kind: options, minAge: 18, limit: 10, adultsOnly: true, hideWhenNothing: true }
+  - { id: rehab, category: recovery, label: Rehab center, subtitle: "A stay away from it all, to get clean.", icon: hospital, kind: options, minAge: 18, limit: 2, adultsOnly: true, hideWhenNothing: true }
+  - { id: counseling, category: recovery, label: Counseling, subtitle: "A counselor, one hour at a time.", icon: speech_balloon, kind: options, minAge: 12, limit: 8 }
 
-  - { id: lottery, group: money_luck, label: Lottery, subtitle: "A ticket and a dream. Adults only.", icon: glowing_star, kind: options, minAge: 18, limit: 10, adultsOnly: true }
-  - { id: casino, group: money_luck, label: Casino, subtitle: "Games with stakes. The house keeps an edge.", icon: money_bag, kind: options, minAge: 18, limit: 12, adultsOnly: true }
-  - { id: shopping, group: money_luck, label: Shopping, subtitle: "Clothes, accessories, hats and treats.", icon: trophy, kind: options, minAge: 5, limit: 12 }
+  # ---------------------------------------------------------------- Mind & body
+  - { id: gym, category: mind_body, label: Gym, subtitle: "Light or hard workouts, classes and runs.", icon: flexed_biceps, kind: options, minAge: 8, limit: 14 }
+  - { id: walk, category: mind_body, label: Walk, subtitle: "Fresh air and nowhere to be.", icon: person_walking, kind: options, minAge: 6, limit: 12 }
+  - { id: meditate, category: mind_body, label: Meditate, subtitle: "Quiet time to lower the stress.", icon: sparkles, kind: options, minAge: 8, limit: 14 }
+  - { id: yoga, category: mind_body, label: Yoga, subtitle: "An hour on a mat.", icon: person_lotus, kind: options, minAge: 12, limit: 8 }
+  - { id: read, category: mind_body, label: Read, subtitle: "The library, a novel or something hard.", icon: light_bulb, kind: options, minAge: 6, limit: 14 }
 
-  - { id: vacation, group: leisure, label: Vacation, subtitle: "A weekend away, or plan a trip.", icon: airplane, kind: vacation, minAge: 8, limit: 6 }
-  - { id: salon, group: leisure, label: Salon & spa, subtitle: "A haircut, a new style, dye or a spa day.", icon: sparkles, kind: options, minAge: 10, limit: 12 }
-  - { id: hobbies, group: leisure, label: Hobbies, subtitle: "Pick a hobby and practice it.", icon: brain, kind: hobbies, minAge: 6, limit: 24 }
+  # ---------------------------------------------------------------- Outdoors
+  - { id: hike, category: outdoors, label: Hike, subtitle: "A trail, a pack and a view.", icon: hiking_boot, kind: options, minAge: 8, limit: 6 }
+  - { id: fish, category: outdoors, label: Fish, subtitle: "A rod, a line and a lot of waiting.", icon: fishing_pole, kind: options, minAge: 8, limit: 5 }
+  - { id: camp, category: outdoors, label: Camp, subtitle: "A tent, a fire and a sky with no streetlights.", icon: camping, kind: options, minAge: 8, limit: 3 }
+  - { id: birdwatch, category: outdoors, label: Birdwatch, subtitle: "Binoculars, patience and a notebook.", icon: bird, kind: options, minAge: 6, limit: 6 }
+  - { id: swim, category: outdoors, label: Swim or snorkel, subtitle: "Cold water, or a reef.", icon: water_wave, kind: options, minAge: 6, limit: 6 }
+  - { id: offroad, category: outdoors, label: Off-road, subtitle: "Dirt, mud and a vehicle that can take it.", icon: sport_utility_vehicle, kind: options, minAge: 18, limit: 4, adultsOnly: true }
+  - { id: garden, category: outdoors, label: Garden & picnic, subtitle: "Dirt under your nails, or a blanket on the grass.", icon: house_with_garden, kind: options, minAge: 4, limit: 8 }
+  - { id: outdoor_gear, category: outdoors, section: shopping, label: Outdoor gear, subtitle: "Boots, packs, tents and rods.", icon: shopping_bags, kind: options, minAge: 8, limit: 4 }
+  - { id: offroad_vehicles, category: outdoors, section: shopping, label: Off-road vehicles, subtitle: "Trucks, SUVs and bikes, in your possessions.", icon: sport_utility_vehicle, kind: link, opens: vehicles, minAge: 18, limit: 1, adultsOnly: true }
+
+  # ---------------------------------------------------------------- Social & love
+  - { id: dating, category: social_love, label: Dating, subtitle: "Find someone. Adults only.", icon: two_hearts, kind: options, minAge: 18, limit: 10, adultsOnly: true }
+  - { id: nightlife, category: social_love, label: Nightlife, subtitle: "Bars, clubs, karaoke and live shows.", icon: fire, kind: options, minAge: 18, limit: 12, adultsOnly: true }
+  - { id: parties, category: social_love, label: Parties, subtitle: "Host one, or go to one.", icon: speech_balloon, kind: options, minAge: 5, limit: 10 }
+  - { id: social_media, category: social_love, label: Social media, subtitle: "Your accounts, followers and the feed.", icon: glowing_star, kind: link, opens: social, minAge: 13, limit: 1 }
+
+  # ---------------------------------------------------------------- Groups and faith (W2, moved here from People)
+  - { id: clubs, category: groups, label: Clubs and hobby groups, subtitle: "Join one, move up, or leave.", icon: trophy, kind: link, opens: club, minAge: 5, limit: 1 }
+  - { id: causes, category: groups, label: Volunteering and causes, subtitle: "Give your time to something you care about.", icon: red_heart, kind: link, opens: service, minAge: 5, limit: 1 }
+  - { id: civic, category: groups, label: Neighborhood and civic groups, subtitle: "Block associations, councils and committees.", icon: house_with_garden, kind: link, opens: civic, minAge: 5, limit: 1 }
+  - { id: faith_yours, category: faith, label: Your faith community, subtitle: "What you believe, where you worship, and your standing.", icon: place_of_worship, kind: link, opens: faith, minAge: 5, limit: 1 }
+  - { id: faith_explore, category: faith, label: Explore other faiths, subtitle: "Visit a community that is not your own.", icon: compass, kind: link, opens: faith_explore, minAge: 12, limit: 1 }
+
+  # ---------------------------------------------------------------- Leisure
+  - { id: vacation, category: leisure, label: Vacation, subtitle: "A weekend away, or plan a trip.", icon: airplane, kind: vacation, minAge: 8, limit: 6 }
+  - { id: salon, category: leisure, label: Salon & spa, subtitle: "A haircut, a new style, dye or a spa day.", icon: sparkles, kind: options, minAge: 10, limit: 12 }
+  - { id: hobbies, category: leisure, label: Hobbies, subtitle: "Pick a hobby and practice it.", icon: brain, kind: hobbies, minAge: 6, limit: 24 }
+  - { id: movies, category: leisure, label: Movie theater, subtitle: "A ticket, a seat and two hours away.", icon: calendar, kind: options, minAge: 0, limit: 12, sharedRepeats: false }
+  - { id: pets, category: leisure, label: Pets, subtitle: "Adopt one, or look after the ones you have.", icon: paw_prints, kind: link, opens: pets, minAge: 5, limit: 1 }
+
+  # ---------------------------------------------------------------- Money & luck
+  - { id: lottery, category: money_luck, label: Lottery, subtitle: "A ticket and a dream. Adults only.", icon: glowing_star, kind: options, minAge: 18, limit: 10, adultsOnly: true }
+  - { id: casino, category: money_luck, label: Casino, subtitle: "Games with stakes. The house keeps an edge.", icon: money_bag, kind: options, minAge: 18, limit: 12, adultsOnly: true }
+  - { id: loans, category: money_luck, label: Loans, subtitle: "Money now, a bill later.", icon: money_with_wings, kind: options, minAge: 18, limit: 12, adultsOnly: true, sharedRepeats: false }
+  - { id: shopping, category: money_luck, section: shopping, label: Stores, subtitle: "Clothes, accessories, hats and treats.", icon: shopping_bags, kind: options, minAge: 5, limit: 12 }
+  - { id: fine_goods, category: money_luck, section: shopping, label: Fine goods, subtitle: "A good watch, a tailored suit, a painting for the wall.", icon: gem_stone, kind: options, minAge: 18, limit: 8, adultsOnly: true, sharedRepeats: false }
+
+  # ---------------------------------------------------------------- Black market and crime
+  - { id: black_market, category: black_market, label: The market, subtitle: "Goods, papers and pills. Trouble comes with them.", icon: money_with_wings, kind: options, minAge: 16, limit: 24, sharedRepeats: false }
+  - { id: crime, category: crime, label: Crimes, subtitle: "Teens only get the small ones. A juvenile record is sealed at 18.", icon: police_car_light, kind: options, minAge: 13, limit: 40, sharedRepeats: false }
+
+  # ---------------------------------------------------------------- Law & life
+  - { id: lawsuits, category: legal, label: Lawsuits, subtitle: "A lawyer costs money whether or not you win.", icon: briefcase, kind: options, minAge: 18, limit: 10, adultsOnly: true, sharedRepeats: false }
+  - { id: names, category: legal, label: Change your name, subtitle: "Your legal name changes everywhere, from now on.", icon: calendar, kind: options, minAge: 13, limit: 6, sharedRepeats: false }
+  - { id: migration, category: legal, label: Move abroad and citizenship, subtitle: "Visas, residence and papers.", icon: airplane, kind: link, opens: migration, minAge: 18, limit: 1, adultsOnly: true }
+  - { id: teen_years, category: legal, label: Teen years, subtitle: "Curfew, jobs, the license and the crowd you run with.", icon: graduation_cap, kind: link, opens: teen, minAge: 13, limit: 1 }
+
+  # ---------------------------------------------------------------- Luxury (above a net worth threshold)
+  - { id: vip, category: luxury, label: VIP events, subtitle: "Front rows, back rooms and a guest list.", icon: crown, kind: options, minAge: 18, limit: 6, adultsOnly: true }
+  - { id: luxury_spa, category: luxury, label: Luxury spa, subtitle: "A week of being looked after.", icon: lotus, kind: options, minAge: 18, limit: 4, adultsOnly: true }
+  - { id: societies, category: luxury, label: Private societies, subtitle: "A club that has no sign on the door.", icon: top_hat, kind: options, minAge: 18, limit: 4, adultsOnly: true }
+  - { id: charity, category: luxury, label: Charity donations, subtitle: "Give big, to something that matters.", icon: heart_with_ribbon, kind: options, minAge: 18, limit: 4, adultsOnly: true }
+  - { id: lux_cars, category: luxury, section: shopping, label: Luxury cars, subtitle: "Hand-built and very fast.", icon: racing_car, kind: options, minAge: 18, limit: 2, adultsOnly: true, sharedRepeats: false }
+  - { id: lux_boats, category: luxury, section: shopping, label: Boats and yachts, subtitle: "From a sailboat to a superyacht.", icon: sailboat, kind: options, minAge: 18, limit: 2, adultsOnly: true, sharedRepeats: false }
+  - { id: lux_air, category: luxury, section: shopping, label: Aircraft, subtitle: "Your own wings.", icon: small_airplane, kind: options, minAge: 18, limit: 2, adultsOnly: true, sharedRepeats: false }
+  - { id: lux_jewelry, category: luxury, section: shopping, label: Jewelry, subtitle: "Stones that outlast you.", icon: ring, kind: options, minAge: 18, limit: 4, adultsOnly: true, sharedRepeats: false }
+  - { id: lux_islands, category: luxury, section: shopping, label: Private islands, subtitle: "A shore with your name on it.", icon: desert_island, kind: options, minAge: 18, limit: 1, adultsOnly: true, sharedRepeats: false }

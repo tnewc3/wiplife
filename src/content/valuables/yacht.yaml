@@ -1,0 +1,4 @@
+id: yacht
+name: "yacht"
+blurb: "A crewed motor yacht with a master cabin and a tender."
+class: boat
