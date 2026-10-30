@@ -1,0 +1,40 @@
+id: donate_blood
+category: health
+label: "Donate blood or plasma"
+blurb: "An hour in a chair, for someone you will never meet."
+minAge: 16
+inPerson: true
+companion: none
+cost: blood_donation
+profile: calm
+yearlyLimit: 3
+hub: donate
+tiers:
+  great:
+    text:
+      - "The nurse tells you your donation will help three people. You walk out with a sticker, a cookie and a warm feeling that lasts all day."
+      - "The chair is comfortable, the staff are cheerful and the hour passes in a pleasant daze. You have done something good."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "A little pinch, an hour of reading and a cup of juice. It is a quiet way to help."
+      - "You roll up your sleeve and think of someone who needs it. You leave a little proud."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+  neutral:
+    text:
+      - "The nurse struggles to find a good vein, but the donation goes through. You are told to drink plenty of water."
+      - "A long wait, a short donation and a tired afternoon."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "You feel faint halfway through, and the nurse stops early and makes you lie down. It takes the rest of the day to feel like yourself."
+      - "The needle bruises your arm badly. You are glad you went, but you will be careful next time."
+    effects:
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: stress, delta: 1 }

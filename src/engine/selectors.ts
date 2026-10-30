@@ -128,7 +128,7 @@ export type { MoodBand, MoodView } from './interactions/mood';
 export { getNews, getPersonLifeView } from './lives/views';
 export { getBelongingsView, getPetDetail, getPets } from './possessions/views';
 export { parseLegalName } from './pastimes/risk';
-export { getActivitiesView, getActivityTabView, nameIssue, type ActivityHubView, type ActivityTabGroupView, type HubBlock, type ActivitiesView, type ActivityEntryView, type ActivityGroupView, type ReceiptView } from './pastimes/views';
+export { getActivitiesView, getActivityTabView, nameIssue, type ActivityHubView, type ActivityCategoryView, type ActivitySectionView, categoryNetWorthNeed, type HubBlock, type ActivitiesView, type ActivityEntryView, type ActivityGroupView, type ReceiptView } from './pastimes/views';
 export { getTeenView } from './teen/views';
 export { getCrimeView, getDirtyView, getLaunderBlock, getSpendBlock } from './crime/views';
 export type { CrimeMemberView, CrimeView, DirtyView, FrontView } from './crime/views';

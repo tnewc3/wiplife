@@ -6,6 +6,7 @@
  * engine's (./query.ts); the screen only draws it.
  */
 import {
+  ACTIVITY_SECTIONS,
   PASTIME_CATEGORIES,
   PASTIME_QUALITIES,
   PASTIME_ROUTES,
@@ -17,12 +18,16 @@ import {
   type PastimeCompanionKind,
   type PastimeLook,
   type ActivityKind,
+  type ActivityLink,
+  type ActivitySection,
   type PastimeMechanic,
   type PastimeDef,
   type PastimeQuality,
   type PastimeRoute,
   type PastimeStake,
 } from '../../content/schemas';
+import { scaledAmount } from '../country';
+import { netWorth } from '../finance';
 import type { MoneyChange, LifeState, PastimeReceipt } from '../types';
 import { allPastimes, companionOptions, HIDING_BLOCKS, pastimeBlock, pastimeCount, pastimeMinAge, pastimePrice, type CompanionOption, type PastimeBlock, type PastimeChoice } from './query';
 import { hobbyLevel, hobbySkill, hubCount, lookOptions, optionsOf } from './activities';
@@ -208,6 +213,10 @@ export interface ActivityHubView {
   subtitle: string;
   icon: string;
   kind: ActivityKind;
+  /** Which part of its category's submenu it is in. */
+  section: ActivitySection;
+  /** `link` activities: the page they open. */
+  opens: ActivityLink | null;
   /** Times done this year (across its options), and the most. */
   count: number;
   limit: number;
@@ -216,40 +225,77 @@ export interface ActivityHubView {
   options: ActivityEntryView[];
 }
 
-export interface ActivityTabGroupView {
-  id: string;
-  label: string;
+export interface ActivitySectionView {
+  id: ActivitySection;
   activities: ActivityHubView[];
 }
 
-/** The Activities tab (A1): every activity in its group, with its options, or the reason it is greyed out. Availability is the engine's. */
-export function getActivityTabView(state: LifeState, content: ContentBundle): { groups: ActivityTabGroupView[]; canAct: boolean; savings: number } {
+export interface ActivityCategoryView {
+  id: string;
+  label: string;
+  icon: string;
+  subtitle: string;
+  accent: 'gold' | null;
+  sections: ActivitySectionView[];
+  /** How many activities it has for you, and how many of them are open to you now. */
+  total: number;
+  open: number;
+}
+
+/** The net worth a category needs to appear (its `needs` threshold, at the prices of the country you live in), or 0. */
+export function categoryNetWorthNeed(state: LifeState, needs: string | undefined, content: ContentBundle): number {
+  if (needs === undefined) return 0;
+  return scaledAmount(state, content.balance.activities.thresholds[needs] ?? 0, content);
+}
+
+/**
+ * The Activities tab (U2): the categories that apply to you, each with its Activities and Shopping sections. An activity is
+ * greyed out with the reason (age, prison, nothing on offer), or hidden when it asks to be (rehab while nothing is wrong); a
+ * category shows once it has something for you, is old enough and, for Luxury, rich enough. Availability is the engine's.
+ */
+export function getActivityTabView(state: LifeState, content: ContentBundle): { categories: ActivityCategoryView[]; canAct: boolean; savings: number } {
   const reg = content.registries.activities;
   const age = state.character.age;
   const adult = content.balance.relationships.adultAge;
   const prison = state.housing.kind === 'incarcerated';
-  const groups = reg.groups.map((g): ActivityTabGroupView => ({
-    id: g.id,
-    label: g.label,
-    activities: reg.activities
-      .filter((a) => a.group === g.id)
+  const worth = netWorth(state);
+  const categories: ActivityCategoryView[] = [];
+  for (const c of reg.categories) {
+    // Only a category that asks for a net worth (Luxury) looks at it: someone in debt still sees everything else.
+    if (age < c.minAge || (c.needs !== undefined && worth < categoryNetWorthNeed(state, c.needs, content))) continue;
+    const activities = reg.activities
+      .filter((a) => a.category === c.id)
       .map((a): ActivityHubView => {
-        const options = a.kind === 'doctor' || a.kind === 'own_thing' ? [] : optionsOf(content, a.id).flatMap((d) => {
+        const hasOptions = a.kind === 'options' || a.kind === 'vacation' || a.kind === 'hobbies';
+        const options = hasOptions ? optionsOf(content, a.id).flatMap((d) => {
           const v = entryView(state, d.id, content);
           return v ? [v] : [];
-        });
+        }) : [];
         // The youngest age any option allows where you live: it is what the greyed-out row says.
         const defs = optionsOf(content, a.id);
         const optionMin = defs.length > 0 ? Math.min(...defs.map((d) => Math.max(d.minAge, d.legalAge ? legalMin(state, d, content) : 0))) : 0;
-        const minAge = Math.max(a.adultsOnly ? adult : 0, a.kind === 'options' || a.kind === 'vacation' || a.kind === 'hobbies' ? optionMin : a.minAge);
+        const minAge = Math.max(a.adultsOnly ? adult : 0, hasOptions ? optionMin : a.minAge);
         let block: HubBlock | null = null;
-        if (prison && a.kind !== 'doctor') block = { reason: 'prison' };
+        if (prison && a.kind !== 'doctor' && a.kind !== 'link') block = { reason: 'prison' };
         else if (age < minAge) block = { reason: 'age', minAge };
         else if ((a.kind === 'options' || a.kind === 'hobbies') && options.length === 0) block = { reason: 'nothing' };
-        return { id: a.id, label: a.label, subtitle: a.subtitle, icon: a.icon, kind: a.kind, count: hubCount(state, a.id), limit: a.limit, block, options };
-      }),
-  }));
-  return { groups, canAct: state.phase === 'yearStart' && !prison, savings: state.finances.savings };
+        return { id: a.id, label: a.label, subtitle: a.subtitle, icon: a.icon, kind: a.kind, section: a.section, opens: a.opens ?? null, count: hubCount(state, a.id), limit: a.limit, block, options };
+      })
+      // Hidden, not greyed out: rehab while nothing is wrong, a trip for a toddler.
+      .filter((a) => !(reg.activities.find((x) => x.id === a.id)!.hideWhenNothing && a.block?.reason === 'nothing'));
+    if (activities.length === 0) continue;
+    categories.push({
+      id: c.id,
+      label: c.label,
+      icon: c.icon,
+      subtitle: c.subtitle,
+      accent: c.accent ?? null,
+      sections: ACTIVITY_SECTIONS.map((id) => ({ id, activities: activities.filter((a) => a.section === id) })).filter((sec) => sec.activities.length > 0),
+      total: activities.length,
+      open: activities.filter((a) => a.block === null).length,
+    });
+  }
+  return { categories, canAct: state.phase === 'yearStart' && !prison, savings: state.finances.savings };
 }
 
 function legalMin(state: LifeState, def: PastimeDef, content: ContentBundle): number {

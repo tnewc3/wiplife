@@ -9,6 +9,7 @@ inPerson: false
 companion: none
 cost: name_change
 yearlyLimit: 1
+hub: names
 requires: { romance: [engaged, married] }
 tiers:
   good:

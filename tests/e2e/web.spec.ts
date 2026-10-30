@@ -27,6 +27,7 @@ async function openPerson(page: Page, list: 'Siblings' | 'Parents' | 'Friends', 
 test("a person's page shows who they are close to and who they are feuding with", async ({ page }) => {
   await openFixture(page);
   await openPerson(page, 'Parents', /Dolores/);
+  await page.getByTestId('person-tab-overview').click();
   const card = page.getByTestId('connections');
   await expect(card.getByRole('heading', { name: 'Connections' })).toBeVisible();
   await expect(card).toContainText('Frank Rivera, your father');
@@ -39,6 +40,7 @@ test("a person's page shows who they are close to and who they are feuding with"
   // The same tie from the other side, and a feud.
   await page.getByRole('button', { name: 'Back to People' }).click();
   await page.getByRole('list', { name: 'Friends' }).getByRole('button', { name: /Marcus/ }).click();
+  await page.getByTestId('person-tab-overview').click();
   await expect(page.getByTestId('connections')).toContainText('Jo Rivera, your friend');
   await expect(page.getByTestId('connections')).toContainText('Friends · Feuding');
 });
@@ -46,12 +48,14 @@ test("a person's page shows who they are close to and who they are feuding with"
 test("a close person's page shows what they have heard about you, their version of the story", async ({ page }) => {
   await openFixture(page);
   await openPerson(page, 'Friends', /Marcus/);
+  await page.getByTestId('person-tab-history').click();
   const heard = page.getByTestId('heard');
   await expect(heard.getByRole('heading', { name: "What they've heard" })).toBeVisible();
   await expect(heard).toContainText('Marcus has heard that you were fired for stealing.');
   await expect(heard).toContainText("They heard it from someone else, and it isn't how it was.");
   await page.getByRole('button', { name: 'Back to People' }).click();
   await page.getByRole('list', { name: 'Friends' }).getByRole('button', { name: /Jo/ }).click();
+  await page.getByTestId('person-tab-history').click();
   await expect(page.getByTestId('heard')).toContainText('Jo has heard that you did something illegal and got away with it.');
   await expect(page.getByTestId('heard')).toContainText('They saw it for themselves.');
   await expectNoHorizontalScroll(page);
@@ -65,7 +69,9 @@ test("a close person's page shows what they have heard about you, their version 
 test('introducing two people you know: pick who, and they have a tie', async ({ page }) => {
   await openFixture(page);
   await openPerson(page, 'Siblings', /Rae/);
+  await page.getByTestId('person-tab-overview').click();
   await expect(page.getByTestId('connections')).not.toContainText('Marcus');
+  await page.getByTestId('person-tab-interact').click();
   await page.getByTestId('interact-button').click();
   await page.getByTestId('interaction-introduce').click();
   const picker = page.getByTestId('interact-picker');
@@ -80,6 +86,7 @@ test('introducing two people you know: pick who, and they have a tie', async ({ 
   const card = page.getByTestId('interaction-card');
   await expect(card).toContainText(/polite|pleasant/);
   await page.getByTestId('interaction-done').click();
+  await page.getByTestId('person-tab-overview').click();
   await expect(page.getByTestId('connections')).toContainText('Marcus Rivera, your friend');
   await expect(page.getByTestId('connections')).toContainText('Friends');
 });

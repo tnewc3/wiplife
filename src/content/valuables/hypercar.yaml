@@ -1,0 +1,4 @@
+id: hypercar
+name: "hypercar"
+blurb: "A numbered car with more power than any road has room for."
+class: car

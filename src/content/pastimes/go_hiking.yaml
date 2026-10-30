@@ -9,6 +9,7 @@ companionKinds: [partner, friend, family]
 cost: hike
 profile: outdoor
 yearlyLimit: 6
+hub: hike
 tiers:
   great:
     text:
@@ -19,7 +20,7 @@ tiers:
       - "{companion.name} sets a quick pace and you keep up. The view at the top is worth every step."
     effects:
       - { type: stat, key: happiness, delta: 4 }
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -5 }
       - { type: stat, key: fitness, delta: 1 }
     companion: { affection: 5, trust: 2 }
     extras:
@@ -37,7 +38,7 @@ tiers:
       - "A pleasant hike with {companion.name}, with a long lunch halfway up."
     effects:
       - { type: stat, key: happiness, delta: 2 }
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -4 }
       - { type: stat, key: fitness, delta: 1 }
     companion: { affection: 3, trust: 1 }
     extras:
@@ -54,7 +55,7 @@ tiers:
       - "You and {companion.name} walk the trail without much to say. It is fine."
       - "A decent hike. {companion.name} takes more pictures than steps."
     effects:
-      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: stress, delta: -2 }
     companion: { affection: 1, trust: 0 }
     extras:
       - chance: outdoor_mishap

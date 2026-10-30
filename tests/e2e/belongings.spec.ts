@@ -92,7 +92,7 @@ test('adopts a pet by name from a shelter, and sees it in the People tab', async
   await tab(page, 'People').click();
   const pets = page.getByTestId('people-pets');
   await expect(pets).toContainText('Waffles the dog');
-  await expect(pets.getByRole('heading', { name: 'Pets' })).toBeVisible();
+  await expect(pets.getByRole('button', { name: /^Pets/ })).toBeVisible();
 });
 
 test('a pet’s page offers the interaction menu, an outcome card, and costs money for a treat', async ({ page }) => {

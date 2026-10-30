@@ -1,0 +1,39 @@
+id: keep_a_journal
+category: recovery
+label: "Keep a journal"
+blurb: "A page a day, and no one to read it."
+minAge: 12
+inPerson: true
+companion: none
+cost: journal
+profile: calm
+yearlyLimit: 10
+hub: counseling
+tiers:
+  great:
+    text:
+      - "Four pages pour out before you notice. When you stop, you can see the shape of the whole year, and it is clearer than it has been."
+      - "Writing it down turns a cloud into a list. You close the notebook feeling lighter."
+    effects:
+      - { type: stat, key: stress, delta: -5 }
+      - { type: stat, key: smarts, delta: 1 }
+      - { type: stat, key: happiness, delta: 2 }
+  good:
+    text:
+      - "A page of honest words and a cup of tea. The knot loosens a little."
+      - "You write until the pen runs dry. You don't solve anything, and you feel better."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "The words come slowly. You manage a paragraph and leave it at that."
+      - "You stare at the page for a while and write three lines."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "You read back what you wrote, and it makes you feel worse. You close the notebook hard."
+      - "Everything you write sounds either false or too true. You stop halfway."
+    effects:
+      - { type: stat, key: stress, delta: 2 }

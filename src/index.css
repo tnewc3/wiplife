@@ -25,6 +25,11 @@
   --color-bar-track: var(--wl-bar-track);
   --color-bar-fill: var(--wl-bar-fill);
   --color-scrim: var(--wl-scrim);
+  --color-gold: var(--wl-gold);
+  --color-gold-surface: var(--wl-gold-surface);
+  --color-gold-border: var(--wl-gold-border);
+  --spacing-row: var(--wl-row-h);
+  --spacing-section: var(--wl-section-h);
   --color-tone-light: var(--wl-tone-light);
   --color-tone-neutral: var(--wl-tone-neutral);
   --color-tone-serious: var(--wl-tone-serious);

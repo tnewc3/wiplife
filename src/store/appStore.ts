@@ -52,6 +52,12 @@ export type ScreenId =
   | 'godEditor';
 
 /** Bottom navigation tabs (docs/design.md, section K). */
+/** U2: which part of the Groups page is open. */
+export type GroupsFocus = 'club' | 'service' | 'civic' | 'faith' | 'faith_explore';
+
+/** U2: the in-screen tabs of the Assets tab. */
+export type AssetsSection = 'money' | 'home' | 'things';
+
 export type TabId = 'home' | 'work' | 'assets' | 'people' | 'activities';
 
 /**
@@ -101,7 +107,13 @@ export interface AppState {
   /** The person open on the People tab, if any (E5: or a pet, by its possession id). */
   personId: string | null;
   /** U1: a page open over the current tab (Assets → Properties, Profile → Health, Activities → Social media...), if any; Back returns to the tab. */
-  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'pastimes' | 'social' | null;
+  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'social' | null;
+  /** U2: the part of the Groups page that is open: the clubs, the causes, the civic groups, your faith, or other faiths to explore (Activities → Groups and Faith). */
+  groupsFocus: GroupsFocus;
+  /** U2: the in-screen tab of the Assets tab that is open (it survives a page opened over it). */
+  assetsSection: AssetsSection;
+  /** U2: the category of the Activities hub that is open (an id of registries/activities.yaml), if any; Back returns to the list of categories. */
+  activityCategory: string | null;
   /** G1: who the god mode editor is open on: 'self' or a person's id. */
   editorTarget: string | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
@@ -202,10 +214,14 @@ export interface AppState {
   openWill: () => void;
   /** U1: Profile → Later life (L1). */
   openLater: () => void;
-  /** U1: People → Groups (W2). */
-  openGroups: () => void;
-  /** U1: Activities → Leisure and self (Batch 2a). */
-  openPastimes: () => void;
+  /** U2: Activities → Groups or Faith (W2, moved from People): opens the Groups page on the part named. */
+  openGroups: (focus: GroupsFocus) => void;
+  /** U2: opens a category of the Activities hub, or (null) goes back to the list. */
+  openActivityCategory: (id: string | null) => void;
+  /** U2: switches the in-screen tab of the Assets tab. */
+  setAssetsSection: (section: AssetsSection) => void;
+  /** U2: opens or closes a collapsible group, and remembers it (settings.openGroups). */
+  setGroupOpen: (id: string, open: boolean) => Promise<void>;
   /** Batch 8: opens the Social screen (Activities, and Job for creators). */
   openSocial: () => void;
   /** U1: Assets → Possessions (E5). */
@@ -514,6 +530,9 @@ export function createAppStore({
         personId: null,
         editorTarget: null,
         moreView: null,
+        groupsFocus: 'club',
+        assetsSection: 'money',
+        activityCategory: null,
         interactSheet: null,
         activitySheet: null,
         modelConnected: false,
@@ -702,6 +721,9 @@ export function createAppStore({
             s.tab = tab;
             s.personId = null;
             s.moreView = null;
+            s.activityCategory = null;
+            // Tapping a tab opens its first page; coming back from a page opened over it (closeHome) keeps the in-screen tab you were on.
+            s.assetsSection = 'money';
             s.interactSheet = null;
             s.activitySheet = null;
             s.groupTime = null;
@@ -962,15 +984,43 @@ export function createAppStore({
             if (s.life) s.moreView = 'belongings';
           }),
 
-        openGroups: () =>
+        openGroups: (focus) =>
           set((s) => {
-            if (s.life) s.moreView = 'groups';
+            if (s.life) {
+              s.moreView = 'groups';
+              s.groupsFocus = focus;
+            }
           }),
 
-        openPastimes: () =>
+        setAssetsSection: (section) =>
           set((s) => {
-            if (s.life) s.moreView = 'pastimes';
+            s.assetsSection = section;
           }),
+
+        openActivityCategory: (id) =>
+          set((s) => {
+            s.activityCategory = id;
+            s.activitySheet = null;
+          }),
+
+        setGroupOpen: async (id, open) => {
+          // Shown at once; saved after. A refused write (a bad id) leaves the screen as it was.
+          const before = get().settings.openGroups;
+          const next = { ...before, [id]: open };
+          set((s) => {
+            s.settings.openGroups = next;
+          });
+          try {
+            const settings = await updateSettings(db, { openGroups: next });
+            set((s) => {
+              s.settings = settings;
+            });
+          } catch {
+            set((s) => {
+              s.settings.openGroups = before;
+            });
+          }
+        },
 
         openSocial: () =>
           set((s) => {

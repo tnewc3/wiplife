@@ -4,7 +4,7 @@
  * each year inside), then release, parole and the record.
  */
 import { expect, test } from '@playwright/test';
-import { ageUpButton, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, playThroughEvents, settle, startRandomLife, tab } from './helpers';
+import { ageUpButton, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, openHubActivity, playThroughEvents, settle, startRandomLife, tab } from './helpers';
 
 
 test('arrest, the years inside with only prison events and a few actions, then release and parole', async ({ page }) => {
@@ -33,8 +33,7 @@ test('arrest, the years inside with only prison events and a few actions, then r
   await tab(page, 'Job').click();
   await expect(page.getByTestId('job-status')).toHaveText('You can’t work while you’re in prison.');
   await expect(page.getByRole('button', { name: 'Start gig work' })).toHaveCount(0);
-  await tab(page, 'Activities').click();
-  await page.getByTestId('activity-hub-doctor').click();
+  await openHubActivity(page, 'doctor');
   await expect(page.getByTestId('doctor-status')).toContainText('the prison doctor');
   await page.keyboard.press('Escape');
   await goHome(page);

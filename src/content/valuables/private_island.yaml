@@ -1,0 +1,4 @@
+id: private_island
+name: "private island"
+blurb: "A palm-fringed island with a dock, a house and no neighbors."
+class: island

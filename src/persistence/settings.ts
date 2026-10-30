@@ -14,6 +14,8 @@ export const settingsSchema = z.object({
   teams: teamSetupSchema,
   /** G1: god mode is on (the Edit buttons show). Read by the screens only; the engine never sees it. */
   godMode: z.boolean(),
+  /** U2: which collapsible groups of the screens are open, by the group's id (a group not listed is as open as it starts). */
+  openGroups: z.record(z.string().regex(/^[a-z0-9_.:-]{1,60}$/), z.boolean()).refine((r) => Object.keys(r).length <= 200, 'too many groups'),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -25,10 +27,11 @@ export const DEFAULT_SETTINGS: Settings = {
   installPromptShown: false,
   teams: emptySetup(),
   godMode: false,
+  openGroups: {},
 };
 
-/** The version of the settings row (Batch 6, then G1). A row without one is version 1: it has no teams. Version 2 has no god mode switch. */
-export const SETTINGS_VERSION = 3;
+/** The version of the settings row (Batch 6, then G1). A row without one is version 1: it has no teams. Version 2 has no god mode switch. Version 3 has no remembered groups (U2). */
+export const SETTINGS_VERSION = 4;
 
 /**
  * Brings a stored settings row up to the current version: version 1 (a row from before the teams setting) gains an empty set of
@@ -47,6 +50,10 @@ export function migrateSettings(stored: unknown): Record<string, unknown> {
     row.godMode = false;
     row.version = 3;
   }
+  if (version < 4) {
+    row.openGroups = {};
+    row.version = 4;
+  }
   return row;
 }
 
@@ -59,7 +66,7 @@ const SETTINGS_KEY = 'app';
 export async function loadSettings(db: WiplifeDb): Promise<Settings> {
   const row = await db.settings.get(SETTINGS_KEY);
   const stored: unknown = row?.value;
-  const result: Settings = { ...DEFAULT_SETTINGS, teams: emptySetup() };
+  const result: Settings = { ...DEFAULT_SETTINGS, teams: emptySetup(), openGroups: {} };
   if (typeof stored !== 'object' || stored === null) return result;
   const record = migrateSettings(stored);
   const shape = settingsSchema.shape;

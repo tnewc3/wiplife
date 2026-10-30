@@ -43,13 +43,13 @@ describe('the god mode setting', () => {
     expect(migrateSettings({ ageConfirmed: true, version: 2 })).toMatchObject({ version: SETTINGS_VERSION, godMode: false, ageConfirmed: true });
     const loaded = await loadSettings(db);
     expect(loaded).toMatchObject({ ageConfirmed: true, theme: 'dark', godMode: false });
-    expect(SETTINGS_VERSION).toBe(3);
+    expect(SETTINGS_VERSION).toBe(4);
     await updateSettings(db, { godMode: true });
-    expect((await db.settings.get('app'))?.value).toMatchObject({ version: 3, godMode: true, theme: 'dark' });
+    expect((await db.settings.get('app'))?.value).toMatchObject({ version: SETTINGS_VERSION, godMode: true, theme: 'dark' });
   });
 
   it('upgrades a version 1 row too', () => {
-    expect(migrateSettings({ ageConfirmed: true })).toMatchObject({ version: 3, godMode: false });
+    expect(migrateSettings({ ageConfirmed: true })).toMatchObject({ version: SETTINGS_VERSION, godMode: false });
   });
 
   it('survives a damaged value: the switch is off and the other settings are kept', async () => {

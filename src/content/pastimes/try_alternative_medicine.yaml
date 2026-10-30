@@ -1,0 +1,40 @@
+id: try_alternative_medicine
+category: health
+label: "Try alternative medicine"
+blurb: "Herbs, needles and a long chat."
+minAge: 12
+inPerson: true
+companion: none
+cost: alt_medicine
+profile: calm
+yearlyLimit: 4
+hub: alt_medicine
+tiers:
+  great:
+    text:
+      - "The practitioner listens for a full hour, and the quiet attention does more for you than anything else you have tried. You walk out feeling light."
+      - "A warm room, a pot of tea and unhurried care. Whether it is the herbs or the hour, you feel better."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 3 }
+  good:
+    text:
+      - "A calm, pleasant session. You come away relaxed, if not quite cured of anything."
+      - "The practitioner is kind and the room is peaceful. You leave with a little jar of something and a lighter mood."
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "Interesting, but you can't tell if it did anything. You feel about the same."
+      - "A pleasant hour, and no way to tell what it did. You will see."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "The tonic upsets your stomach for days, and the promises do not come true. A lesson in being careful what you trust."
+      - "You are told you do not need a doctor, and the symptoms linger. It leaves you uneasy."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: happiness, delta: -1 }

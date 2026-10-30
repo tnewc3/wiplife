@@ -8,6 +8,7 @@ companion: none
 cost: oil_painting
 profile: luxury
 yearlyLimit: 1
+hub: fine_goods
 buys: oil_painting
 tiers:
   great:

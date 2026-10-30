@@ -8,6 +8,7 @@ companion: none
 cost: dealing_stock
 profile: crime_serious
 yearlyLimit: 2
+hub: black_market
 tiers:
   great:
     text:

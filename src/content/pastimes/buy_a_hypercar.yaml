@@ -1,0 +1,41 @@
+id: buy_a_hypercar
+category: luxury
+label: "Buy a hypercar"
+blurb: "A numbered car with more power than any road has room for."
+minAge: 18
+inPerson: true
+companion: none
+cost: hypercar
+profile: luxury
+yearlyLimit: 1
+hub: lux_cars
+buys: hypercar
+tiers:
+  great:
+    text:
+      - "Number twelve of a short run. The engine wakes like thunder, and for ten seconds the world is only noise and speed. {cost}, and bragging rights forever."
+      - "The car is delivered on a flatbed with a crew of four. {cost}, and the most exciting thing you own."
+    effects:
+      - { type: stat, key: happiness, delta: 7 }
+      - { type: stat, key: confidence, delta: 3 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "It is absurd, and glorious. You pay {cost} and drive it once, very carefully, to the end of the street and back."
+      - "A fast, loud, famous car. {cost}, and every head turns."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 2 }
+  neutral:
+    text:
+      - "It is a marvel and an inconvenience: too low for the driveway, too fast for the road. {cost}."
+      - "Mostly, it sits in the garage and gets looked at. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "The first service comes with a bill that makes you sit down. The car cost {cost}, and keeping it will cost more."
+      - "You scrape the front on the ramp on day one. {cost}, and a very expensive noise."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 3 }

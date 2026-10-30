@@ -4,7 +4,7 @@
  * predictable card.
  */
 import { expect, test } from '@playwright/test';
-import { ageUp, eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, playThroughEvents, settle, startRandomLife, tab } from './helpers';
+import { ageUp, eventSheet, expectNoHorizontalScroll, expectTouchTargets, openHubActivity, openPage, playThroughEvents, settle, startRandomLife } from './helpers';
 
 
 test('More → Health shows your health and lets you see a doctor once a year', async ({ page }) => {
@@ -33,11 +33,13 @@ test('More → Health shows your health and lets you see a doctor once a year', 
 
   // Once a year.
   await page.getByRole('button', { name: 'Back to Home' }).click();
-  await tab(page, 'Activities').click();
-  await page.getByTestId('activity-hub-doctor').click();
+  await openHubActivity(page, 'doctor');
   await expect(page.getByTestId('doctor-status')).toHaveText('You saw a doctor this year. You can go again next year.');
   await page.getByRole('dialog', { name: 'Doctor' }).getByTestId('doctor-therapy').click();
   await expect(page.getByRole('heading', { name: 'Health', level: 1 })).toBeVisible();
+  // Back returns to the category of the Activities hub it was opened from (Health), and Back again to the hub.
+  await page.getByRole('button', { name: 'Back to Health' }).click();
+  await page.getByRole('button', { name: 'Back to Activities' }).click();
   await page.getByRole('button', { name: 'Back to Home' }).click();
   await expect(page.getByTestId('life-log')).toBeVisible();
 });

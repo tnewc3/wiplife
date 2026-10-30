@@ -1,0 +1,48 @@
+id: call_your_sponsor
+category: recovery
+label: "Call your sponsor"
+blurb: "Someone who has been where you are."
+minAge: 18
+inPerson: true
+companion: none
+cost: support_group
+profile: steady
+yearlyLimit: 8
+hub: support_group
+requires: { health: { conditions: [alcohol_addiction, drug_addiction, gambling_addiction] } }
+tiers:
+  great:
+    text:
+      - "You call at the worst moment, and they pick up on the second ring. Twenty minutes later the craving has passed, and you are still standing."
+      - "Your sponsor listens and says only three words: you can do it. It is enough."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: discipline, delta: 2 }
+      - { type: stat, key: happiness, delta: 2 }
+    extras:
+      - chance: recovery_progress
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: -8 }
+          - { type: health, conditionId: drug_addiction, severity: -8 }
+          - { type: health, conditionId: gambling_addiction, severity: -8 }
+        note: "One more night survived. The count goes up by one."
+  good:
+    text:
+      - "A short call and a steady voice. You hang up and make a cup of tea instead."
+      - "You talk it through and get through the evening. That is all you wanted."
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: discipline, delta: 1 }
+  neutral:
+    text:
+      - "They don't answer, and you leave a message. Having dialed is something."
+      - "A quick call, mostly small talk. It is a lifeline all the same."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "You hang up before they answer. The shame is heavier than the craving."
+      - "You call, and snap at them, and wish you hadn't. They tell you it is all right."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }

@@ -1,0 +1,40 @@
+id: see_a_counselor
+category: recovery
+label: "See a counselor"
+blurb: "A counselor, one hour at a time."
+minAge: 12
+inPerson: true
+companion: none
+cost: counseling
+profile: calm
+yearlyLimit: 8
+hub: counseling
+tiers:
+  great:
+    text:
+      - "The counselor asks one small question and the whole thing opens up. You cry, you laugh, and you leave lighter than you've felt in months."
+      - "An hour of honest talk with someone who is on your side. It changes how you see the coming week."
+    effects:
+      - { type: stat, key: stress, delta: -5 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: discipline, delta: 1 }
+  good:
+    text:
+      - "A steady, useful session. You leave with one thing to try this week."
+      - "The counselor helps you name what has been weighing on you. Naming it makes it smaller."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "You talk around the real thing and the hour runs out. Maybe next time."
+      - "A polite conversation that doesn't go far. You show up, and that counts."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "It stirs up more than you expected, and you come out raw and tired. The counselor says that is part of it."
+      - "You say something you didn't mean to and spend the walk home going over it. A hard session."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }

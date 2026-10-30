@@ -1,0 +1,40 @@
+id: dine_with_a_private_society
+category: social
+label: "Dine with a private society"
+blurb: "A club that has no sign on the door."
+minAge: 18
+inPerson: true
+companion: none
+cost: private_society
+profile: luxury
+yearlyLimit: 4
+hub: societies
+tiers:
+  great:
+    text:
+      - "The door opens onto a candlelit room of people who all seem to know your name. By dessert you have been invited to three things you can't mention. The evening: {cost}."
+      - "A conversation about nothing and everything with people who run things. You leave with a card and a nod. {cost}, and a door open."
+    effects:
+      - { type: stat, key: confidence, delta: 3 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: smarts, delta: 1 }
+  good:
+    text:
+      - "A long table, old wine and quiet talk. You are welcomed, and {cost} lighter."
+      - "The members are polite and curious about you. A dignified evening, for {cost}."
+    effects:
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: happiness, delta: 2 }
+  neutral:
+    text:
+      - "The food is excellent and the company is stiff. You are an outsider here, for now. {cost}."
+      - "Everyone is courteous and nobody is warm. You leave unsure if you were tested. The evening costs {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "You say the wrong thing to the wrong person, and the table goes quiet. It's a long walk to the door, and {cost} gone."
+      - "Your name is spelled wrong on the card, and no one corrects it. It stings, for {cost}."
+    effects:
+      - { type: stat, key: confidence, delta: -2 }
+      - { type: stat, key: stress, delta: 2 }

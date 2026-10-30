@@ -225,3 +225,19 @@ describe('reset all data', () => {
     expect(await loadSettings(db)).toEqual(DEFAULT_SETTINGS);
   });
 });
+
+describe('remembered groups (U2)', () => {
+  it('starts empty, keeps what was opened and closed, and drops a stored value that is not valid', async () => {
+    const db = freshDb();
+    expect((await loadSettings(db)).openGroups).toEqual({});
+    await updateSettings(db, { openGroups: { 'people.friends': false, 'activities.outdoors': true } });
+    expect((await loadSettings(db)).openGroups).toEqual({ 'people.friends': false, 'activities.outdoors': true });
+    await db.settings.put({ key: 'app', value: { ageConfirmed: true, version: 4, openGroups: { 'Bad Id!': true } } as never });
+    expect((await loadSettings(db)).openGroups).toEqual({});
+  });
+
+  it('refuses to save a group id that could not be a screen id', async () => {
+    const db = freshDb();
+    await expect(updateSettings(db, { openGroups: { 'has space': true } })).rejects.toThrow();
+  });
+});

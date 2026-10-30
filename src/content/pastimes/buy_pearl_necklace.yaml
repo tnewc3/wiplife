@@ -8,6 +8,7 @@ companion: none
 cost: pearl_necklace
 profile: luxury
 yearlyLimit: 1
+hub: fine_goods
 buys: pearl_necklace
 tiers:
   great:

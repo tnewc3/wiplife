@@ -10,6 +10,7 @@ companionKinds: [ex]
 cost: lawyer_ex
 quality: true
 yearlyLimit: 1
+hub: lawsuits
 requires: { not: { flag: sued_ex } }
 evidence:
   - { memory: { role: companion, tag: divorced } }

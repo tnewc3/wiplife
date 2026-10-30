@@ -9,6 +9,7 @@ companion: none
 cost: lawyer_landlord
 quality: true
 yearlyLimit: 1
+hub: lawsuits
 requires: { all: [{ not: { flag: sued_landlord } }, { home: { kind: [renting] } }] }
 evidence:
   - { flag: was_evicted }

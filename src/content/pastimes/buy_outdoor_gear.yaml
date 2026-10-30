@@ -1,0 +1,38 @@
+id: buy_outdoor_gear
+category: shopping
+label: "Buy outdoor gear"
+blurb: "Boots, a pack, a tent or a good rod."
+minAge: 8
+inPerson: true
+companion: none
+cost: outdoor_gear
+profile: shop
+yearlyLimit: 4
+hub: outdoor_gear
+tiers:
+  great:
+    text:
+      - "The shop assistant knows every piece of gear in the store, and you leave with exactly what you need and {cost} lighter, ready for the next trail."
+      - "You find the boots that feel like they were made for your feet. {cost}, and you can't wait to wear them out."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "A good pack, solid boots and a lamp that works. {cost} for a safer, easier season outside."
+      - "You spend {cost} on proper kit and feel better about every trail ahead."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  neutral:
+    text:
+      - "You wander the aisles, buy a few things you will use and a few you will not. {cost} gone."
+      - "A small haul of gear for {cost}. Some of it will see use."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "The tent turns out to be a size too small and the boots rub. {cost}, and a lesson in trying things on."
+      - "You buy the flashiest gear on the shelf, for {cost}, and it falls apart on the first trip."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 1 }

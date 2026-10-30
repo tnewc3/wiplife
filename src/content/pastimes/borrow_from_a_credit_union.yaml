@@ -10,6 +10,7 @@ inPerson: false
 companion: none
 cost: nothing
 yearlyLimit: 1
+hub: loans
 tiers:
   good:
     text:

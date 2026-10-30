@@ -56,6 +56,14 @@ describe.each([
     pair('border', 'bg', 1.2);
   });
 
+  it('has a readable gold accent for the Luxury hub (U2)', () => {
+    pair('gold', 'gold-surface', 4.5);
+    pair('text', 'gold-surface', 4.5);
+    pair('muted', 'gold-surface', 4.5);
+    pair('gold', 'bg', 4.5);
+    pair('gold-border', 'bg', 3);
+  });
+
   it('has readable ink on every category banner, and banners that stand out from the card', () => {
     for (const id of BANNERS) {
       expect(t[`cat-${id}`], `cat-${id} is defined`).toBeDefined();

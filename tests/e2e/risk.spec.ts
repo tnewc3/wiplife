@@ -7,25 +7,25 @@
 import { expect, test, type Page } from '@playwright/test';
 import { activitiesLife, type ActivitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, goHome, openHubActivity, passAgeGate, settle, tab } from './helpers';
 
 
-async function open(page: Page, options: ActivitiesLife): Promise<void> {
+/** Starts the life and opens the sheet of one activity of the hub (U2). */
+async function open(page: Page, options: ActivitiesLife, hubId: string): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, activitiesLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await openPage(page, 'pastimes');
-  await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
+  await openHubActivity(page, hubId);
+  await expect(page.getByTestId(`activity-sheet-${hubId}`)).toBeVisible();
 }
 
 const dollars = (text: string): number => Number(text.match(/\$([\d,]+)/)![1]!.replace(/,/g, ''));
 
 test('a gambling night: the stake is on the button, the receipt shows the money and your new balance, and a loss can be chased', async ({ page }) => {
-  await open(page, { seed: 'e2e-risk-gamble', savings: 20_000, vice: 5 });
-  const gambling = page.getByTestId('activities-gambling');
-  await expect(gambling).toContainText('The house always has the edge');
-  for (const id of ['play_the_slots', 'play_blackjack', 'play_roulette', 'buy_a_lottery_ticket', 'bet_on_a_game', 'bet_on_the_horses']) {
+  await open(page, { seed: 'e2e-risk-gamble', savings: 20_000, vice: 5 }, 'casino');
+  await expect(page.getByTestId('activity-note')).toContainText('The house always has the edge');
+  for (const id of ['play_the_slots', 'play_blackjack', 'play_roulette', 'bet_on_a_game', 'bet_on_the_horses']) {
     await expect(page.getByTestId(`activity-${id}`)).toBeVisible();
   }
   await expect(page.getByTestId('do-play_the_slots-low')).toContainText('Small stake');
@@ -45,13 +45,14 @@ test('a gambling night: the stake is on the button, the receipt shows the money 
   await expect(page.getByTestId('activity-play_the_slots')).toContainText('Done 1 of');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
+  await page.keyboard.press('Escape');
   await tab(page, 'Assets').click();
   await expect(page.getByTestId('savings')).toHaveText(`$${balance.toLocaleString('en-US')}`);
 });
 
 test('chasing a loss is offered after a loss and bets the loss back', async ({ page }) => {
   // Play small bets until one loses (the odds are against the player); then the chase button is there.
-  await open(page, { seed: 'e2e-risk-chase', savings: 50_000, vice: 5 });
+  await open(page, { seed: 'e2e-risk-chase', savings: 50_000, vice: 5 }, 'casino');
   for (let i = 0; i < 6; i++) {
     if ((await page.getByTestId('chase-bet_on_the_horses').count()) > 0) break;
     await page.getByTestId('do-bet_on_the_horses-high').click();
@@ -66,7 +67,7 @@ test('chasing a loss is offered after a loss and bets the loss back', async ({ p
 });
 
 test('a lawsuit: it is offered with something to go on, settles or goes to trial, and the receipt shows the fee and the money', async ({ page }) => {
-  await open(page, { seed: 'e2e-risk-suit', savings: 30_000, flags: ['whistleblower', 'burned_out'] });
+  await open(page, { seed: 'e2e-risk-suit', savings: 30_000, flags: ['whistleblower', 'burned_out'] }, 'lawsuits');
   const suit = page.getByTestId('activity-sue_your_employer');
   await expect(suit).toBeVisible();
   await expect(page.getByTestId('evidence-sue_your_employer')).toContainText('good deal to go on');
@@ -92,7 +93,7 @@ test('a lawsuit: it is offered with something to go on, settles or goes to trial
 });
 
 test('a name change checks what is typed, shows the fee, and the new name is used everywhere afterwards', async ({ page }) => {
-  await open(page, { seed: 'e2e-risk-name', savings: 10_000 });
+  await open(page, { seed: 'e2e-risk-name', savings: 10_000 }, 'names');
   const field = page.getByTestId('name-first-change_your_first_name');
   const button = page.getByTestId('do-change_your_first_name');
   await expect(field).toBeVisible();
@@ -113,6 +114,7 @@ test('a name change checks what is typed, shows the fee, and the new name is use
   // Once a year, and the character's name everywhere is the new one.
   await expect(page.getByTestId('activity-change_your_first_name')).toContainText('Done 1 of 1');
   await expect(page.getByTestId('do-change_your_first_name')).toBeDisabled();
+  await page.keyboard.press('Escape');
   await goHome(page);
   await expect(page.getByTestId('character-name')).toContainText('Rowan');
   await expectTouchTargets(page);

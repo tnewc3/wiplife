@@ -6,6 +6,7 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { InteractSheet } from '../../components/InteractSheet';
+import { SectionHeader } from '../../components/SectionHeader';
 import { WayRow } from '../../components/WayRow';
 import { money } from '../../labels';
 import { BusinessCard } from './BusinessCard';
@@ -58,16 +59,14 @@ export function WorkTab({ life }: { life: LifeState }) {
   const school = <SchoolCard life={life} />;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {enrolled && school}
       {job && <JobCard life={life} />}
       {!enrolled && school}
       {/* The Talk buttons on the school and job cards open the interaction menu here. */}
       <InteractSheet life={life} />
-      <section aria-labelledby="ways-title" className="flex flex-col gap-2">
-        <h2 id="ways-title" className="font-display text-lg font-semibold">
-          Ways to work
-        </h2>
+      <section aria-labelledby="ways-title" className="flex flex-col gap-1.5">
+        <SectionHeader id="ways-title">Ways to work</SectionHeader>
         <WayRow title="Gig work" status={view.gig ? 'Doing it now' : undefined} reason={gigReason} testId="way-gig">
           <GigCard life={life} />
         </WayRow>
@@ -81,10 +80,8 @@ export function WorkTab({ life }: { life: LifeState }) {
         )}
       </section>
       {(fame || sports || social || crime) && (
-        <section aria-labelledby="special-title" className="flex flex-col gap-2">
-          <h2 id="special-title" className="font-display text-lg font-semibold">
-            Special careers
-          </h2>
+        <section aria-labelledby="special-title" className="flex flex-col gap-1.5">
+          <SectionHeader id="special-title">Special careers</SectionHeader>
           {fame && (
             <WayRow title="Arts and media">
               <FameCard life={life} />

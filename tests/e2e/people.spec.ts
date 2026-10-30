@@ -34,8 +34,8 @@ test('the People tab groups people with bars, and a person page shows who they a
   const family = familyLists(page);
   const members = await family.getByRole('listitem').count();
   expect(members).toBeGreaterThan(0);
-  await expect(family.getByRole('meter')).toHaveCount(members * 2);
-  await expect(family.getByRole('meter', { name: 'Affection' }).first()).toBeVisible();
+  await expect(family.getByRole('meter')).toHaveCount(members);
+  await expect(family.getByRole('meter', { name: /feels about you$/ }).first()).toBeVisible();
   await expect(page.getByRole('region', { name: 'Friends' })).toContainText('No friends yet.');
   await expect(page.getByRole('region', { name: 'Love' })).toHaveCount(0);
   await expectNoHorizontalScroll(page);
@@ -45,7 +45,9 @@ test('the People tab groups people with bars, and a person page shows who they a
   await expect(page.getByTestId('person-name')).toBeVisible();
   await expect(page.getByTestId('person-line')).toContainText(/^(Mother|Father|Parent) · \d+ years old · /);
   await expect(page.getByRole('group', { name: /feels about you$/ }).getByRole('meter')).toHaveCount(2);
+  await page.getByTestId('person-tab-history').click();
   await expect(page.getByText('No memories together yet.')).toBeVisible();
+  await page.getByTestId('person-tab-interact').click();
   // A one-year-old can't take any action with a parent.
   await expect(actions(page)).toHaveCount(0);
   await expectNoHorizontalScroll(page);
@@ -69,7 +71,9 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await page.getByRole('list', { name: 'Friends' }).getByRole('button').first().click();
   const line = page.getByTestId('person-line');
   await expect(line).toContainText(/^Acquaintance · /);
+  await page.getByTestId('person-tab-history').click();
   await expect(page.getByRole('list', { name: 'Memories' })).toContainText('Swapped numbers with you');
+  await page.getByTestId('person-tab-interact').click();
   const name = ((await page.getByTestId('person-name').textContent()) ?? '').trim();
   const first = name.split(' ')[0]!;
   await expect(actions(page).getByRole('button')).toHaveText(['Ask out', 'Cut contact']);
@@ -107,7 +111,9 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await expect(actions(page).getByRole('button')).toHaveText(['Get married', 'Break up', 'Try for a baby']);
   await act(page, 'Get married');
   await expect(line).toContainText(/^Husband · /);
+  await page.getByTestId('person-tab-history').click();
   await expect(page.getByRole('list', { name: 'Memories' })).toContainText('Married you');
+  await page.getByTestId('person-tab-interact').click();
   await tab(page, 'People').click();
   await expect(page.getByTestId('romance-line')).toHaveText(`Married to ${name}`);
 
@@ -133,7 +139,9 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await expect(sheet.getByTestId('event-outcome')).toContainText('The papers are signed.');
   await sheet.getByRole('button', { name: 'Continue' }).click();
   await expect(line).toContainText(/^Ex-spouse · /);
+  await page.getByTestId('person-tab-history').click();
   await expect(page.getByRole('list', { name: 'Memories' })).toContainText('Divorced you');
+  await page.getByTestId('person-tab-interact').click();
 
   await tab(page, 'People').click();
   await expect(page.getByTestId('romance-line')).toHaveCount(0);

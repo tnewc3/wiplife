@@ -9,6 +9,7 @@ companionKinds: [partner, friend, family]
 cost: movie_ticket
 profile: movie
 yearlyLimit: 4
+hub: movies
 tiers:
   great:
     text:

@@ -8,6 +8,7 @@ companion: none
 cost: gold_watch
 profile: luxury
 yearlyLimit: 1
+hub: fine_goods
 buys: gold_watch
 tiers:
   great:

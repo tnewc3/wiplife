@@ -1,0 +1,57 @@
+id: swim_or_snorkel
+category: outdoor
+label: "Swim or snorkel"
+blurb: "Cold water, or a reef."
+minAge: 6
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: swim
+profile: outdoor
+yearlyLimit: 6
+hub: swim
+tiers:
+  great:
+    text:
+      - "The water is clear and warm, and a school of silver fish turns around you as one. You float there until your fingers wrinkle."
+      - "You swim far out and then simply lie on the water, looking up. Nothing has ever felt so light."
+    together:
+      - "{companion.name} spots a turtle and grabs your arm, and you watch it glide under you side by side."
+      - "You and {companion.name} race to the buoy and back, laughing too hard to breathe."
+    effects:
+      - { type: stat, key: stress, delta: -5 }
+      - { type: stat, key: fitness, delta: 1 }
+      - { type: stat, key: happiness, delta: 3 }
+    companion: { affection: 5, trust: 2 }
+  good:
+    text:
+      - "Lap after lap, and your body settles into the rhythm. You climb out tired and clear."
+      - "A good swim in good water. The worries stay on the shore."
+    together:
+      - "You and {companion.name} swim and float and talk about nothing in particular."
+      - "{companion.name} holds your towel while you swim, and you trade places after."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: fitness, delta: 1 }
+    companion: { affection: 3, trust: 1 }
+  neutral:
+    text:
+      - "The water is colder than you hoped and the beach is crowded. Still, it is a swim."
+      - "A short dip and a long wait for the towel to dry. Fine."
+    together:
+      - "{companion.name} stays on the sand with a book while you swim. It is a nice, ordinary afternoon."
+      - "You and {companion.name} paddle about for a while and head back."
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "A current drags you farther than you meant to go, and the swim back is hard. You sit on the sand for a long time afterward."
+      - "You scrape your knee on a rock and swallow a lot of the sea. The day ends early."
+    together:
+      - "{companion.name} is stung by a jellyfish and you spend the afternoon helping. Not the swim you had in mind."
+      - "The water turns rough, and you and {companion.name} haul yourselves out, shaken and sandy."
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+      - { type: stat, key: health, delta: -2 }
+    companion: { affection: -1, trust: 0 }

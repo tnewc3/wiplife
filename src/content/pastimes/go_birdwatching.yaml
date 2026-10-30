@@ -1,0 +1,40 @@
+id: go_birdwatching
+category: outdoor
+label: "Go birdwatching"
+blurb: "Binoculars, patience and a notebook."
+minAge: 6
+inPerson: true
+companion: none
+cost: birdwatch
+profile: outdoor
+yearlyLimit: 6
+hub: birdwatch
+tiers:
+  great:
+    text:
+      - "A rare bird lands twenty feet away and stays long enough for you to write down every detail. You walk home quietly thrilled."
+      - "The marsh at dawn is full of wings. You tick off three new birds and lose track of the hours."
+    effects:
+      - { type: stat, key: stress, delta: -5 }
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: smarts, delta: 1 }
+  good:
+    text:
+      - "A slow morning, a thermos and a dozen kinds of bird. The quiet does you good."
+      - "You sit by the water and let the birds come to you. Your head is clearer by noon."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 2 }
+  neutral:
+    text:
+      - "The birds are shy today. You see mostly sparrows, and enjoy the stillness anyway."
+      - "A gray morning and few birds. You are outside, which counts for something."
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+  bad:
+    text:
+      - "Rain sets in an hour after you arrive, and every bird has the sense to go home. You squelch back to the car."
+      - "You walk for hours and see almost nothing, and the mosquitoes find you. You come home itchy and cross."
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+      - { type: stat, key: happiness, delta: -1 }

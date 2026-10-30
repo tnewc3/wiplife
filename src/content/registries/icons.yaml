@@ -29,3 +29,37 @@ icons:
   anxious_face_with_sweat: { fluent: Anxious face with sweat }
   headstone: { fluent: Headstone }
   rocket: { fluent: Rocket }
+  # U2: the Activities hub (categories and the activities in them).
+  mountain: { fluent: Mountain }
+  hiking_boot: { fluent: Hiking boot }
+  fishing_pole: { fluent: Fishing pole }
+  camping: { fluent: Camping }
+  bird: { fluent: Bird }
+  water_wave: { fluent: Water wave }
+  sport_utility_vehicle: { fluent: Sport utility vehicle }
+  person_walking: { fluent: Person walking, variant: Default }
+  person_lotus: { fluent: Person in lotus position, variant: Default }
+  ambulance: { fluent: Ambulance }
+  tooth: { fluent: Tooth }
+  eyes: { fluent: Eyes }
+  herb: { fluent: Herb }
+  drop_of_blood: { fluent: Drop of blood }
+  hospital: { fluent: Hospital }
+  crown: { fluent: Crown }
+  lotus: { fluent: Lotus }
+  top_hat: { fluent: Top hat }
+  heart_with_ribbon: { fluent: Heart with ribbon }
+  gem_stone: { fluent: Gem stone }
+  beach_with_umbrella: { fluent: Beach with umbrella }
+  busts_in_silhouette: { fluent: Busts in silhouette }
+  place_of_worship: { fluent: Place of worship }
+  reminder_ribbon: { fluent: Reminder ribbon }
+  money_with_wings: { fluent: Money with wings }
+  shopping_bags: { fluent: Shopping bags }
+  sailboat: { fluent: Sailboat }
+  small_airplane: { fluent: Small airplane }
+  desert_island: { fluent: Desert island }
+  racing_car: { fluent: Racing car }
+  ring: { fluent: Ring }
+  compass: { fluent: Compass }
+  books: { fluent: Books }

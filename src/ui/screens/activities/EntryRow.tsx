@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
 import { content } from '../../../content';
 import { PASTIME_QUALITIES, PASTIME_ROUTES, type PastimeQuality, type PastimeRoute, type PastimeStake } from '../../../content/schemas';
-import { getActivitiesView, nameIssue, parseLegalName, type ActivityEntryView, type ReceiptView } from '../../../engine/selectors';
+import { nameIssue, parseLegalName, type ActivityEntryView, type ReceiptView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
-import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import type { Picks } from './picks';
 import {
   ACTIVITY_TAB_LABELS,
   HOBBY_LEVEL_LABELS,
@@ -22,8 +21,6 @@ import {
   moneyChange,
   OUTCOME_TIER_LABELS,
   PASTIME_BLOCK_LABELS,
-  PASTIME_CATEGORY_LABELS,
-  PASTIME_CATEGORY_NOTES,
   PASTIME_QUALITY_LABELS,
   PASTIME_QUALITY_NOTES,
   PASTIME_ROUTE_LABELS,
@@ -32,121 +29,6 @@ import {
   PASTIME_STAKE_NOTES,
   pastimeChangeWords,
 } from '../../labels';
-
-/** What the player has chosen on an entry before pressing its button: a lawsuit's route, a chase, a typed name, a parent's agreement. */
-export interface Picks {
-  look?: string;
-  route?: PastimeRoute;
-  chase?: boolean;
-  first?: string;
-  last?: string;
-  consent?: string | null;
-}
-
-/** More → Activities: leisure and self, grouped by category. Only what is on offer to you now; the price is on each button; an outcome shows the money change and your new balance. */
-export function ActivitiesScreen({ life }: { life: LifeState }) {
-  const view = getActivitiesView(life, content);
-  const busy = useAppStore((s) => s.aging);
-  const act = useAppStore((s) => s.takeLifeAction);
-  const [who, setWho] = useState<Record<string, string | null>>({});
-  const [picks, setPicks] = useState<Record<string, Picks>>({});
-  const disabled = busy || !view.canAct;
-  const latest = view.receipts[0];
-  const latestRef = useRef<HTMLDivElement | null>(null);
-  const seen = useRef(view.receipts.length);
-
-  // A new outcome comes into view at the top.
-  useEffect(() => {
-    if (view.receipts.length > seen.current) latestRef.current?.scrollIntoView({ block: 'nearest' });
-    seen.current = view.receipts.length;
-  }, [view.receipts.length]);
-
-  const choose = (entry: ActivityEntryView, extra: { quality?: PastimeQuality; stake?: PastimeStake } = {}) => {
-    const companionId = who[entry.id] ?? (entry.companion === 'required' ? entry.companions[0]?.id : undefined);
-    const p = picks[entry.id] ?? {};
-    void act('do_activity', {
-      pastimeId: entry.id,
-      ...(companionId ? { companionId } : {}),
-      ...(extra.quality ? { quality: extra.quality } : {}),
-      ...(extra.stake ? { stake: extra.stake } : {}),
-      ...(entry.mechanic === 'gamble' && p.chase ? { chase: true } : {}),
-      ...(entry.routes ? { route: p.route ?? 'settle' } : {}),
-      ...(entry.look ? { look: p.look ?? entry.look.options[0] } : {}),
-      ...(entry.name ? nameParams(entry, p) : {}),
-    });
-  };
-
-  return (
-    <div className="flex flex-col gap-4">
-      <Card role="region" aria-labelledby="activities-title" data-testid="activities-summary">
-        <h2 id="activities-title" className="text-2xl leading-tight font-bold">
-          What would you like to do?
-        </h2>
-        <p className="mt-1 text-muted">Time for yourself, with a price on it. You have {money(view.savings)} saved. Doing the same thing again and again in a year gives you less each time.</p>
-        {!view.canAct && <p className="mt-2 text-sm">Activities are for when you are free to go out.</p>}
-      </Card>
-
-      {latest && (
-        <div ref={latestRef}>
-          <ReceiptCard receipt={latest} balance={view.savings} latest />
-        </div>
-      )}
-
-      {view.groups.map((g) => (
-        <Card key={g.category} role="region" aria-labelledby={`cat-${g.category}`} data-testid={`activities-${g.category}`}>
-          <h3 id={`cat-${g.category}`} className="text-lg font-bold">
-            {PASTIME_CATEGORY_LABELS[g.category]}
-          </h3>
-          {PASTIME_CATEGORY_NOTES[g.category] && <p className="mt-1 text-sm text-muted">{PASTIME_CATEGORY_NOTES[g.category]}</p>}
-          <ul className="mt-2 flex flex-col divide-y divide-border" aria-label={PASTIME_CATEGORY_LABELS[g.category]}>
-            {g.entries.map((entry) => (
-              <EntryRow
-                key={entry.id}
-                life={life}
-                entry={entry}
-                disabled={disabled}
-                selected={who[entry.id] ?? null}
-                picks={picks[entry.id] ?? {}}
-                onPick={(p) => setPicks((all) => ({ ...all, [entry.id]: { ...(all[entry.id] ?? {}), ...p } }))}
-                onWho={(id) => setWho((w) => ({ ...w, [entry.id]: id }))}
-                onDo={(extra) => choose(entry, extra)}
-              />
-            ))}
-          </ul>
-        </Card>
-      ))}
-
-      {view.receipts.length > 1 && (
-        <Card role="region" aria-labelledby="earlier-title" data-testid="activities-earlier">
-          <h3 id="earlier-title" className="text-lg font-bold">
-            Earlier this year
-          </h3>
-          <ul className="mt-2 flex flex-col divide-y divide-border">
-            {view.receipts.slice(1).map((r) => (
-              <li key={r.key} className="flex min-w-0 flex-col py-2">
-                <span className="flex justify-between gap-3 font-semibold">
-                  <span className="min-w-0 break-words">{r.label}</span>
-                  {r.money && <span className="shrink-0 tabular-nums">{moneyChange(r.money.change)}</span>}
-                </span>
-                <span className="text-sm text-muted">{OUTCOME_TIER_LABELS[r.tier]}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-    </div>
-  );
-}
-
-/** The typed names and the parent who agrees, as the action takes them (the engine checks and tidies them). */
-function nameParams(entry: ActivityEntryView, p: Picks): { first?: string; last?: string; consentId?: string } {
-  const n = entry.name!;
-  return {
-    ...(n.fields.includes('first') ? { first: p.first ?? '' } : {}),
-    ...(n.fields.includes('last') ? { last: p.last ?? '' } : {}),
-    ...(!n.adult && (p.consent ?? n.consent[0]?.id) ? { consentId: p.consent ?? n.consent[0]!.id } : {}),
-  };
-}
 
 export function EntryRow({
   life,

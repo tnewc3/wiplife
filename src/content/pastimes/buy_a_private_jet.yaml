@@ -1,0 +1,41 @@
+id: buy_a_private_jet
+category: luxury
+label: "Buy a private jet"
+blurb: "A small jet with your name on the registration."
+minAge: 18
+inPerson: true
+companion: none
+cost: private_jet
+profile: luxury
+yearlyLimit: 1
+hub: lux_air
+buys: private_jet
+tiers:
+  great:
+    text:
+      - "The door folds down, the engines spool up, and you are above the cloud before your coffee is cool. {cost}, and the end of every airport queue."
+      - "You sign for {cost}, and an hour later you are in the air, at your own pace, to wherever you like."
+    effects:
+      - { type: stat, key: happiness, delta: 7 }
+      - { type: stat, key: confidence, delta: 3 }
+      - { type: stat, key: stress, delta: -3 }
+  good:
+    text:
+      - "A clean, quiet cabin and a pilot who has flown it before. {cost}, and a new way to see the world."
+      - "The jet is delivered with a full tank and a bow. {cost}, and a first flight you won't forget."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: confidence, delta: 2 }
+  neutral:
+    text:
+      - "The jet is a marvel and an administrative burden: crew, hangar, permits. {cost}, and a very busy week."
+      - "It flies beautifully and costs a fortune to keep in the air. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "The inspection finds a faulty part, and the delivery slips by three months. {cost}, and a plane that sits on the ground."
+      - "A hangar fee, a crew bill and a delay. {cost}, and your first flight is a very long time coming."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 3 }

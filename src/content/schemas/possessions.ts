@@ -316,7 +316,7 @@ export const possessionsBalanceSchema = z.strictObject({
   }),
   /** Batch 2a: valuables (E5 extended). Yearly shares of the value, by class; the price is the cost of the activity that buys one. */
   valuables: z.strictObject({
-    classes: z.strictObject({ jewelry: valuableClass, designer: valuableClass, art: valuableClass, boat: valuableClass }),
+    classes: z.strictObject({ jewelry: valuableClass, designer: valuableClass, art: valuableClass, boat: valuableClass, car: valuableClass, aircraft: valuableClass, island: valuableClass }),
     /** A theft of an insured valuable pays this share of its value. */
     payout: share,
   }),

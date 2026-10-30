@@ -1,0 +1,41 @@
+id: attend_a_vip_event
+category: nightlife
+label: "Attend a VIP event"
+blurb: "Front rows, back rooms and a guest list."
+minAge: 18
+inPerson: true
+companion: none
+cost: vip_event
+profile: luxury
+yearlyLimit: 6
+hub: vip
+tiers:
+  great:
+    text:
+      - "Your name is on the list, and the room opens for you like a door. You meet three people tonight who will matter for years, and you dance till the lights come up. Entry: {cost}."
+      - "From the front row to the back room, every door is held open. The night costs {cost} and is worth every cent of it."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: stress, delta: -2 }
+  good:
+    text:
+      - "Champagne, a string quartet and a roomful of people who look like they never worry about anything. A glittering evening, for {cost}."
+      - "You are waved through the rope and handed a drink. The night is lovely, and {cost} lighter."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+  neutral:
+    text:
+      - "The crowd is polished and the conversation is thin. You stay for two hours and go home, {cost} lighter."
+      - "A grand room and a small conversation. You have been to better parties, but not many pricier ones: {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "You are seated behind a pillar, ignored by the people you came to meet, and charged {cost} for the privilege."
+      - "A flat night in a loud room. You spent {cost} on a view of other people's good time."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }

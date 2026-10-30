@@ -6,8 +6,9 @@ import { getActivitiesView, getActivityTabView, type ActivityEntryView } from '.
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Sheet } from '../../components/Sheet';
-import { ACTIVITY_TAB_LABELS, HUB_BLOCK_WORDS, money } from '../../labels';
-import { EntryRow, ReceiptCard, type Picks } from '../more/ActivitiesScreen';
+import { ACTIVITY_TAB_LABELS, HUB_BLOCK_WORDS, money, PASTIME_CATEGORY_NOTES } from '../../labels';
+import { EntryRow, ReceiptCard } from './EntryRow';
+import { nameParams, type Picks } from './picks';
 import { DoctorPanel } from './DoctorPanel';
 
 /** The sheet of one activity of the Activities tab (A1): its options, with the price on each button, then the outcome card. */
@@ -57,7 +58,7 @@ function SheetBody({ life, hubId, kind }: { life: LifeState; hubId: string; kind
 /** The options of an activity: each is an entry of the leisure engine (age, legal and yearly limits, price, companions and portrait choices are the engine's). */
 function Options({ life, hubId }: { life: LifeState; hubId: string }) {
   const tab = getActivityTabView(life, content);
-  const hub = tab.groups.flatMap((g) => g.activities).find((a) => a.id === hubId);
+  const hub = tab.categories.flatMap((c) => c.sections.flatMap((x) => x.activities)).find((a) => a.id === hubId);
   const all = getActivitiesView(life, content);
   const busy = useAppStore((s) => s.aging);
   const act = useAppStore((s) => s.takeLifeAction);
@@ -73,6 +74,8 @@ function Options({ life, hubId }: { life: LifeState; hubId: string }) {
   }, [count]);
   if (!hub) return null;
   const disabled = busy || !tab.canAct || hub.block !== null;
+  // What to know before you choose, for the risky categories (crime, the black market, gambling, lawsuits, names, loans).
+  const note = PASTIME_CATEGORY_NOTES[content.pastimes[hub.options[0]?.id ?? '']?.category as keyof typeof PASTIME_CATEGORY_NOTES];
 
   const choose = (entry: ActivityEntryView, extra: { quality?: PastimeQuality; stake?: PastimeStake } = {}) => {
     const companionId = who[entry.id] ?? (entry.companion === 'required' ? entry.companions[0]?.id : undefined);
@@ -83,7 +86,9 @@ function Options({ life, hubId }: { life: LifeState; hubId: string }) {
       ...(extra.quality ? { quality: extra.quality } : {}),
       ...(extra.stake ? { stake: extra.stake } : {}),
       ...(entry.mechanic === 'gamble' && p.chase ? { chase: true } : {}),
+      ...(entry.routes ? { route: p.route ?? 'settle' } : {}),
       ...(entry.look ? { look: p.look ?? entry.look.options[0] } : {}),
+      ...(entry.name ? nameParams(entry, p) : {}),
     });
   };
 
@@ -92,6 +97,7 @@ function Options({ life, hubId }: { life: LifeState; hubId: string }) {
       <p className="text-sm text-muted">
         You have {money(tab.savings)} saved. {ACTIVITY_TAB_LABELS.doneThisYear(hub.count, hub.limit)} Each time you do the same thing in a year, you get less from it and it is likelier to go wrong.
       </p>
+      {note && <p className="text-sm text-muted" data-testid="activity-note">{note}</p>}
       {hub.block?.reason === 'age' && <p data-testid="activity-blocked">{HUB_BLOCK_WORDS.age(hub.block.minAge)}</p>}
       {latest && (
         <div ref={latestRef}>

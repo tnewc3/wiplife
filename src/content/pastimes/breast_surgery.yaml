@@ -9,6 +9,7 @@ cost: breast_surgery
 profile: surgery
 quality: true
 yearlyLimit: 1
+hub: cosmetic
 tiers:
   great:
     text:

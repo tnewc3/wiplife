@@ -3,13 +3,14 @@ import { content } from '../../../content';
 import { getFindDateView, getGroupTimeView, getPeople, getPets, getPortrait, getCharacterSummary, type PersonRow } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
-import { BondBars } from '../../components/BondBars';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { CollapsibleGroup } from '../../components/CollapsibleGroup';
+import { ListRow, RowList } from '../../components/ListRow';
+import { MiniBar } from '../../components/MiniBar';
 import { Sheet } from '../../components/Sheet';
 import { CharacterPortrait } from '../../portraits/CharacterPortrait';
 import {
-  bondWords,
   FIND_DATE_LABELS,
   GROUP_TIME_LABELS,
   money,
@@ -44,32 +45,30 @@ function sectionsOf(groups: ReturnType<typeof getPeople>): { living: Record<Excl
   return { living, late };
 }
 
-function PersonButton({ row, life }: { row: PersonRow; life: LifeState }) {
+/** One person as a 56px row (U2): a portrait, the name and who they are to you, how they feel about you as a bar, and a chevron to their page. */
+function PersonRowItem({ row, life }: { row: PersonRow; life: LifeState }) {
   const openPerson = useAppStore((s) => s.openPerson);
   const diedAgo = row.deathYear !== undefined ? yearsSince(life.currentYear - row.deathYear) : null;
+  const line = row.alive ? `${personLine(row)}${row.mood ? ` · ${moodPhrase(row.mood)}` : ''}` : `${personLine(row)}${diedAgo ? ` · Died ${diedAgo}` : ''}`;
   return (
-    <button type="button" onClick={() => openPerson(row.id)} className="flex min-h-14 w-full min-w-0 items-start gap-3 py-3 text-left active:bg-surface-2">
-      <span className="relative shrink-0">
-        <CharacterPortrait portrait={getPortrait(life, row.id, content)} size={48} label={`Portrait of ${row.fullName}`} />
-        {!row.alive && (
-          <span className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full bg-surface-2 text-muted" data-testid="memorial-icon" aria-hidden="true">
-            <Skull size={14} />
-          </span>
-        )}
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-2">
-        <span className="flex min-w-0 flex-col">
-          <span className={`font-semibold break-words [overflow-wrap:anywhere] ${row.alive ? '' : 'text-muted'}`}>{row.fullName}</span>
-          <span className="text-sm text-muted">{row.alive ? personLine(row) : `${personLine(row)}${diedAgo ? ` · Died ${diedAgo}` : ''}`}</span>
-          {row.mood && (
-            <span className="text-sm font-medium" data-testid="person-row-mood">
-              {moodPhrase(row.mood)}
+    <ListRow
+      lead={
+        <span className="relative shrink-0">
+          <CharacterPortrait portrait={getPortrait(life, row.id, content)} size={40} label={`Portrait of ${row.fullName}`} />
+          {!row.alive && (
+            <span className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full bg-surface-2 text-muted" data-testid="memorial-icon" aria-hidden="true">
+              <Skull size={12} />
             </span>
           )}
         </span>
-        {row.alive && <BondBars affection={row.affection} trust={row.trust} label={`How ${row.fullName} feels about you`} />}
-      </span>
-    </button>
+      }
+      title={row.fullName}
+      subtitle={line}
+      value={row.alive ? <MiniBar label={`How ${row.fullName} feels about you`} value={row.affection} /> : undefined}
+      ending="chevron"
+      muted={!row.alive}
+      onClick={() => openPerson(row.id)}
+    />
   );
 }
 
@@ -122,10 +121,11 @@ function GroupTimeSheet() {
 }
 
 /**
- * The People tab (U1): Love, Parents, Siblings, other family, Children, Friends, School, Work and Pets, then "Late
- * relationships" (everyone who has died, with a memorial icon). Each row has a portrait, the name, the relationship and
- * a bar for how they feel about you. "Spend time with everyone" at the bottom is a group interaction: it spends time
- * with each person who can, and every repeat in a year returns less.
+ * The People tab (U2): only people. Love, Parents, Siblings, other family, Children, Friends, School, Work and Pets, then "Late
+ * relationships" (everyone who has died, with a memorial icon), each a collapsible group that remembers whether it is open.
+ * A row is a portrait, the name, who they are to you and a bar for how they feel about you. Groups and faith are under
+ * Activities now. "Spend time with everyone" at the bottom is a group interaction: it spends time with each person who can,
+ * and every repeat in a year returns less.
  */
 export function PeopleTab({ life }: { life: LifeState }) {
   const groups = getPeople(life, content);
@@ -135,13 +135,12 @@ export function PeopleTab({ life }: { life: LifeState }) {
   const busy = useAppStore((s) => s.aging);
   const spend = useAppStore((s) => s.spendTimeWithEveryone);
   const openFamily = useAppStore((s) => s.openFamily);
-  const openGroups = useAppStore((s) => s.openGroups);
   const group = getGroupTimeView(life, content);
   const summary = getCharacterSummary(life, content);
   const love = romanceLine(summary.romance.status, summary.romance.partnerName);
   const order = Object.keys(living) as Exclude<PeopleSectionId, 'late' | 'pets'>[];
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {love && (
         <p className="font-semibold break-words" data-testid="romance-line">
           {love}
@@ -151,68 +150,47 @@ export function PeopleTab({ life }: { life: LifeState }) {
       {order
         .filter((id) => living[id].length > 0 || ALWAYS_SHOWN.includes(id))
         .map((id) => (
-          <Card key={id} role="region" aria-labelledby={`people-${id}`}>
-            <h2 id={`people-${id}`} className="font-display mb-1 text-lg font-semibold">
-              {PEOPLE_SECTION_LABELS[id]}
-            </h2>
+          <CollapsibleGroup key={id} id={`people.${id}`} title={PEOPLE_SECTION_LABELS[id]} count={living[id].length} testId={`people-${id}`}>
             {living[id].length === 0 ? (
-              <p className="text-muted">{PEOPLE_SECTION_EMPTY[id]}</p>
+              <p className="px-1 text-sm text-muted">{PEOPLE_SECTION_EMPTY[id]}</p>
             ) : (
-              <ul className="flex flex-col divide-y divide-border" aria-label={PEOPLE_SECTION_LABELS[id]}>
+              <RowList label={PEOPLE_SECTION_LABELS[id]}>
                 {living[id].map((row) => (
-                  <li key={row.id}>
-                    <PersonButton row={row} life={life} />
-                  </li>
+                  <PersonRowItem key={row.id} row={row} life={life} />
                 ))}
-              </ul>
+              </RowList>
             )}
-          </Card>
+          </CollapsibleGroup>
         ))}
       {pets.length > 0 && (
-        <Card role="region" aria-labelledby="people-pets" data-testid="people-pets">
-          <h2 id="people-pets" className="font-display mb-1 text-lg font-semibold">
-            {PEOPLE_SECTION_LABELS.pets}
-          </h2>
-          <ul className="flex flex-col divide-y divide-border" aria-label={PEOPLE_SECTION_LABELS.pets}>
+        <CollapsibleGroup id="people.pets" title={PEOPLE_SECTION_LABELS.pets} count={pets.length} testId="people-pets">
+          <RowList label={PEOPLE_SECTION_LABELS.pets}>
             {pets.map((p) => (
-              <li key={p.id}>
-                <button type="button" onClick={() => openPet(p.id)} data-testid={`pet-row-${p.id}`} className="flex min-h-14 w-full min-w-0 flex-col py-3 text-left active:bg-surface-2">
-                  <span className="font-semibold break-words [overflow-wrap:anywhere]">
-                    {p.name} the {p.species}
-                  </span>
-                  <span className="text-sm text-muted">
-                    {PET_PERSONALITY_LABELS[p.personality]} · {yearsOld(p.age)} · {petHealthWords(p.health, p.ill)} · {bondWords(p.bond)}
-                  </span>
-                </button>
-              </li>
+              <ListRow
+                key={p.id}
+                title={`${p.name} the ${p.species}`}
+                subtitle={`${PET_PERSONALITY_LABELS[p.personality]} · ${yearsOld(p.age)} · ${petHealthWords(p.health, p.ill)}`}
+                value={<MiniBar label={`How close ${p.name} is to you`} value={p.bond} />}
+                ending="chevron"
+                onClick={() => openPet(p.id)}
+                testId={`pet-row-${p.id}`}
+              />
             ))}
-          </ul>
-        </Card>
+          </RowList>
+        </CollapsibleGroup>
       )}
       {late.length > 0 && (
-        <Card role="region" aria-labelledby="people-late" data-testid="people-late">
-          <h2 id="people-late" className="font-display mb-1 text-lg font-semibold">
-            {PEOPLE_SECTION_LABELS.late}
-          </h2>
-          <ul className="flex flex-col divide-y divide-border" aria-label={PEOPLE_SECTION_LABELS.late}>
+        <CollapsibleGroup id="people.late" title={PEOPLE_SECTION_LABELS.late} count={late.length} defaultOpen={false} testId="people-late">
+          <RowList label={PEOPLE_SECTION_LABELS.late}>
             {late.map((row) => (
-              <li key={row.id}>
-                <PersonButton row={row} life={life} />
-              </li>
+              <PersonRowItem key={row.id} row={row} life={life} />
             ))}
-          </ul>
-        </Card>
+          </RowList>
+        </CollapsibleGroup>
       )}
-      <Card className="flex flex-col gap-2" role="region" aria-label="Your family and groups">
-        <Button variant="secondary" block onClick={openFamily} data-testid="people-family-planning">
-          Family
-        </Button>
-        <p className="-mt-1 text-sm text-muted">{GROUP_TIME_LABELS.familyBlurb}</p>
-        <Button variant="secondary" block onClick={openGroups} data-testid="people-groups">
-          Groups
-        </Button>
-        <p className="-mt-1 text-sm text-muted">{GROUP_TIME_LABELS.groupsBlurb}</p>
-      </Card>
+      <RowList label="Your family">
+        <ListRow title="Family" subtitle={GROUP_TIME_LABELS.familyBlurb} ending="chevron" onClick={openFamily} testId="people-family-planning" />
+      </RowList>
       <div className="flex flex-col gap-1">
         <Button size="lg" block disabled={busy || !group.available} onClick={() => void spend()} data-testid="spend-time-everyone">
           {GROUP_TIME_LABELS.button}

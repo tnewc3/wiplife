@@ -8,6 +8,7 @@ companion: none
 cost: tailored_suit
 profile: luxury
 yearlyLimit: 1
+hub: fine_goods
 buys: tailored_suit
 tiers:
   great:

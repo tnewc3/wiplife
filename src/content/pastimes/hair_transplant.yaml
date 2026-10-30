@@ -9,6 +9,7 @@ cost: hair_transplant
 profile: surgery
 quality: true
 yearlyLimit: 1
+hub: cosmetic
 tiers:
   great:
     text:

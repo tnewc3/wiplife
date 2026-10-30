@@ -86,10 +86,8 @@ test('close people show a mood, everyone else does not', async ({ page }) => {
   // The living (those with bars) show a mood; someone who has died doesn't (they are under Late relationships).
   const members = await family.getByRole('listitem').filter({ has: page.getByRole('meter') }).count();
   expect(members).toBeGreaterThan(0);
-  await expect(family.getByTestId('person-row-mood')).toHaveCount(members);
-  await expect(family.getByTestId('person-row-mood').first()).toHaveText(
-    /^(in a great mood|in good spirits|doing okay|stressed|having a rough time|annoyed with you)$/,
-  );
+  const moods = family.getByRole('listitem').filter({ has: page.getByRole('meter') });
+  await expect(moods.filter({ hasText: /in a great mood|in good spirits|doing okay|stressed|having a rough time|annoyed with you/ })).toHaveCount(members);
   await family.getByRole('button').first().click();
   await expect(page.getByTestId('person-mood')).toHaveText(/ is (in a great mood|in good spirits|doing okay|stressed|having a rough time|annoyed with you)\.$/);
   await expectNoHorizontalScroll(page);

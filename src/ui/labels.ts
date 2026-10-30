@@ -229,6 +229,10 @@ export const LOG_LABELS = { quietYear: 'A quiet year.', start: 'Your story start
 export const EVENT_CARD_LABELS = { whatWillYouDo: 'What will you do?', surpriseMe: 'Surprise me', yourYear: 'Your year' } as const;
 
 /** U1: the Activities tab, until the Activities stage fills it. */
+/** U2: the title of the Groups page for each part of it (Activities → Groups and Faith). */
+export const GROUPS_FOCUS_TITLES = { club: 'Clubs and hobby groups', service: 'Volunteering and causes', civic: 'Neighborhood and civic groups', faith: 'Your faith community', faith_explore: 'Explore other faiths' } as const;
+export const GROUPS_TAB_LABELS = { yours: 'Yours', join: 'Join', explore: 'Explore', left: 'Groups you left' } as const;
+
 export const ACTIVITIES_LABELS = {
   soonTitle: 'More to do is coming soon',
   soonBody: 'The gym, the doctor, nightlife, dating, the lottery, the casino, shopping, vacations, the salon and hobbies are on their way.',
@@ -1857,6 +1861,8 @@ export const MOVE_BLOCK_LABELS: Record<string, string> = {
 
 export const PASTIME_CATEGORY_LABELS: Record<PastimeCategory, string> = {
   mind_body: 'Mind & body',
+  health: 'Health',
+  recovery: 'Recovery',
   salon_spa: 'Salon & spa',
   surgery: 'Plastic surgery',
   shopping: 'Shopping',
@@ -1918,8 +1924,12 @@ export const HUB_BLOCK_WORDS = {
 /** A1: the Activities tab. */
 export const ACTIVITY_TAB_LABELS = {
   title: 'What would you like to do?',
-  more: 'More ways to spend a year',
-  moreBody: 'Treats, courses, surgery, luxury, loans, lawsuits and the rest.',
+  // U2: the hub.
+  sections: { activities: 'Activities', shopping: 'Shopping' },
+  categoryCount: (open: number, total: number) => (open === total ? `${total}` : `${open} of ${total}`),
+  backToList: 'Back to Activities',
+  luxuryNote: 'Gold marks the finest things money can buy.',
+  noneOpen: 'Nothing open to you here right now.',
   doneThisYear: (n: number, limit: number) => `Done ${n} of ${limit} times this year.`,
   hobbySkill: (level: string, skill: number) => `${level} · ${skill}%`,
   plan: 'Plan a longer trip',
@@ -2031,7 +2041,7 @@ export const PASTIME_COMPANION_LABELS: Record<'partner' | 'friend' | 'family', s
 };
 
 /** Valuable classes, as the Belongings screen reads them. */
-export const VALUABLE_CLASS_LABELS: Record<string, string> = { jewelry: 'Jewelry', designer: 'Designer goods', art: 'Art', boat: 'Boat' };
+export const VALUABLE_CLASS_LABELS: Record<string, string> = { jewelry: 'Jewelry', designer: 'Designer goods', art: 'Art', boat: 'Boat', car: 'Car', aircraft: 'Aircraft', island: 'Island' };
 
 // ---- Batch 3: school and work life ----
 

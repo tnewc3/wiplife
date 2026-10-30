@@ -289,13 +289,20 @@ export function checkPastimes(bundle: ContentBundle, fileOf: (typeKey: Collectio
     if (!bundle.registries.icons.icons[hub.icon]) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: unknown icon "${hub.icon}" (registries/icons.yaml)` });
     if (hub.adultsOnly && hub.minAge < adult) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: adultsOnly needs minAge ${adult} or more` });
     const options = Object.values(bundle.pastimes).filter((p) => !p.retired && p.hub === hub.id);
-    if (['options', 'vacation', 'hobbies'].includes(hub.kind) && options.length < 2) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: needs at least 2 options (found ${options.length})` });
-    if (['doctor', 'own_thing'].includes(hub.kind) && options.length > 0) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: a ${hub.kind} activity has a sheet of its own and takes no options` });
+    if (['options', 'vacation', 'hobbies'].includes(hub.kind) && options.length < 1) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: needs at least 1 option (found ${options.length})` });
+    if (['doctor', 'own_thing', 'link'].includes(hub.kind) && options.length > 0) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: a ${hub.kind} activity has a sheet of its own and takes no options` });
+  }
+  // U2: the categories of the hub have an icon, and a threshold they ask for exists; everything the tab holds can be reached.
+  for (const category of bundle.registries.activities.categories) {
+    if (!bundle.registries.icons.icons[category.icon]) errors.push({ file: 'registries/activities.yaml', message: `category ${category.id}: unknown icon "${category.icon}" (registries/icons.yaml)` });
+    if (category.needs !== undefined && bundle.balance.activities.thresholds[category.needs] === undefined) errors.push({ file: 'registries/activities.yaml', message: `category ${category.id}: needs "${category.needs}", which balance/activities.yaml thresholds does not have` });
+    if (!bundle.registries.activities.activities.some((a) => a.category === category.id)) errors.push({ file: 'registries/activities.yaml', message: `category ${category.id}: has no activity` });
   }
   for (const [id, def] of Object.entries(bundle.pastimes)) {
     if (def.retired) continue;
     const file = fileOf('pastimes', id);
     const err = (message: string) => errors.push({ file, message: `${id}: ${message}` });
+    if (def.hub === undefined) err('no hub: every activity belongs to an activity of the Activities hub (registries/activities.yaml), so that it can be reached');
     const hub = def.hub === undefined ? undefined : hubs.find((h) => h.id === def.hub);
     if (def.hub !== undefined && !hub) err(`unknown hub "${def.hub}" (registries/activities.yaml)`);
     if (hub?.adultsOnly && def.minAge < adult) err(`${hub.label} is adults only: minAge must be at least ${adult}`);

@@ -4,7 +4,7 @@
  * schema can use them without importing the larger file.
  */
 
-/** What you can own: a pet, a vehicle, a vacation home (the home you live in is housing, not a possession), or (Batch 2a, reversing E5's "no valuables") a valuable: jewelry, designer goods, art or a boat. */
+/** What you can own: a pet, a vehicle, a vacation home (the home you live in is housing, not a possession), or (Batch 2a, reversing E5's "no valuables") a valuable: jewelry, designer goods, art, a boat, and (U2) a luxury car, an aircraft or an island. */
 export const POSSESSION_KINDS = ['pet', 'vehicle', 'home', 'valuable'] as const;
 export type PossessionKindId = (typeof POSSESSION_KINDS)[number];
 
@@ -51,5 +51,5 @@ export const ACCIDENT_KINDS = ['minor', 'major', 'total', 'drunk'] as const;
 export type AccidentKind = (typeof ACCIDENT_KINDS)[number];
 
 /** Batch 2a: the kinds of valuable (src/content/valuables), each with its own appreciation, upkeep, insurance and theft numbers in balance/possessions.yaml. */
-export const VALUABLE_CLASSES = ['jewelry', 'designer', 'art', 'boat'] as const;
+export const VALUABLE_CLASSES = ['jewelry', 'designer', 'art', 'boat', 'car', 'aircraft', 'island'] as const;
 export type ValuableClassId = (typeof VALUABLE_CLASSES)[number];

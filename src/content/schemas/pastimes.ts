@@ -25,7 +25,7 @@ import { templateSchema } from './text';
 
 /** The groups on the Activities screen, in the order they appear. */
 export const PASTIME_CATEGORIES = [
-  'mind_body', 'salon_spa', 'surgery', 'shopping', 'movies', 'nightlife', 'outdoor', 'luxury', 'love',
+  'mind_body', 'health', 'recovery', 'salon_spa', 'surgery', 'shopping', 'movies', 'nightlife', 'outdoor', 'luxury', 'love',
   // A1: parties and get-togethers, and hobbies.
   'social', 'hobby',
   // Batch 2b: risk and legal.
