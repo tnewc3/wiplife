@@ -25,7 +25,7 @@ import { runLanguages } from './languages';
  * job's pay joins the ledger's income. The possessions step (E5) follows the ledger, which has charged the year's upkeep and insurance:
  * pets and vehicles age, accidents and deaths are queued as events.
  * The looks step (P1) comes after the travel step and before pacing: whoever joined your life since the last year gets a look (it draws nothing from the life's random stream).
- * The hub step (C2) follows the social step and comes before the fame step: skills grow and fade, the roles you have add up to a load
+ * The hub's year (C2) runs at the start of the fame step: skills grow and fade, the roles you have add up to a load
  * that costs Stress and burnout, and the band's players improve; performance enhancers are taken and tested before the season.
  * The social step (Batch 8) comes right before it, so a year of posting counts as a year of work and your reach is fame when the fame step runs.
  * The fame step (E6b) follows the crime step and runs before the ledger: the year's
@@ -40,7 +40,6 @@ import type { ContentBundle } from '../content/schemas';
 import { runCrime } from './crime/step';
 import { runFame } from './fame/step';
 import { runSocial } from './social/step';
-import { runHub } from './hub/step';
 import { runHeritage } from './estate/heritage';
 import { runLives } from './lives/step';
 import { runLooks } from './looks/step';
@@ -79,7 +78,6 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'legal', run: runLegal },
   { id: 'crime', run: runCrime },
   { id: 'social', run: runSocial },
-  { id: 'hub', run: runHub },
   { id: 'fame', run: runFame },
   { id: 'business', run: runBusiness },
   { id: 'education', run: runEducation },
