@@ -7,7 +7,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { activitiesLife, type ActivitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, goHome, openHubActivity, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, goHome, openHubActivity, passAgeGate, settle, goTab } from './helpers';
 
 
 /** Starts the life and opens the sheet of one activity of the hub (U2). */
@@ -46,7 +46,7 @@ test('a gambling night: the stake is on the button, the receipt shows the money 
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.keyboard.press('Escape');
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByTestId('savings')).toHaveText(`$${balance.toLocaleString('en-US')}`);
 });
 

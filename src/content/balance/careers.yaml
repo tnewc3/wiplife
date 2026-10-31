@@ -167,3 +167,43 @@ workActions:
 # The youngest age you can retire (the retirement benefit itself starts at
 # economy.yaml retirement.age).
 retireAge: 55
+
+# C2: the Career hub. Roles take time; the total is your load.
+hub:
+  # Load points each role takes by how hard you work at it (100 is every hour you could give).
+  roles:
+    school:    { back: 18, steady: 30, all: 42 }
+    job:       { back: 30, steady: 42, all: 56 }
+    gig:       { back: 10, steady: 18, all: 28 }
+    sports:    { back: 8,  steady: 16, all: 28 }
+    # A pro contract counts as a full-time job.
+    proSports: { back: 36, steady: 44, all: 58 }
+    fame:      { back: 8,  steady: 16, all: 30 }
+    band:      { back: 5,  steady: 10, all: 18 }
+    business:  { back: 14, steady: 26, all: 44 }
+    crime:     { back: 8,  steady: 16, all: 28 }
+    social:    { back: 5,  steady: 12, all: 22 }
+  # The total you can carry without paying for it.
+  comfortable: 62
+  over:
+    stress: 0.35
+    burnout: 0.9
+    performance: 0.35
+    allIn: 2
+    # Points over at which something gives, and the chance each year by the points over.
+    giveAt: 22
+    give:
+      - { at: 22, x: 0.15 }
+      - { at: 40, x: 0.4 }
+      - { at: 70, x: 0.75 }
+  burnout:
+    recover: 6
+    light: 10
+    above: 55
+    performance: 0.2
+    happiness: 0.04
+  gives: { grades: 0.35, job: 8, bench: 6, band: 12 }
+  relief: { share: 0.8, max: 6 }
+  side: { minAge: 12 }
+  youthAge: 18
+  youthTries: 8

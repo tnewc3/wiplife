@@ -772,6 +772,21 @@ export const targetsBalanceSchema = z.strictObject({
    * games are on a body (and what playing through pain does), titles,
    * all-stars and earnings. Nobody under 18 is ever in the pros.
    */
+  /**
+   * C2: the Career hub, judged on the multi-career player (one that plays a sport as a child, keeps a band and rehearses): lives that
+   * run two or more careers at once, how often the load is more than they can carry, burnout, that no skill ever falls under its
+   * floor, that young players do switch sports, and that bandmates get better.
+   */
+  hub: z.strictObject({
+    floorViolations: numberRangeSchema,
+    multiCareerLives: shareRangeSchema,
+    overLoadYears: shareRangeSchema,
+    meanBurnout: numberRangeSchema,
+    youthSwitchers: shareRangeSchema,
+    bands: shareRangeSchema,
+    memberGrowth: numberRangeSchema,
+    testedPositive: shareRangeSchema,
+  }),
   sports: z.strictObject({
     underAgePros: numberRangeSchema,
     entered: shareRangeSchema,

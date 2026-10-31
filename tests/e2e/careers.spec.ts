@@ -7,7 +7,7 @@
  * quitting, and the career in Life history, at phone size.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { openPage, ageUp, ageUpTimes, createCustomLife, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, passAgeGate, settle, tab, type CustomLifeData } from './helpers';
+import { openPage, ageUp, ageUpTimes, createCustomLife, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, passAgeGate, settle, type CustomLifeData, openRow, goTab } from './helpers';
 
 
 const WORKER: CustomLifeData = {
@@ -41,7 +41,8 @@ test('job search, an interview, a promotion, a raise and quitting', async ({ pag
 
   // High school done at 18: no longer in school, so work is open.
   await ageUpTimes(page, 18);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-jobs');
   const work = page.getByRole('region', { name: 'Work' });
   await expect(work.getByTestId('job-status')).toContainText('You don’t have a job.');
   await expectNoHorizontalScroll(page);
@@ -76,14 +77,16 @@ test('job search, an interview, a promotion, a raise and quitting', async ({ pag
   await expect(job.getByRole('meter', { name: 'Performance' })).toBeVisible();
   await expect(job.getByTestId('job-salary')).toHaveText(/^\$[\d,]+ a year$/);
   await expect(job.getByRole('button', { name: 'Ask for a raise' })).toBeDisabled();
-  await page.getByTestId('way-gig').getByRole('button', { name: /Gig work/ }).click();
-  await expect(page.getByTestId('way-gig-reason')).toHaveText('You have a full-time job, so there’s no time for gig work.');
+  await goTab(page, 'Job');
+  await page.getByTestId('find-gigs').click({ force: true });
+  await expect(page.getByTestId('closed-reason')).toHaveText('You have a full-time job, so there’s no time for gig work.');
   await goHome(page);
   await expect(page.getByTestId('job-line')).toHaveText(/^Receptionist at /);
 
   // A year of work, then the yearly review promotes you.
   await ageUpTimes(page, 2);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-jobs');
   const promoted = page.getByRole('region', { name: 'Office assistant' });
   await expect(promoted.getByTestId('job-status')).toContainText('Level 2 of 4');
   const before = await promoted.getByTestId('job-salary').textContent();

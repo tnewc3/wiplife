@@ -8,7 +8,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, goTab } from './helpers';
 import { peopleLife } from './peopleFixtures';
 
 const OPEN = { testPack: true };
@@ -33,7 +33,7 @@ test('Home shows the news from your people', async ({ page }) => {
 
 test("a person's page shows their job, partner, children, city and troubles", async ({ page }) => {
   await openFixture(page);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Friends' }).getByRole('button', { name: /Marcus/ }).click();
   await page.getByTestId('person-tab-overview').click();
   const life = page.getByTestId('their-life');
@@ -93,7 +93,7 @@ test('a year brings news and a funeral request, counted among the year\'s events
   await expect(eventSheet(page)).toHaveCount(0);
   // And it is on Home, and on her page.
   await expect(page.getByTestId('news-card')).toContainText(/[Rr]etired/);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Siblings' }).getByRole('button', { name: /Rae/ }).click();
   await page.getByTestId('person-tab-overview').click();
   await expect(page.getByTestId('life-work')).toContainText('Retired');

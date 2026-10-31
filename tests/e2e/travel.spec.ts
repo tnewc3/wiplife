@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { produce } from 'immer';
 import { familyLife, loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, eventSheet, openPage, passAgeGate, playThroughEvents, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, eventSheet, openPage, passAgeGate, playThroughEvents, settle, openRow, goTab, closeSheets } from './helpers';
 
 test('More trip planner has a destination, budget and companions; costs and skills survive reload', async ({ page }) => {
   await passAgeGate(page, { testPack: true });
@@ -40,17 +40,23 @@ test('Work/School exchange moves temporarily, preserves enrollment and automatic
     d.education.current = { program: 'college', tier: 'state', majorId: 'computer_science', year: 2, lengthYears: 4, gpa: 3.2, boost: 0, repeats: 0, scholarship: 0.5, since: d.currentYear - 1 };
   });
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await page.getByLabel('Partner school city').selectOption('montreal');
   await page.getByLabel('Length or route').selectOption('semester');
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Start exchange' }).click(); await playThroughEvents(page);
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await expect(page.getByTestId('work-residence')).toContainText('Montreal');
   await expect(page.getByTestId('work-residence')).toContainText(String(life.currentYear + 1));
   await page.reload(); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await expect(page.getByTestId('work-residence')).toContainText('Montreal');
-  await page.getByRole('button', { name: 'Age up', exact: true }).click(); await playThroughEvents(page);
+  await closeSheets(page); await page.getByRole('button', { name: 'Age up', exact: true }).click(); await playThroughEvents(page);
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await expect(page.getByTestId('work-residence')).toHaveCount(0);
   await openPage(page, 'properties');
   await expect(page.getByTestId('housing-line')).toContainText('Chicago');
@@ -64,7 +70,8 @@ test('temporary work uses a dated residence, charges a receipt, and returns afte
     for (const p of Object.values(d.people)) p.cityId = 'chicago';
   });
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await page.getByLabel('Work destination').selectOption('london');
   await page.getByLabel('Length or route').selectOption('working_holiday');
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
@@ -73,10 +80,16 @@ test('temporary work uses a dated residence, charges a receipt, and returns afte
   await expect(page.getByTestId('event-money')).toContainText('£1,264');
   await expect(page.getByTestId('event-money')).toContainText('£38,236');
   await playThroughEvents(page);
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await expect(page.getByTestId('work-residence')).toContainText('London');
-  await page.getByRole('button', { name: 'Age up', exact: true }).click(); await playThroughEvents(page);
+  await closeSheets(page); await page.getByRole('button', { name: 'Age up', exact: true }).click(); await playThroughEvents(page);
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await expect(page.getByTestId('work-residence')).toContainText('London');
-  await page.getByRole('button', { name: 'Age up', exact: true }).click(); await playThroughEvents(page);
+  await closeSheets(page); await page.getByRole('button', { name: 'Age up', exact: true }).click(); await playThroughEvents(page);
+  await goTab(page, 'Job');
+  await openRow(page, 'find-abroad');
   await expect(page.getByTestId('work-residence')).toHaveCount(0);
   await openPage(page, 'properties');
   await expect(page.getByTestId('housing-line')).toContainText('Chicago');

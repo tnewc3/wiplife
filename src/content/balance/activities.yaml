@@ -23,5 +23,4 @@ hobbies:
   talent:
     base: 0.05
     curve: [{ at: 0, x: 0.4 }, { at: 40, x: 1 }, { at: 100, x: 2.5 }]
-  # Skill lost for each year without practice.
-  decay: 2
+  # C2: how a hobby skill grows and fades is on the shared skills system (balance/skills.yaml).

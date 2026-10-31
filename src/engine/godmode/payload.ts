@@ -91,6 +91,44 @@ export const editPayloadSchema = z.strictObject({
     .partial()
     .optional(),
   birthYear: z.int().min(1000).max(5000).optional(),
+  /**
+   * C2: your careers beyond a job. Sports: position, Greatness (craft), skills, salary, the season history. Music: buzz, the band's
+   * chemistry and members' playing, releases. Fame: fame, image, fans, fan mood, agent, contract. Yours only.
+   */
+  career: z
+    .strictObject({
+      sports: z
+        .strictObject({
+          position: idSchema,
+          greatness: score,
+          skills: z.record(idSchema, score),
+          salary: z.int('Must be a whole number').min(0).max(1_000_000_000),
+          history: z.literal('clear'),
+        })
+        .partial()
+        .optional(),
+      music: z
+        .strictObject({
+          buzz: score,
+          chemistry: score,
+          members: z.array(z.strictObject({ id: personId, skill: score })).max(8),
+          releases: z.literal('clear'),
+        })
+        .partial()
+        .optional(),
+      fame: z
+        .strictObject({
+          fame: score,
+          image: score,
+          fans: z.int('Must be a whole number').min(0).max(2_000_000_000),
+          mood: score,
+          agent: idSchema.nullable(),
+          contract: z.literal('end'),
+        })
+        .partial()
+        .optional(),
+    })
+    .optional(),
 });
 
 export type EditPayload = z.infer<typeof editPayloadSchema>;
@@ -98,7 +136,7 @@ export type EditArea = Exclude<keyof EditPayload, 'target'>;
 
 export const EDIT_AREAS: readonly EditArea[] = [
   'name', 'identity', 'latent', 'looks', 'appearance', 'stats', 'personality', 'values', 'conditions', 'troubles', 'neuro',
-  'relationship', 'work', 'wealth', 'cityId', 'faith', 'languages', 'citizenships', 'money', 'birthYear',
+  'relationship', 'work', 'wealth', 'cityId', 'faith', 'languages', 'citizenships', 'money', 'birthYear', 'career',
 ];
 
 /** The person an edit is about, or null for you. */

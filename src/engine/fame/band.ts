@@ -33,6 +33,7 @@ import { addTie, canTie, inCircle } from '../web/ties';
 import { fameHistory, hasGuardian } from './ladder';
 import { isMinorStar, pathDef, workedPaths } from './query';
 import { bandNameSuggestion, genresOf, setMainGenre } from './sound';
+import { poolSkill } from '../hub/pool';
 
 type BandEffect = Extract<Effect, { type: 'band' }>;
 
@@ -84,8 +85,8 @@ export function moveBand(state: LifeState, affection: number, chemistry: number,
 }
 
 /** A bandmate's skill when they join, by your rung, with a little either way. */
-function memberSkill(rung: number, content: ContentBundle, rng: RngState): number {
-  return clampInt(curveAt(content.balance.fame.band.skill, rung) + nextInt(rng, -8, 8), 0, 100);
+function memberSkill(_rung: number, content: ContentBundle, rng: RngState, state: LifeState): number {
+  return poolSkill(state, content, rng);
 }
 
 /** The ages a new bandmate can be: an adult's are adults; a young star's are young, within a few years of them. */
@@ -98,8 +99,8 @@ export function memberAgeRange(state: LifeState, content: ContentBundle): { min:
 }
 
 /** A new person for the band, from an audition (or the band that asks you in): a friend in your city, tagged `band`. */
-function audition(state: LifeState, part: Id, skill: number, memory: string, content: ContentBundle, rng: RngState): BandMember | null {
-  const spec = { kind: 'friend', presence: 'city', age: memberAgeRange(state, content) } as CastSpec;
+export function audition(state: LifeState, part: Id, skill: number, memory: string, content: ContentBundle, rng: RngState, age?: number, temper?: BandMember['temper']): BandMember | null {
+  const spec = { kind: 'friend', presence: 'city', age: age === undefined ? memberAgeRange(state, content) : { min: age, max: age } } as CastSpec;
   const id = createPerson(state, spec, rng, content);
   if (id === null) return null;
   const person = state.people[id]!;
@@ -107,11 +108,11 @@ function audition(state: LifeState, part: Id, skill: number, memory: string, con
   const rel = state.relationships[id]!;
   rel.affection = clampInt(content.balance.fame.band.affection + nextInt(rng, -8, 8), 0, 100);
   rel.memories.push({ tag: memory, year: state.currentYear });
-  return { id, part, skill, since: state.currentYear };
+  return { id, part, skill, since: state.currentYear, ...(temper !== undefined ? { temper } : {}) };
 }
 
 /** Ties the new member to the rest of the band (people who play together know each other). */
-function tieIn(state: LifeState, id: Id, rng: RngState): void {
+export function tieIn(state: LifeState, id: Id, rng: RngState): void {
   for (const other of liveMembers(state)) {
     if (other.id !== id && canTie(state, id, other.id)) addTie(state.web, id, other.id, 'friends', 55 + nextInt(rng, 0, 10), 'context', state.currentYear);
   }
@@ -161,7 +162,7 @@ export function formBand(state: LifeState, name: string, part: Id | undefined, c
   const rung = f.paths[pathId]!.rung;
   const members: BandMember[] = [];
   for (const p of partsToFill(def, mine, size)) {
-    const m = audition(state, p, memberSkill(rung, content, rng), 'band_founded_with_you', content, rng);
+    const m = audition(state, p, memberSkill(rung, content, rng, state), 'band_founded_with_you', content, rng);
     if (m) members.push(m);
   }
   if (members.length === 0) return false;
@@ -325,7 +326,7 @@ export function recruitMember(state: LifeState, part: Id, content: ContentBundle
   if (recruitBlock(state, part, content) !== null) return false;
   const band = state.fame.band!;
   const rung = state.fame.paths[band.path]?.rung ?? 1;
-  const m = audition(state, part, memberSkill(rung, content, rng), 'band_joined_you', content, rng);
+  const m = audition(state, part, memberSkill(rung, content, rng, state), 'band_joined_you', content, rng);
   if (!m) return false;
   band.members.push(m);
   tieIn(state, m.id, rng);
@@ -381,7 +382,7 @@ export function bandYear(state: LifeState, content: ContentBundle, rng: RngState
         name: bandNameSuggestion(state, f.offers.length + nextInt(rng, 0, 20), content),
         genre,
         size: nextInt(rng, b.size.min, Math.max(b.size.min, b.size.max)),
-        skill: memberSkill(path.rung, content, rng),
+        skill: memberSkill(path.rung, content, rng, state),
         part: yourPart(state, def, undefined),
         year: state.currentYear,
       });

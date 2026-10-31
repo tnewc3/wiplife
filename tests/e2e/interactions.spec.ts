@@ -4,7 +4,7 @@
  * in an injury and a charge, and no other events get in the way.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { ageUpTimes, createCustomLife, expectNoHorizontalScroll, expectTouchTargets, familyLists, openPage, passAgeGate, tab, type CustomLifeData } from './helpers';
+import { ageUpTimes, createCustomLife, expectNoHorizontalScroll, expectTouchTargets, familyLists, openPage, passAgeGate, type CustomLifeData, openRow, goTab } from './helpers';
 
 const CHARACTER: CustomLifeData = {
   first: 'Sam',
@@ -29,7 +29,7 @@ async function startLife(page: Page): Promise<void> {
 
 /** Opens a living family member's page from the People tab: the first one, or the first whose line matches (a living person's line ends "N years old"). */
 async function openRelative(page: Page, kind?: string): Promise<void> {
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   const family = familyLists(page);
   const button = kind ? family.getByRole('button', { name: new RegExp(`(${kind}) · \\d+ years old`) }) : family.getByRole('button', { name: /years old/ });
   await button.first().click();
@@ -80,7 +80,7 @@ test('close people show a mood, everyone else does not', async ({ page }) => {
   test.setTimeout(120_000);
   await startLife(page);
   await ageUpTimes(page, 3);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   // Family is close: each has a mood word in the list and on their page.
   const family = familyLists(page);
   // The living (those with bars) show a mood; someone who has died doesn't (they are under Late relationships).
@@ -98,7 +98,8 @@ test('a gift takes real money and shows your new balance; a fight can escalate i
   await startLife(page);
   await ageUpTimes(page, 16);
   // Gig work from 16 gives you something to spend.
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-gigs');
   await page.getByRole('button', { name: 'Start gig work' }).click();
   await ageUpTimes(page, 3);
 
@@ -122,7 +123,7 @@ test('a gift takes real money and shows your new balance; a fight can escalate i
   await page.getByTestId('interaction-done').click();
 
   // The Money tab agrees.
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByText(`$${now!.toLocaleString('en-US')}`).first()).toBeVisible();
 
   // Picking a fight with a sibling: a tense stand-off opens a choice.

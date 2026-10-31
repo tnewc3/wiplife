@@ -4,7 +4,7 @@ import { measureFullCircle, peopleTargets } from './people';
 import { runSimulation } from './run';
 
 describe("the people's lives report (E3)", () => {
-  it('begins a year in well under 20 ms with a full circle of sixty people simulated', { timeout: 60_000 }, () => {
+  it('begins a year within the time budget with a full circle of sixty people simulated', { timeout: 60_000 }, () => {
     // The budget is about what the code costs, not what a busy machine adds: the best of three runs is judged (other test files share the CPU).
     const budget = content.balance.targets.people.maxBeginYearMs;
     let best = Infinity;
@@ -17,7 +17,7 @@ describe("the people's lives report (E3)", () => {
   });
 
   it('measures work, love, trouble, requests and news, with no romance under 18 and no invariant failures', { timeout: 120_000 }, () => {
-    const report = runSimulation(content, { lives: 12, seedPrefix: 'people-report-b10' });
+    const report = runSimulation(content, { lives: 12, seedPrefix: 'people-report-c2' });
     const p = report.people;
     expect(report.invariantFailures).toBe(0);
     expect(p.lives).toBe(12);

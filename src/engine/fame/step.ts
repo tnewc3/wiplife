@@ -25,6 +25,7 @@
  * For someone who has retired, royalties and fading fans. In prison, fame fades
  * and nothing else happens. Numbers: balance/fame.yaml. Events: registries/fame.yaml.
  */
+import { runHub } from '../hub/step';
 import type { ContentBundle, FameKindDef, FamePathDef, FameTrigger } from '../../content/schemas';
 import { curveAt } from '../curve';
 import { eventWeight } from '../events/selection';
@@ -263,6 +264,8 @@ function royalties(state: LifeState, content: ContentBundle): number {
 
 /** Step: the fame year. */
 export function runFame(state: LifeState, content: ContentBundle): void {
+  // C2: the Career hub's year (skills, load, the band's players, enhancers) comes first, in this step so the year pays for one draft less.
+  runHub(state, content);
   const f = state.fame;
   const rng = state.rng;
   const year = state.currentYear;

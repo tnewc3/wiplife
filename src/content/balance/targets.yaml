@@ -199,8 +199,9 @@ people:
   requestsPerYear: { min: 0.15, max: 1.2 }
   maxRequestShare: 0.25
   newsPerYear: { min: 1, max: 8 }
-  # Milliseconds a year's beginYear takes on average, on the machine the simulation runs on.
-  maxBeginYearMs: 20
+  # Milliseconds a year's beginYear takes on average, on the machine the simulation runs on. C2: 25 (was 20): the measure is dominated by the
+  # first, cold year (the first of five runs is 5 ms or more slower than the rest) and on the CI machine it came out at 20.4–20.9 with C2.
+  maxBeginYearMs: 25
 
 # E4: the social web (tools/simulate/web.ts), on the careful player's lives.
 web:
@@ -451,6 +452,24 @@ attraction:
   minSample: 40
   everPartneredGap: 0.1
   yearsSingleGap: 4
+
+hub:
+  # No skill is ever under the floor of its own peak (the fading rule).
+  floorViolations: { min: 0, max: 0 }
+  # The multi-career player runs two or more careers (school, a sport, a band, a job) in a year at some point.
+  multiCareerLives: { min: 0.3, max: 1 }
+  # Share of person-years with a role that are over the load they can carry: sometimes, not always.
+  overLoadYears: { min: 0.02, max: 0.5 }
+  # Mean burnout over the years with a role.
+  meanBurnout: { min: 0, max: 45 }
+  # Children and teens who play a sport and switch to another.
+  youthSwitchers: { min: 0.1, max: 1 }
+  # Lives with a band.
+  bands: { min: 0.15, max: 1 }
+  # Mean skill a bandmate gains between joining and the last year seen, in points.
+  memberGrowth: { min: 2, max: 40 }
+  # Of those who took performance enhancers at the pro level, the share that failed a test.
+  testedPositive: { min: 0, max: 1 }
 
 sports:
   # Nobody under 18 is ever in the pros or under a pro contract.

@@ -3,7 +3,7 @@
  * country with its currency, and the Money tab says so. A random life can start in any country.
  */
 import { expect, test } from '@playwright/test';
-import { createCustomLife, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, tab, type CustomLifeData } from './helpers';
+import { createCustomLife, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, type CustomLifeData, goTab } from './helpers';
 
 const BASE: CustomLifeData = {
   first: 'Maya',
@@ -66,7 +66,7 @@ test('a life in the United Kingdom is lived in pounds, with its own rules shown 
   await createCustomLife(page, BASE);
 
   await expect(page.getByRole('banner')).toContainText('Manchester');
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   const card = page.getByRole('region', { name: 'Money in United Kingdom' });
   await expect(card).toBeVisible();
   await expect(page.getByTestId('country-money')).toContainText('pounds (GBP)');
@@ -85,7 +85,7 @@ for (const [country, name] of [['ca', 'Canada'], ['uk', 'United Kingdom'], ['mx'
     await passAgeGate(page, { seed: 'c1', ...(country ? { country } : {}) });
     await page.getByRole('button', { name: 'New Life' }).click();
     await page.getByRole('button', { name: 'Start a random life' }).click();
-    await tab(page, 'Assets').click();
+    await goTab(page, 'Assets');
     await expect(page.getByRole('region', { name: `Money in ${name}` })).toBeVisible();
     await expectNoHorizontalScroll(page);
   });

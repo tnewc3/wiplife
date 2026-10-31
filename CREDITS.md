@@ -71,6 +71,19 @@ The icons on event cards, stat bars and in the People list (`public/icons`) are 
 | `public/icons/ring.svg` | Ring |
 | `public/icons/compass.svg` | Compass |
 | `public/icons/books.svg` | Books |
+| `public/icons/basketball.svg` | Basketball |
+| `public/icons/guitar.svg` | Guitar |
+| `public/icons/musical_note.svg` | Musical note |
+| `public/icons/clapper_board.svg` | Clapper board |
+| `public/icons/camera.svg` | Camera |
+| `public/icons/mobile_phone.svg` | Mobile phone |
+| `public/icons/memo.svg` | Memo |
+| `public/icons/office_building.svg` | Office building |
+| `public/icons/sunglasses.svg` | Sunglasses |
+| `public/icons/alarm_clock.svg` | Alarm clock |
+| `public/icons/syringe.svg` | Syringe |
+| `public/icons/microphone.svg` | Microphone |
+| `public/icons/drum.svg` | Drum |
 
 ## Interface icons
 

@@ -113,6 +113,19 @@ function scaleEffects(effects: readonly Effect[], factor: number, heat: number):
   });
 }
 
+/** C2: whatever lowers your Stress (a walk, meditation, yoga, the outdoors, leisure, a spa) lowers burnout too, by a share of it and with the same diminishing returns (the Stress it took off is already smaller each time). */
+function relieveBurnout(state: LifeState, stressDrop: number, content: ContentBundle): void {
+  if (stressDrop <= 0) return;
+  const r = content.balance.careers.hub.relief;
+  const relief = Math.min(r.max, Math.round(stressDrop * r.share));
+  if (relief <= 0) return;
+  const hub = state.hub;
+  const before = hub.burnout;
+  hub.burnout = clampInt(hub.burnout - relief, 0, 100);
+  hub.totals.relieved += before - hub.burnout;
+  if (state.fame.active) state.fame.burnout = clampInt(state.fame.burnout - relief, 0, 100);
+}
+
 function statsOf(state: LifeState): Record<(typeof STATS)[number], number> {
   const s = state.character.stats;
   return { health: s.health, happiness: s.happiness, smarts: s.smarts, looks: s.looks, fitness: s.fitness, stress: s.stress };
@@ -229,7 +242,9 @@ export function performPastime(state: LifeState, def: PastimeDef, input: Pastime
   const minor = state.character.age < content.balance.relationships.adultAge;
   const heat = minor ? 0 : inCrew(state) && def.category === 'crime' ? content.balance.risk.crew.heat : 1;
   const effectCtx = { def: { id: def.id, rarity: 'common' as const }, cast, rng: state.rng, content };
+  const stressBefore = state.character.stats.stress;
   applyEffects(state, scaleEffects(outcome.effects as Effect[], factor, heat), effectCtx);
+  relieveBurnout(state, stressBefore - state.character.stats.stress, content);
   if (def.category === 'crime' && state.crime.crew) state.crime.standing = clampInt(state.crime.standing - content.balance.risk.crew.standing, 0, 100);
   let affection = 0;
   if (companionId !== undefined && outcome.companion) {

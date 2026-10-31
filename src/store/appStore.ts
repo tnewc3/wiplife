@@ -1,3 +1,5 @@
+import { trainingLines, type TrainingLine } from '../engine/selectors';
+import { trainingKind } from '../engine/hub/training';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { content } from '../content';
@@ -91,6 +93,8 @@ export interface AppState {
   aging: boolean;
   /** Open while the year's events (and then its recap) are showing. */
   eventSheet: EventSheetState | null;
+  /** C2: the short card after a practice, training session, rehearsal, study session or gym visit (null when none is showing). */
+  training: { kind: 'practice' | 'rehearsal' | 'training' | 'study' | 'gym'; lines: TrainingLine[] } | null;
   /** The archive entry of the life that just ended, for the Death screen. */
   lastDeath: ArchivedLife | null;
   /**
@@ -245,6 +249,8 @@ export interface AppState {
   /** A1: opens the sheet of an activity of the Activities tab, and closes it. */
   openActivity: (activityId: string) => void;
   closeActivity: () => void;
+  /** C2: dismisses the training card (a tap skips it). */
+  closeTraining: () => void;
   /** E5: opens the Interact sheet for a pet. */
   openPetInteractions: (petId: string) => void;
   /** E5: spends time with a pet (between years) and autosaves; the outcome card opens like any interaction's. */
@@ -522,6 +528,7 @@ export function createAppStore({
         creating: false,
         aging: false,
         eventSheet: null,
+        training: null,
         lastDeath: null,
         deadLife: null,
         deathView: null,
@@ -854,6 +861,12 @@ export function createAppStore({
             if (!life || life.phase !== 'yearStart' || get().eventSheet) return;
             const next = performAction(life, actionId, params, bundle);
             await commit(next);
+            // C2: a practice, training session, rehearsal, study session or gym visit shows what it did.
+            const kind = trainingKind(actionId, params, bundle);
+            if (kind) {
+              const lines = trainingLines(life, next, bundle);
+              if (lines.length > 0) set((s) => void (s.training = { kind, lines }));
+            }
             // A job application or a raise request answers with an event.
             if (next.phase === 'action') openEvents(next);
           }),
@@ -878,6 +891,11 @@ export function createAppStore({
         openActivity: (activityId) =>
           set((s) => {
             if (s.life && s.life.phase === 'yearStart' && s.life.housing.kind !== 'incarcerated' || activityId === 'doctor') s.activitySheet = activityId;
+          }),
+
+        closeTraining: () =>
+          set((s) => {
+            s.training = null;
           }),
 
         closeActivity: () =>

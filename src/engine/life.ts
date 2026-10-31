@@ -63,6 +63,7 @@ import { customLook, personLook, yourLook } from './looks/query';
 import { emptyBelonging } from './belonging/query';
 import { emptyBusiness } from './business/query';
 import { emptyPastimes } from './pastimes/query';
+import { emptyHub } from './hub/query';
 import { emptySocial } from './social/query';
 import { startBelonging } from './belonging/start';
 import { citiesOfCountry, startWeights } from './country';
@@ -219,6 +220,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     business: emptyBusiness(),
     pastimes: emptyPastimes(),
     hobbies: {},
+    hub: emptyHub(),
     social: emptySocial(),
   };
   // P1: how everyone looks (a custom character's own choices, and a roll for the rest). From generators of their own, so the life's random sequence is as it was.

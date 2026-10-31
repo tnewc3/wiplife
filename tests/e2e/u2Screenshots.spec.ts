@@ -5,7 +5,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { activitiesLife, type ActivitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { openHubActivity, passAgeGate, settle, startRandomLife, tab } from './helpers';
+import { openHubActivity, passAgeGate, settle, startRandomLife, goTab } from './helpers';
 
 test.skip(!process.env.SCREENSHOTS, 'screenshots are taken on request');
 
@@ -35,7 +35,7 @@ async function open(page: Page, options: ActivitiesLife): Promise<void> {
 
 test('the hub, its submenus and Luxury', async ({ page }) => {
   await open(page, { seed: 'shots-hub', age: 45, savings: 3_000_000 });
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   await shoot(page, 'activities-hub');
   await page.getByTestId('activities-category-money_luck').click();
   await shoot(page, 'category-money-luck');
@@ -55,17 +55,17 @@ test('the hub, its submenus and Luxury', async ({ page }) => {
   await shoot(page, 'groups');
   await openHubActivity(page, 'faith_yours');
   await shoot(page, 'faith');
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await shoot(page, 'assets-money');
   await page.getByTestId('assets-tab-things').click();
   await shoot(page, 'assets-things');
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   await shoot(page, 'job');
 });
 
 test('People and a person', async ({ page }) => {
   await startRandomLife(page, { testPack: true, seed: 'shots-people' });
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await shoot(page, 'people');
   await page.getByRole('list', { name: 'Parents' }).getByRole('button').first().click();
   await shoot(page, 'person');

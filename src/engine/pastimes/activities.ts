@@ -10,6 +10,7 @@
  *
  * Pure reading and small writes to the life; every number is in balance/activities.yaml.
  */
+import { hobbyLevelOf, setHobbySkill } from '../hub/skills';
 import type { ActivityHub, ContentBundle, PastimeDef, PastimeLook } from '../../content/schemas';
 import { curveAt } from '../curve';
 import { discoverTalent } from '../discovery';
@@ -54,11 +55,9 @@ export function optionsOf(content: ContentBundle, hubId: Id): PastimeDef[] {
 // ---------------------------------------------------------------------------------------------------------------- hobbies
 
 /** Your skill in a hobby now: what you had when you last practiced, less a little for each year since you did. 0 for a hobby you haven't taken up. */
-export function hobbySkill(state: LifeState, pastimeId: Id, content: ContentBundle): number {
-  const h = state.hobbies[pastimeId];
-  if (!h) return 0;
-  const idle = Math.max(0, state.currentYear - h.year - 1);
-  return Math.max(0, h.skill - idle * content.balance.activities.hobbies.decay);
+export function hobbySkill(state: LifeState, pastimeId: Id, _content: ContentBundle): number {
+  // C2: hobby skills are on the shared skills system (src/engine/hub/skills.ts), which fades them from the third year untouched.
+  return hobbyLevelOf(state, pastimeId);
 }
 
 /** 0 for someone with no skill yet, up to the number of levels. */
@@ -78,9 +77,9 @@ export function practiceHobby(state: LifeState, def: PastimeDef, gain: number, r
   const hobby = def.hobby;
   if (!hobby) return;
   const b = content.balance.activities.hobbies;
-  const skill = Math.min(100, hobbySkill(state, def.id, content) + gain);
+  const skill = setHobbySkill(state, def.id, gain);
   const prev = state.hobbies[def.id];
-  state.hobbies[def.id] = { skill, year: state.currentYear, sessions: (prev?.sessions ?? 0) + 1 };
+  state.hobbies[def.id] = { year: state.currentYear, sessions: (prev?.sessions ?? 0) + 1 };
   state.flags[practicedFlag(def.id)] = true;
   if (skill >= b.skilledAt) state.flags[skilledFlag(def.id)] = true;
   const h = state.character.hidden;
