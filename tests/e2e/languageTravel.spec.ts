@@ -4,7 +4,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, playThroughEvents, settle, openRow, goTab } from './helpers';
+import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, playThroughEvents, settle, openRow, goTab, closeSheets } from './helpers';
 import { chicagoLife, examLife, familyStayLife, newlywedLife, withSpanishFriend } from './languageTravelFixtures';
 import type { LifeState } from '../../src/engine/types';
 
@@ -116,7 +116,7 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await goTab(page, 'Job');
   await openRow(page, 'find-abroad');
   await expect(page.getByTestId('work-family')).toBeVisible();
-  for (let i = 0; i < 2; i++) { await page.getByRole('button', { name: 'Age up', exact: true }).click(); await settle(page); await playThroughEvents(page); }
+  for (let i = 0; i < 2; i++) { await closeSheets(page); await page.getByRole('button', { name: 'Age up', exact: true }).click(); await settle(page); await playThroughEvents(page); }
   await expect(page.getByTestId('work-residence')).toHaveCount(0);
   await openPage(page, 'properties');
   await expect(page.getByTestId('housing-line')).toContainText('Chicago');

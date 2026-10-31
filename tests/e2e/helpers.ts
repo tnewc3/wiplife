@@ -324,6 +324,8 @@ export async function openRow(page: Page, id: string): Promise<void> {
 
 /** C2: opens every collapsed group of the open screen (the Sports screen's Overview keeps its details in groups). */
 export async function expandGroups(page: Page): Promise<void> {
+  // The groups appear when the Overview does: wait for the first one (a screen with none, such as the ways in, goes on after a moment).
+  await page.locator('[data-testid^="grp-"]').first().waitFor({ state: 'visible', timeout: 3000 }).catch(() => undefined);
   for (;;) {
     const closed = page.locator('[data-testid^="grp-"] > button[aria-expanded="false"]').first();
     if ((await closed.count()) === 0) return;
