@@ -6,6 +6,7 @@
  */
 import { z } from 'zod';
 import { curveSchema } from './balance';
+import { hubBalanceSchema } from './hub';
 import { jobCategorySchema } from './city';
 import { baseDefSchema, idSchema, scoreKeySchema } from './common';
 import { chanceModelSchema } from './education';
@@ -70,6 +71,8 @@ const range = z
 
 /** Careers: the job market, hiring, performance, promotions, raises and job loss (src/content/balance/careers.yaml). */
 export const careersBalanceSchema = z.strictObject({
+  /** C2: the Career hub: time cost by role and commitment, total load and what it does. */
+  hub: hubBalanceSchema,
   /** The youngest age you can be hired. */
   minAge: z.int().min(14).max(30),
   /** Most job applications in one year. */

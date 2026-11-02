@@ -6,7 +6,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { activitiesLife, type ActivitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, openHubActivity, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, openHubActivity, passAgeGate, settle, goTab } from './helpers';
 
 
 async function open(page: Page, options: ActivitiesLife): Promise<void> {
@@ -30,18 +30,18 @@ test('the sheets list what is on offer with the price on each button, and fit a 
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.keyboard.press('Escape');
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   await openSheet(page, 'walk');
   await expect(page.getByTestId('do-walk_in_the_park')).toContainText('Free');
   await page.keyboard.press('Escape');
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   // Surgery asks for a price tier first.
   await openSheet(page, 'cosmetic');
   await expect(page.getByTestId('do-rhinoplasty-budget')).toContainText('$');
   await expect(page.getByTestId('do-rhinoplasty-premier')).toContainText('Top surgeon');
   await expectNoHorizontalScroll(page);
   await page.keyboard.press('Escape');
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   // Only what is on offer: a date night needs a partner, and a single person isn't shown it.
   await openSheet(page, 'dating');
   await expect(page.getByTestId('activity-date_night')).toHaveCount(0);
@@ -56,7 +56,7 @@ test('hides what the drinking age keeps from you, and shows the rest of the nigh
   for (const shown of ['go_to_a_comedy_night', 'see_a_live_show', 'go_to_karaoke']) await expect(page.getByTestId(`activity-${shown}`)).toBeVisible();
   await expectNoHorizontalScroll(page);
   await page.keyboard.press('Escape');
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   await openSheet(page, 'parties');
   await expect(page.getByTestId('activity-go_to_a_house_party')).toHaveCount(0);
 });
@@ -75,7 +75,7 @@ test('a paid activity shows its receipt: the money change and your new balance, 
   // Doing it again costs the full price again but gives less; the screen counts it.
   await expect(page.getByTestId('activity-haircut')).toContainText('Done 1 of');
   await page.keyboard.press('Escape');
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByTestId('savings')).toHaveText(`$${(40_000 - price).toLocaleString('en-US')}`);
 });
 

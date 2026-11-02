@@ -13,6 +13,7 @@
  * The engine tries out for you when you did not choose (a new level arrives and you have no team): it aims at the best
  * team within reach, and the last team of the level takes anyone who earned the level. Numbers: balance/sports.yaml tryout.
  */
+import { leaveForSwitch, returnAfterSwitch, undoSwitch, youthSwitchable } from '../hub/shelf';
 import { TEAM_TIERS, type ContentBundle, type FamePathDef, type SportDef, type SportLevel, type TeamTier, type TryoutApproach } from '../../content/schemas';
 import { enterPath, enterBlock } from '../fame/ladder';
 import { rungDef } from '../fame/query';
@@ -160,7 +161,8 @@ export function teamOptions(state: LifeState, def: SportPath, content: ContentBu
   const sport = def.sport;
   const here = levelHere(state, def);
   const out: TeamOption[] = [];
-  const busy = f.active && !playingSport(state, def);
+  // C2: a child or teen who plays one sport can try out for another with no wait (the first is left behind when the new team takes them).
+  const busy = f.active && !playingSport(state, def) && !youthSwitchable(state, content);
   const levels: AmateurLevel[] = [];
   if (here === null) {
     levels.push('youth', 'school', 'college');
@@ -171,7 +173,8 @@ export function teamOptions(state: LifeState, def: SportPath, content: ContentBu
   } else if (here === 'college') {
     levels.push('college');
   }
-  const mine = s.team?.tier;
+  // Another sport's team is not your team (C2: a young player switching).
+  const mine = playingSport(state, def) ? s.team?.tier : undefined;
   for (const level of levels) {
     // A child's youth team: the youth level ends at the age you age out of it, so a teenager's only youth teams are alongside a school team.
     const asClub = level === 'youth' && here !== null && here !== 'youth';
@@ -212,13 +215,13 @@ function optionBlock(state: LifeState, def: SportPath, o: TeamOption, busy: bool
   if (busy) return 'busy';
   if (isIncarcerated(state)) return 'prison';
   if (s.tryout) return 'pending';
-  if (triesThisYear(state) >= B.perYear) return 'year';
+  if (triesThisYear(state) >= (youthSwitchable(state, content) ? content.balance.careers.hub.youthTries : B.perYear)) return 'year';
   const cutIn = s.cut[o.key];
   if (cutIn !== undefined && state.currentYear - cutIn < B.cutWait) return 'cut';
   const t = o.tier;
   if (t !== null) {
-    if (s.team?.tier === t && s.team.level === o.level && !o.club) return 'member';
-    if (o.club && s.club?.tier === t) return 'member';
+    if (playingSport(state, def) && s.team?.tier === t && s.team.level === o.level && !o.club) return 'member';
+    if (playingSport(state, def) && o.club && s.club?.tier === t) return 'member';
     if (o.level === 'school') {
       const act = sportActivity(content, def.id);
       if (!act) return 'unknown';
@@ -227,7 +230,7 @@ function optionBlock(state: LifeState, def: SportPath, o: TeamOption, busy: bool
   }
   if (!playingSport(state, def)) {
     const route = routeFor(def, o.level as AmateurLevel);
-    const eb = enterBlock(state, def.id, route?.id, content);
+    const eb = enterBlock(state, def.id, route?.id, content, youthSwitchable(state, content));
     if (eb === 'parent') return 'parent';
     if (eb !== null) return eb === 'age' ? 'age' : eb === 'prison' ? 'prison' : 'busy';
   } else if (o.level === 'pro' && !campOpen(state, def, content)) {
@@ -285,7 +288,16 @@ function landOn(state: LifeState, def: SportPath, o: TeamOption, content: Conten
   if (o.level === 'pro') return o.teamId !== null && signCampDeal(state, o.teamId, content, rng);
   const level = o.level as AmateurLevel;
   if (!playingSport(state, def)) {
-    if (!enterPath(state, def.id, routeFor(def, level)?.id, content, rng)) return false;
+    // C2: a young player's switch: the old sport's skills are shelved, the band, fans and seasons stay.
+    const oldSport = youthSwitchable(state, content) ? state.fame.main : null;
+    const oldPath = oldSport === null ? undefined : state.fame.paths[oldSport];
+    const kept = oldSport === null ? null : leaveForSwitch(state);
+    if (oldSport !== null) leaveSchoolTeam(state, oldSport, content);
+    if (!enterPath(state, def.id, routeFor(def, level)?.id, content, rng)) {
+      if (kept) undoSwitch(state, kept, oldPath);
+      return false;
+    }
+    if (kept) returnAfterSwitch(state, kept, content);
   }
   // Starting a career replaces the sports record: read it from here on.
   const s = state.sports;

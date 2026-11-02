@@ -718,7 +718,7 @@ const fame = z.strictObject({
       name: fameTitle,
       path: id,
       leader: z.union([z.literal('you'), id]),
-      members: z.array(z.strictObject({ id, part: id, skill: score, since: int })).max(8),
+      members: z.array(z.strictObject({ id, part: id, skill: z.number().min(0).max(100), since: int, temper: z.enum(['steady', 'fiery', 'flaky']).exactOptional() })).max(8),
       part: id,
       chemistry: score,
       since: int,
@@ -1170,7 +1170,24 @@ const pastimeReceipt = z.strictObject({
 });
 const pastimes = z.strictObject({ year: int, counts: z.record(z.string(), int.min(1)), receipts: z.array(pastimeReceipt) });
 // A1: hobbies, by the id of the practice activity.
-const hobbies = z.record(z.string(), z.strictObject({ skill: int.min(0).max(100), year: int, sessions: int.min(1) }));
+const hobbies = z.record(z.string(), z.strictObject({ year: int, sessions: int.min(1) }));
+// C2: the Career hub.
+const commitLevel = z.enum(['back', 'steady', 'all']);
+const hub = z.strictObject({
+  skills: z.record(z.string(), z.strictObject({ level: z.number().min(0).max(100), peak: z.number().min(0).max(100), last: int })),
+  marks: z.record(z.string(), z.strictObject({ peak: z.number().min(0).max(100), last: int })),
+  commit: z.strictObject({ school: commitLevel.exactOptional(), job: commitLevel.exactOptional(), gig: commitLevel.exactOptional(), sports: commitLevel.exactOptional(), fame: commitLevel.exactOptional(), band: commitLevel.exactOptional(), business: commitLevel.exactOptional(), crime: commitLevel.exactOptional(), social: commitLevel.exactOptional() }),
+  load: z.number().min(0).max(400),
+  shares: z.record(z.string(), z.number().min(0).max(100)),
+  burnout: score,
+  gave: z.strictObject({ year: int, what: z.enum(['grades', 'job', 'bench', 'band']) }).nullable(),
+  overYears: int.min(0),
+  peakLoad: z.number().min(0).max(400),
+  enhancers: z.strictObject({ on: z.boolean(), since: int, years: int.min(0), tests: int.min(0), positives: int.min(0) }),
+  pool: z.strictObject({ year: int, part: id, candidates: z.array(z.strictObject({ part: id, skill: score, age: int.min(0).max(120), temper: z.enum(['steady', 'fiery', 'flaky']) })).max(12) }).nullable(),
+  rehearsals: z.strictObject({ year: int, count: int.min(0) }),
+  totals: z.strictObject({ rehearsals: int.min(0), auditions: int.min(0), hired: int.min(0), sportSwitches: int.min(0), relieved: int.min(0) }),
+});
 
 // Batch 8: social media. A handle is what the player typed, kept in its tidy form (checked again by the action that takes it and by the invariants).
 const socialAccount = z.strictObject({
@@ -1430,6 +1447,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   business: businessState,
   pastimes,
   hobbies,
+  hub,
   social,
 });
 

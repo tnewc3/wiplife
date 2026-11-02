@@ -5,7 +5,7 @@
  */
 import { expect, test } from '@playwright/test';
 import { deadLife, familyLife, loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, passFuneral, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, passFuneral, goTab } from './helpers';
 
 const OPEN = { testPack: true };
 
@@ -54,7 +54,7 @@ test('a child cannot write a will', async ({ page }) => {
   await passAgeGate(page, { ...OPEN, seed: 'e2e-heir-child' });
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByTestId('assets-will')).toHaveCount(0);
 });
 
@@ -100,7 +100,7 @@ test('death settles the estate; continue as a child of 9: Previously, trust, fam
   await page.getByRole('button', { name: /Back/ }).click();
 
   // The money is held in trust.
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByTestId('trust-card')).toContainText('Held in trust');
   await expect(page.getByTestId('trust-balance')).toContainText('$');
   await expect(page.getByTestId('savings')).toHaveText('$0');

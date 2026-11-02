@@ -31,7 +31,8 @@ import { WillScreen } from '../more/WillScreen';
 import { PeopleTab } from '../people/PeopleTab';
 import { PersonScreen } from '../people/PersonScreen';
 import { PetScreen } from '../people/PetScreen';
-import { WorkTab } from '../work/WorkTab';
+import { CareerTab } from '../work/CareerTab';
+import { TrainingPopup } from '../../components/TrainingPopup';
 
 /** The pages that open over a tab (Assets → Properties, Profile → Health, Activities → Trips...), by the store's moreView. */
 const PAGE_TITLES = {
@@ -112,7 +113,7 @@ export function GameScreen({ life }: { life: LifeState }) {
       <PeopleTab life={life} />
     )
   ) : tab === 'work' ? (
-    <WorkTab life={life} />
+    <CareerTab life={life} />
   ) : tab === 'assets' ? (
     <AssetsTab life={life} />
   ) : (
@@ -129,6 +130,7 @@ export function GameScreen({ life }: { life: LifeState }) {
           <EventSheet life={life} />
           <InteractionCard life={life} />
           <ActivitySheet life={life} />
+          <TrainingPopup />
         </main>
         <div className="shrink-0">
           <GameNav />

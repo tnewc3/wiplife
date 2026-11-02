@@ -7,14 +7,14 @@
 import { expect, test, type Page } from '@playwright/test';
 import { activitiesLife, type ActivitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, openHubActivity, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, openHubActivity, passAgeGate, settle, goTab } from './helpers';
 
 async function open(page: Page, options: ActivitiesLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, activitiesLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
 }
 
 test('lists every category of the hub, and opens each into its own submenu, and fits a phone', async ({ page }) => {
@@ -83,7 +83,7 @@ test('the salon changes the portrait through a chosen style', async ({ page }) =
 
 test('Go shopping on the Assets tab opens the shopping options', async ({ page }) => {
   await open(page, { seed: 'e2e-a1-shop', age: 28, savings: 40_000 });
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await page.getByTestId('assets-tab-things').click();
   await page.getByTestId('assets-go-shopping').click();
   const sheet = page.getByRole('dialog', { name: 'Stores' });

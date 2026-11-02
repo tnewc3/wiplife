@@ -14,6 +14,7 @@ import { webFailures } from './web/invariants';
 import { looksFailures } from './looks/invariants';
 import { possessionsFailures } from './possessions/invariants';
 import { pastimesFailures } from './pastimes/invariants';
+import { hubFailures } from './hub/invariants';
 import { socialFailures } from './social/invariants';
 import { teenFailures } from './teen/invariants';
 import { schoolFailures } from './school/invariants';
@@ -274,6 +275,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   // Pets, vehicles and vacation homes (E5).
   failures.push(...possessionsFailures(state, content));
   failures.push(...pastimesFailures(state, content));
+  failures.push(...hubFailures(state, content));
   failures.push(...socialFailures(state, content));
 
   // The teen years (T1), including that no romance involves anyone under 18.

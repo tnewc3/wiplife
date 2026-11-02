@@ -51,6 +51,12 @@ export interface EditView {
   /** Yours only: savings, the debts an edit can change, and how many belong to a home, vehicle or business. */
   money: { savings: number; debts: { id: Id; kind: DebtKind; balance: number }[]; locked: number } | null;
   birthYear: number;
+  /** C2, yours only: your sports, music and fame careers, as the numbers an edit can change (null for each you do not have). */
+  career: {
+    sports: { sport: string; position: Id; positions: { id: Id; label: string }[]; greatness: number; skills: { id: Id; label: string; level: number }[]; salary: number | null; seasons: number; clearHistory: boolean } | null;
+    music: { band: string; buzz: number; chemistry: number; members: { id: Id; name: string; part: string; skill: number }[]; releases: number; clearReleases: boolean } | null;
+    fame: { path: string; fame: number; image: number; fans: number; mood: number; agent: Id | null; hasContract: boolean; endContract: boolean } | null;
+  } | null;
 }
 
 const traits = (source: Partial<Personality> | undefined, all: boolean): TraitScores =>
@@ -100,6 +106,7 @@ export function getEditView(state: LifeState, target: 'self' | Id, content: Cont
       citizenships: [...c.citizenships],
       money: { savings: state.finances.savings, debts: editable.map((d) => ({ id: d.id, kind: d.kind, balance: d.balance })), locked: state.finances.debts.length - editable.length },
       birthYear: state.birthYear,
+      career: careerOf(state, content),
     };
   }
   const person: Person | undefined = state.people[target];
@@ -133,5 +140,42 @@ export function getEditView(state: LifeState, target: 'self' | Id, content: Cont
     citizenships: [...person.citizenships],
     money: null,
     birthYear: person.birthYear,
+    career: null,
+  };
+}
+
+/** C2: the careers an edit can change. */
+function careerOf(state: LifeState, content: ContentBundle): NonNullable<EditView['career']> | null {
+  const f = state.fame;
+  if (!f.active || f.main === null) return null;
+  const main = content.famePaths[f.main];
+  const mainPath = f.paths[f.main];
+  const sport = state.sports.sport !== null && f.main === state.sports.sport ? main?.sport : undefined;
+  const band = f.band;
+  return {
+    sports:
+      main && mainPath && sport
+        ? {
+            sport: main.name,
+            position: state.sports.position ?? sport.positions[0]!.id,
+            positions: sport.positions.map((p) => ({ id: p.id, label: p.label })),
+            greatness: Math.round(mainPath.craft),
+            skills: (main.skills ?? []).map((k) => ({ id: k.id, label: k.label, level: Math.round(mainPath.skills?.[k.id] ?? content.balance.fame.practice.start) })),
+            salary: state.sports.contract?.salary ?? null,
+            seasons: state.sports.seasons.length,
+            clearHistory: false,
+          }
+        : null,
+    music: band
+      ? {
+          band: band.name,
+          buzz: Math.round(f.paths[band.path]?.fame ?? 0),
+          chemistry: band.chemistry,
+          members: band.members.map((m) => ({ id: m.id, name: `${state.people[m.id]?.name.first ?? ''} ${state.people[m.id]?.name.last ?? ''}`.trim(), part: content.famePaths[band.path]?.instruments?.find((i) => i.id === m.part)?.label ?? m.part, skill: Math.round(m.skill) })),
+          releases: f.projects.length,
+          clearReleases: false,
+        }
+      : null,
+    fame: mainPath && main ? { path: main.name, fame: Math.round(mainPath.fame), image: f.image, fans: f.fans, mood: f.mood, agent: f.agent?.agentId ?? null, hasContract: f.contract !== null, endContract: false } : null,
   };
 }

@@ -37,7 +37,7 @@ const WORK_PLACE_KINDS = ['coworker', 'boss', 'classmate'];
 const DEAD_OK: readonly EditArea[] = ['name', 'identity'];
 const DEAD_IDENTITY_KEYS = ['genderCategory', 'genderIdentity', 'genderExpression', 'pronouns'];
 
-const SELF_ONLY: readonly EditArea[] = ['appearance', 'conditions', 'money'];
+const SELF_ONLY: readonly EditArea[] = ['appearance', 'conditions', 'money', 'career'];
 const PERSON_ONLY: readonly EditArea[] = ['relationship', 'troubles', 'neuro'];
 
 /** Every reason this edit can't be made: `before` is the life now, `after` the life with the edit applied. */
@@ -97,6 +97,7 @@ export function editRefusals(before: LifeState, after: LifeState, payload: EditP
     moneyRules(before, payload, content, add);
     selfCityRules(before, payload, content, add);
     selfWorkRules(before, after, payload, content, add);
+    if (payload.career) careerRules(before, payload, content, add);
   } else if (person) {
     relationshipRules(before, after, person, payload, content, add);
     ageRules(before, person, payload, content, add);
@@ -385,4 +386,39 @@ function partnerRules(before: LifeState, after: LifeState, add: (r: EditRefusal)
   const was = currentPartner(before);
   if (was?.personId === partner.personId && !mutualAttraction(before, before.people[partner.personId]!)) return;
   add(refusal('no_attraction', 'relationship', { field: 'kind', person: partner.personId }));
+}
+
+/** C2: sports, music and fame edits: the career must exist, and what is named must belong to it. */
+function careerRules(before: LifeState, payload: EditPayload, content: ContentBundle, add: (r: EditRefusal) => void): void {
+  const career = payload.career;
+  if (!career) return;
+  const f = before.fame;
+  const unavailable = (field: string) => add(refusal('field_unavailable', 'career', { field, facts: { who: 'self' } }));
+  if (career.sports) {
+    const def = f.active && before.sports.sport !== null && f.main === before.sports.sport ? content.famePaths[before.sports.sport] : undefined;
+    const sport = def?.sport;
+    if (!def || !sport) unavailable('sports');
+    else {
+      const s = career.sports;
+      if (s.position !== undefined && !sport.positions.some((p) => p.id === s.position)) add(refusal('unknown_id', 'career', { field: 'position', facts: { id: s.position } }));
+      for (const id of Object.keys(s.skills ?? {})) if (!def.skills?.some((k) => k.id === id)) add(refusal('unknown_id', 'career', { field: 'skills', facts: { id } }));
+      if (s.salary !== undefined && before.sports.contract === null) unavailable('salary');
+    }
+  }
+  if (career.music) {
+    const m = career.music;
+    const path = f.active && f.band !== null ? f.paths[f.band.path] : undefined;
+    if (m.buzz !== undefined && !path) unavailable('buzz');
+    if ((m.chemistry !== undefined || m.members !== undefined) && f.band === null) unavailable('band');
+    for (const member of m.members ?? []) if (!f.band?.members.some((x) => x.id === member.id)) add(refusal('unknown_id', 'career', { field: 'members', person: member.id, facts: { id: member.id } }));
+    if (m.releases !== undefined && f.projects.length === 0) add(refusal('nothing_changed', 'career', { field: 'releases' }));
+  }
+  if (career.fame) {
+    const e = career.fame;
+    if (!f.active || f.main === null) unavailable('fame');
+    else {
+      if (e.agent !== undefined && e.agent !== null && !content.fameAgents[e.agent]) add(refusal('unknown_id', 'career', { field: 'agent', facts: { id: e.agent } }));
+      if (e.contract !== undefined && f.contract === null) unavailable('contract');
+    }
+  }
 }

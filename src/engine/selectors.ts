@@ -1581,3 +1581,6 @@ export function getArchivedPortrait(entry: ArchivedLife, content: ContentBundle)
   if (!entry.look) return null;
   return portraitSettings(entry.look, { age: entry.ageAtDeath, year: entry.deathYear, mood: entry.finalStats.happiness }, content);
 }
+/** C2: the Career hub, the band screen and performance enhancers. */
+export { getBandHubView, getEnhancerView, getHubView, skillRows, type BandHubView, type EnhancerView, type HubView, type RoleRowView, type SkillRowView } from './hub/views';
+export { trainingLines, type TrainingLine } from './hub/training';

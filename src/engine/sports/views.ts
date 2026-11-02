@@ -6,6 +6,7 @@
  * fame bars (fame, image, fan mood, commitment, agent) and the ways in before
  * a career and out after one. Read-only; the words are in src/ui/labels.ts.
  */
+import { prospectRating } from './rating';
 import type { ContentBundle, FameBand, SportLevel, SportRetireRoute, SportRole, TeamTier, Tier, TrainingMode } from '../../content/schemas';
 import { SPORT_RETIRE_ROUTES, TRAINING_MODES } from '../../content/schemas';
 import { countryIdOfCity, countryOf } from '../country';
@@ -117,7 +118,7 @@ export interface SportsView {
   sport: { id: Id; name: string; noun: string; blurb: string; league: string; title: string } | null;
   path: FamePathView | null;
   level: SportLevel | null;
-  team: { name: string; level: SportLevel; qualityBand: number; city: string; place: string | null; away: 'city' | 'country' | null; division: 1 | 2 | null; divisionName: string | null; country: string | null } | null;
+  team: { name: string; level: SportLevel; qualityBand: number; quality: number; city: string; place: string | null; away: 'city' | 'country' | null; division: 1 | 2 | null; divisionName: string | null; country: string | null } | null;
   position: { id: Id; label: string; blurb: string; fit: number; fitBand: number } | null;
   positions: { id: Id; label: string; blurb: string; fit: number; fitBand: number; current: boolean; allowed: boolean }[];
   focus: 'skills' | 'conditioning' | 'film';
@@ -131,6 +132,9 @@ export interface SportsView {
   injury: { name: string; severityBand: number; treated: boolean; pain: boolean } | null;
   latest: SportsSeasonView | null;
   seasons: SportsSeasonView[];
+  /** C2: your Greatness (this season's rating, or what a coach would say today), and every season you have played, newest first. */
+  greatness: number;
+  history: SportsSeasonView[];
   run: { won: number; stage: string } | null;
   awards: { name: string; category: string; year: number; won: boolean }[];
   nominated: { name: string; category: string; due: number } | null;
@@ -175,7 +179,7 @@ export interface SportsView {
   /** A camp, an open tryout or a call for a player with no team: open now. */
   camps: boolean;
   /** Batch 6: the teams you could play for in each sport you are looking at (your sport, or every sport before a career), by name. */
-  leagues: { sportId: Id; sport: string; league: string; teams: { id: string; name: string; place: string; division: 1 | 2 | null; yours: boolean }[]; more: number }[];
+  leagues: { sportId: Id; sport: string; league: string; teams: { id: string; name: string; place: string; division: 1 | 2 | null; yours: boolean; quality: number }[]; more: number }[];
   /** Batch 6: the academy you belong to, a loan (on, or offered), the transfer window, the national side, your club's rival, and what you may ask. */
   soccer: boolean;
   academy: { club: string; abroad: boolean; place: string | null } | null;
@@ -260,7 +264,7 @@ const LEAGUE_LIST = 60;
 function leagueView(state: LifeState, d: NonNullable<ReturnType<typeof mySport>>, content: ContentBundle): SportsView['leagues'][number] {
   const home = state.character.cityId;
   const all = marketTeams(state, d.id, home, content)
-    .map((t) => ({ id: t.id, name: t.name, place: t.cityName ?? content.cities[t.city]?.name ?? '', division: (hasDivisions(d.sport) ? divisionOf(state, t) : null) as 1 | 2 | null, yours: state.sports.team?.id === t.id }))
+    .map((t) => ({ id: t.id, name: t.name, place: t.cityName ?? content.cities[t.city]?.name ?? '', division: (hasDivisions(d.sport) ? divisionOf(state, t) : null) as 1 | 2 | null, yours: state.sports.team?.id === t.id, quality: Math.round(t.quality) }))
     .sort((a, b) => (a.division ?? 0) - (b.division ?? 0) || (a.name < b.name ? -1 : 1));
   const first = all.slice(0, LEAGUE_LIST);
   // The team you play for is always on the list.
@@ -316,6 +320,7 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
           name: s.team.name,
           level: s.team.level,
           qualityBand: bandOf(teamQuality, [35, 50, 65]),
+          quality: Math.round(teamQuality),
           city: content.cities[s.team.city]?.name ?? '',
           place: s.team.place ?? null,
           away: s.team.away ?? null,
@@ -343,6 +348,8 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
     injury: worst && condition ? { name: content.conditions[worst.conditionId]?.noun ?? '', severityBand: bandOf(worst.severity, [25, 50, 75]), treated: condition.treated, pain: s.pain } : null,
     latest: latest ? seasonView(state, latest, content) : null,
     seasons: [...s.seasons].reverse().slice(0, 8).map((x) => seasonView(state, x, content)),
+    greatness: latest ? latest.rating : def ? Math.round(prospectRating(state, def, content)) : 0,
+    history: [...s.seasons].reverse().slice(0, 40).map((x) => seasonView(state, x, content)),
     run: s.run && s.run.alive && def ? { won: s.run.won, stage: def.sport.stages[Math.min(2, s.run.won)] ?? '' } : null,
     awards: f.awards
       .filter((a) => def !== undefined && a.path === def.id)

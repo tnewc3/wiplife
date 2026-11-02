@@ -91,11 +91,12 @@ describe('A1 saves', () => {
 
   it('roundtrips a life with a hobby, a dyed look and an activity count for a whole activity', () => {
     const life = produce(lifeAtAge('a1-save', 30), (d) => {
-      d.hobbies.play_the_guitar = { skill: 42, year: d.currentYear, sessions: 7 };
+      d.hobbies.play_the_guitar = { year: d.currentYear, sessions: 7 };
+      d.hub.skills['hobby.play_the_guitar'] = { level: 42, peak: 42, last: d.currentYear };
       d.pastimes = { year: d.currentYear, counts: { 'hub:gym': 2, go_to_the_gym: 2 }, receipts: [] };
     });
     expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
-    expect(lifeStateSchema.safeParse(produce(life, (d) => { d.hobbies.play_the_guitar!.skill = 101; })).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => { d.hub.skills['hobby.play_the_guitar']!.level = 101; })).success).toBe(false);
   });
 });
 
@@ -403,5 +404,21 @@ describe('Batch 8 saves', () => {
     expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.social.accounts.twitch!.followers = -1))).success).toBe(false);
     expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.social.accounts.twitch!.engagement = 101))).success).toBe(false);
     expect(loadedLifeSchema(content).safeParse(produce(life, (d) => void (d.social.accounts.twitch!.handle = 'no good!'))).success).toBe(false);
+  });
+});
+
+describe('C2 saves', () => {
+  it('upgrades a save from before the Career hub: hobby skills move onto the shared skills, path skills and bandmates get a peak', () => {
+    const life = lifeAtAge('c2-migrate', 30);
+    const old = cloneJson(life) as unknown as Record<string, unknown>;
+    delete old.hub;
+    old.hobbies = { play_the_guitar: { skill: 40, year: life.currentYear - 1, sessions: 3 } };
+    const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 39 }).data as typeof life;
+    expect(after.hub.skills['hobby.play_the_guitar']).toEqual({ level: 40, peak: 40, last: life.currentYear - 1 });
+    expect(after.hobbies.play_the_guitar).toEqual({ year: life.currentYear - 1, sessions: 3 });
+    expect(after.hub.commit).toEqual({});
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ hub: { burnout: 0 } });
+    expect(lifeStateSchema.safeParse(after).success).toBe(true);
   });
 });

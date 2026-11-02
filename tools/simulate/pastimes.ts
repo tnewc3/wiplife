@@ -465,7 +465,7 @@ export class PastimesWatcher {
       a.hobbies.practices++;
       this.hobby = true;
       if (after.flags[`skilled_${def.id}`] === true) this.skilled = true;
-      a.hobbies.bestSkill = Math.max(a.hobbies.bestSkill, after.hobbies[def.id]?.skill ?? 0);
+      a.hobbies.bestSkill = Math.max(a.hobbies.bestSkill, after.hub.skills[`hobby.${def.id}`]?.level ?? 0);
       if (after.character.hidden.talentDiscovered && !before.character.hidden.talentDiscovered) a.hobbies.talentsFound++;
     }
     const has = (l: LifeState, id: string) => l.health.conditions.some((c) => c.conditionId === id);

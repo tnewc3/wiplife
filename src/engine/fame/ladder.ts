@@ -5,6 +5,7 @@
  * your recent work; without new work fame slowly fades and the rung goes
  * with it, one at a time. Numbers: balance/fame.yaml.
  */
+import { resetMarks } from '../hub/skills';
 import type { ContentBundle, FameAgentDef, FameCompanyDef, FameHistoryKey, FamePathDef, FameTerms } from '../../content/schemas';
 import { curveAt } from '../curve';
 import { earn, spend, wholeDollars } from '../finance';
@@ -54,12 +55,12 @@ export function hasGuardian(state: LifeState): boolean {
 export type EnterBlock = 'unknown' | 'active' | 'age' | 'prison' | 'parent';
 
 /** Why you can't start a career in this path this way, or null. */
-export function enterBlock(state: LifeState, pathId: string, routeId: string | undefined, content: ContentBundle): EnterBlock | null {
+export function enterBlock(state: LifeState, pathId: string, routeId: string | undefined, content: ContentBundle, ignoreActive = false): EnterBlock | null {
   const def = pathDef(content, pathId);
   if (!def) return 'unknown';
   const route = routeId === undefined ? undefined : def.routes.find((r) => r.id === routeId);
   if (routeId !== undefined && !route) return 'unknown';
-  if (state.fame.active) return 'active';
+  if (state.fame.active && !ignoreActive) return 'active';
   if (state.housing.kind === 'incarcerated') return 'prison';
   const age = state.character.age;
   if (age < Math.max(def.minAge, route?.minAge ?? 0) || age > Math.min(content.balance.fame.entry.maxAge, route?.maxAge ?? 200)) return 'age';
@@ -86,7 +87,9 @@ export function enterPath(state: LifeState, pathId: string, routeId: string | un
   f.main = pathId;
   f.second = null;
   const rung = Math.min(def.rungs.length, route?.rung ?? 1);
+  // C2: what you reached in an earlier career (its peak rung, which jobs like coaching ask for) stays on the record.
   f.paths = {
+    ...Object.fromEntries(Object.entries(f.paths).filter(([id]) => id !== pathId)),
     [pathId]: { rung, peak: rung, fame: Math.max(e.fame, rung > 1 ? rungDef(def, rung).fame + 1 : 0), craft: route?.craft ?? e.craft, since: year, last: year, recent: [], breakYear: 0, ...(route ? { route: route.id } : {}) },
   };
   f.image = e.image;
@@ -100,6 +103,8 @@ export function enterPath(state: LifeState, pathId: string, routeId: string | un
   f.band = null;
   f.offers = [];
   f.instrument = null;
+  // C2: a new career in a path starts its skills again (a young player's shelved ones come back, faded, in returnAfterSwitch).
+  resetMarks(state, pathId);
   fameHistory(state, 'entered', content);
   if (def.sport) startSports(state, def, content);
   if (route?.id === 'band' && def.bands) formBand(state, bandNameSuggestion(state, 0, content), undefined, content, rng, 'route');
@@ -108,10 +113,15 @@ export function enterPath(state: LifeState, pathId: string, routeId: string | un
   return true;
 }
 
+/** C2: your main career is a sport, so a second one beside it starts from the ground (it carries nothing over, and asks no rung or fame). */
+export function sideCareer(state: LifeState, content: ContentBundle): boolean {
+  return state.fame.main !== null && pathDef(content, state.fame.main)?.sport !== undefined && state.sports.retired === undefined;
+}
+
 export type CrossBlock = 'unknown' | 'inactive' | 'same' | 'second' | 'rung' | 'fame' | 'age' | 'contract' | 'prison';
 
 /** Why you can't cross over into this path now, or null. */
-export function crossBlock(state: LifeState, pathId: string, content: ContentBundle): CrossBlock | null {
+export function crossBlock(state: LifeState, pathId: string, content: ContentBundle, side = true): CrossBlock | null {
   const def = pathDef(content, pathId);
   const f = state.fame;
   if (!def || def.sport) return 'unknown';
@@ -121,33 +131,39 @@ export function crossBlock(state: LifeState, pathId: string, content: ContentBun
   if (f.second !== null) return 'second';
   const main = f.paths[f.main]!;
   const c = content.balance.fame.crossover;
-  if (main.rung < c.rung) return 'rung';
-  if (main.fame < c.fame) return 'fame';
-  if (state.character.age < def.minAge) return 'age';
+  // C2: a sport leaves room for a second career beside it (a band beside a team): no rung or fame is asked, only the age.
+  const asSide = side && sideCareer(state, content);
+  if (!asSide) {
+    if (main.rung < c.rung) return 'rung';
+    if (main.fame < c.fame) return 'fame';
+  }
+  if (state.character.age < Math.max(def.minAge, asSide ? content.balance.careers.hub.side.minAge : 0)) return 'age';
   if (f.contract?.exclusive) return 'contract';
   return null;
 }
 
 /** You start a second path; part of your fame, rung and craft carries over. */
-export function crossOver(state: LifeState, pathId: string, content: ContentBundle): boolean {
-  if (crossBlock(state, pathId, content) !== null) return false;
+export function crossOver(state: LifeState, pathId: string, content: ContentBundle, side = true): boolean {
+  if (crossBlock(state, pathId, content, side) !== null) return false;
   const def = pathDef(content, pathId)!;
   const f = state.fame;
   const main = f.paths[f.main!]!;
   const c = content.balance.fame.crossover.carry;
-  const rung = clampInt(Math.round(main.rung * c.rung), 1, def.rungs.length);
+  const asSide = side && sideCareer(state, content);
+  const rung = asSide ? 1 : clampInt(Math.round(main.rung * c.rung), 1, def.rungs.length);
   const fameAt = rungDef(def, rung).fame;
   f.paths[pathId] = {
     rung,
     peak: rung,
-    fame: Math.min(fameAt + 1, Math.max(fameAt, main.fame * c.fame)),
-    craft: Math.round(main.craft * c.craft),
+    fame: asSide ? content.balance.fame.entry.fame : Math.min(fameAt + 1, Math.max(fameAt, main.fame * c.fame)),
+    craft: asSide ? content.balance.fame.entry.craft : Math.round(main.craft * c.craft),
     since: state.currentYear,
     last: state.currentYear,
     recent: [],
     breakYear: 0,
   };
   f.second = pathId;
+  resetMarks(state, pathId);
   f.totals.crossovers += 1;
   fameHistory(state, 'crossover', content, { secondPath: def.noun });
   return true;

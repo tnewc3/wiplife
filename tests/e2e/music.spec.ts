@@ -7,7 +7,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fameLife, type FameLife } from './fameFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { ageUp, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { ageUp, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, goTab } from './helpers';
 
 
 async function openFame(page: Page, options: FameLife): Promise<void> {
@@ -15,22 +15,20 @@ async function openFame(page: Page, options: FameLife): Promise<void> {
   await loadSavedLife(page, fameLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   await page.getByTestId('fame-open').click();
   await expect(page.getByTestId('fame-screen')).toBeVisible();
 }
 
 test('form a band from an open-mic start, rename it and replace a member', async ({ page }) => {
   await openFame(page, { seed: 'e2e-band-1', fresh: true });
-  const band = page.getByTestId('band');
+  await page.getByTestId('band-open').click();
+  const band = page.getByTestId('band-screen');
   await expect(band).toContainText('You perform on your own.');
   await band.getByTestId('band-name-input').fill('  The Night   Shift  ');
   await band.getByTestId('band-form').click();
-  await expect(band.getByTestId('band-name')).toHaveText('The Night Shift');
-  const members = band.getByTestId('band-member');
-  const count = await members.count();
-  expect(count).toBeGreaterThanOrEqual(2);
-  await expect(band).toContainText('You lead it.');
+  await expect(page.getByRole('dialog', { name: 'The Night Shift' })).toBeVisible();
+  await expect(band.getByTestId('band-overview')).toContainText('You lead it.');
   await expectTouchTargets(page);
 
   // A name that can't be a title is refused before it is sent.
@@ -38,15 +36,18 @@ test('form a band from an open-mic start, rename it and replace a member', async
   await expect(band.getByTestId('band-rename')).toBeDisabled();
   await band.getByTestId('band-rename-input').fill('Static Bloom');
   await band.getByTestId('band-rename').click();
-  await expect(band.getByTestId('band-name')).toHaveText('Static Bloom');
+  await expect(page.getByRole('dialog', { name: 'Static Bloom' })).toBeVisible();
 
-  // Ask someone to leave, then hold auditions for their part.
-  const first = (await members.first().locator('span').first().textContent())!.split('·')[0]!.trim();
-  await members.first().getByRole('button').click();
-  await page.getByRole('button', { name: 'Ask them to leave' }).click();
+  // Replace someone: they go, and auditions for their part open.
+  await band.getByTestId('band-tab-members').click();
+  const members = band.getByTestId('band-member');
+  const count = await members.count();
+  expect(count).toBeGreaterThanOrEqual(2);
+  await page.locator('[data-testid^="member-more-"]').first().click();
+  await page.getByTestId('member-replace').click();
+  await page.getByRole('button', { name: 'Replace', exact: true }).click();
   await expect(members).toHaveCount(count - 1);
-  await expect(band).not.toContainText(first);
-  await band.getByTestId('recruit').click();
+  await band.getByTestId('candidate-0').click();
   await expect(members).toHaveCount(count);
   await expectNoHorizontalScroll(page);
 });
@@ -82,7 +83,7 @@ test('release an off-genre single with a typed title', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('fame-screen')).toBeHidden();
   await ageUp(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   await page.getByTestId('fame-open').click();
   const row = page.getByTestId('project-row').first();
   await expect(row).toContainText('Night Bus Hymn');

@@ -107,8 +107,6 @@ export const activitiesBalanceSchema = z.strictObject({
     skilledAt: z.int().min(1).max(100),
     /** The chance a practice brings a hidden talent of the hobby's kind to light: a base, times a curve over the hobby's skill. */
     talent: z.strictObject({ base: share, curve: curveSchema }),
-    /** Skill lost each year you don't practice. */
-    decay: z.int().min(0).max(20),
   }),
 });
 export type ActivitiesBalance = z.infer<typeof activitiesBalanceSchema>;

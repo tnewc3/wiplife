@@ -85,6 +85,47 @@ export function toPayload(base: EditView, draft: EditView): EditPayload | null {
 
   if (!base.self && base.birthYear !== draft.birthYear) set('birthYear', draft.birthYear);
 
+  // C2: sports, music and fame.
+  if (base.career && draft.career) {
+    const career: NonNullable<EditPayload['career']> = {};
+    const bs = base.career.sports;
+    const ds = draft.career.sports;
+    if (bs && ds) {
+      const sports: NonNullable<NonNullable<EditPayload['career']>['sports']> = {};
+      if (bs.position !== ds.position) sports.position = ds.position;
+      if (bs.greatness !== ds.greatness) sports.greatness = ds.greatness;
+      const skills = Object.fromEntries(ds.skills.filter((k, i) => k.level !== bs.skills[i]?.level).map((k) => [k.id, k.level]));
+      if (Object.keys(skills).length > 0) sports.skills = skills;
+      if (ds.salary !== null && bs.salary !== ds.salary) sports.salary = ds.salary;
+      if (ds.clearHistory) sports.history = 'clear';
+      if (Object.keys(sports).length > 0) career.sports = sports;
+    }
+    const bm = base.career.music;
+    const dm = draft.career.music;
+    if (bm && dm) {
+      const music: NonNullable<NonNullable<EditPayload['career']>['music']> = {};
+      if (bm.buzz !== dm.buzz) music.buzz = dm.buzz;
+      if (bm.chemistry !== dm.chemistry) music.chemistry = dm.chemistry;
+      const members = dm.members.filter((m, i) => m.skill !== bm.members[i]?.skill).map((m) => ({ id: m.id, skill: m.skill }));
+      if (members.length > 0) music.members = members;
+      if (dm.clearReleases) music.releases = 'clear';
+      if (Object.keys(music).length > 0) career.music = music;
+    }
+    const bf = base.career.fame;
+    const df = draft.career.fame;
+    if (bf && df) {
+      const fame: NonNullable<NonNullable<EditPayload['career']>['fame']> = {};
+      if (bf.fame !== df.fame) fame.fame = df.fame;
+      if (bf.image !== df.image) fame.image = df.image;
+      if (bf.fans !== df.fans) fame.fans = df.fans;
+      if (bf.mood !== df.mood) fame.mood = df.mood;
+      if (bf.agent !== df.agent) fame.agent = df.agent;
+      if (df.endContract) fame.contract = 'end';
+      if (Object.keys(fame).length > 0) career.fame = fame;
+    }
+    if (Object.keys(career).length > 0) set('career', career);
+  }
+
   return any ? out : null;
 }
 

@@ -74,7 +74,7 @@ export const FAME_ICON = 'glowing_star';
 export const HOME_STATS = ['happiness', 'health', 'smarts', 'looks'] as const satisfies readonly (keyof Stats)[];
 
 /** U1: the main tabs. The first is Job, or School while you are enrolled. */
-export const TAB_LABELS = { home: 'Home', job: 'Job', school: 'School', assets: 'Assets', people: 'People', activities: 'Activities' } as const;
+export const TAB_LABELS = { home: 'Home', job: 'Career', school: 'Career', assets: 'Assets', people: 'People', activities: 'Activities' } as const;
 
 /** U1: what the Home header says you do. */
 export function occupationLine(summary: { job: { title: string; employer: string } | null; retired: boolean; school: SchoolLine | null; lifeStage: LifeStage }): string {
@@ -2290,6 +2290,7 @@ export const GOD_AREA_LABELS: Record<string, string> = {
   citizenships: 'Citizenships',
   money: 'Money',
   birthYear: 'Age',
+  career: 'Sports, music and fame',
   target: 'This edit',
 };
 
@@ -2431,3 +2432,146 @@ export const GOD_FIELD_LABELS = {
   pronouns: 'Pronouns', subject: 'Subject', object: 'Object', possessive: 'Possessive', possessivePronoun: 'Possessive pronoun', reflexive: 'Reflexive',
   younger: 'Younger', older: 'Older',
 } as const;
+
+/** C2: the words of the god mode group for sports, music and fame careers. */
+export const GOD_CAREER_LABELS = {
+  sports: 'Sports',
+  music: 'Music',
+  fame: 'Fame',
+  position: 'Position',
+  greatness: 'Greatness',
+  salary: 'Salary',
+  clearHistory: 'Clear the season history',
+  buzz: 'Buzz',
+  chemistry: 'Chemistry',
+  members: 'Members',
+  clearReleases: 'Clear the releases',
+  fame_: 'Fame',
+  image: 'Public image',
+  fans: 'Fans',
+  mood: 'Fan mood',
+  agent: 'Agent',
+  noAgent: 'No agent',
+  endContract: 'End the contract',
+  none: 'Nothing to edit here yet: start a career first.',
+} as const;
+
+// ── C2: the Career hub ───────────────────────────────────────────────────────
+
+export const CAREER_LABELS = {
+  title: 'Career',
+  you: 'You',
+  findWork: 'Find work',
+  special: 'Special careers',
+  schedule: 'Schedule',
+  scheduleTitle: 'Your schedule',
+  noRoles: 'Nothing on your plate. Find work, join a team or start something below.',
+  gigTitle: 'Gig work',
+  load: 'Load',
+  loadWords: ['Light', 'Steady', 'Heavy', 'More than you can carry'] as const,
+  scheduleNote: 'Each role takes some of your time. Past what you can carry, Stress and burnout build and every role does worse.',
+  over: (points: number) => `${points} over what you can carry`,
+  burnout: 'Burnout',
+  penalty: (points: number) => `Performance is down ${points} points everywhere`,
+  gave: {
+    grades: 'Your grades slipped under the load.',
+    job: 'Your work slipped under the load.',
+    bench: 'Your coach benched you for a stretch.',
+    band: 'The band got annoyed with how little you gave it.',
+  } as const,
+  skills: 'Skills',
+  noSkills: 'No skills yet. They grow with the years you use them and fade after two years untouched, never below a floor.',
+  skillLine: (peak: number, idle: number) => (idle >= 2 ? `Fading: ${idle} years idle. Best was ${peak}%.` : peak > 0 ? `Best so far ${peak}%.` : ''),
+  jobs: { title: 'Jobs', subtitle: 'Full-time listings' },
+  partTime: { title: 'Part-time', subtitle: 'Work around school', closed: 'Teen jobs are open from 14 to 17.' },
+  gigs: { title: 'Gigs', subtitle: 'Deliveries, rides and odd jobs' },
+  education: { title: 'Education', subtitle: 'School, college and trades' },
+  abroad: { title: 'Time abroad', subtitle: 'Study or work in another country' },
+  specials: { sports: 'Sports', music: 'Music', acting: 'Acting', social: 'Social media', writing: 'Writing & art', business: 'Business', crime: 'Crime' } as const,
+  specialSubtitles: {
+    sports: 'Teams, seasons and the pros',
+    music: 'Solo or in a band',
+    acting: 'Stage, screen and auditions',
+    social: 'Followers and posts',
+    writing: 'Books, pages and paintings',
+    business: 'Start or buy one',
+    crime: 'A crew, jobs and heat',
+  } as const,
+  bar: { greatness: 'Greatness', buzz: 'Buzz', grades: 'Grades', performance: 'Performance', rank: 'Rank', fame: 'Fame' } as const,
+  roleNames: { school: 'School', job: 'Job', gig: 'Gig work', sports: 'Sports', fame: 'Arts and media', band: 'Band', business: 'Business', crime: 'Crime', social: 'Social media' } as const,
+  commitment: 'How hard',
+  closed: 'Not open to you yet.',
+  closedAge: (age: number) => `You can start from ${age}.`,
+} as const;
+
+export const SPORTS_TAB_LABELS = { overview: 'Overview', season: 'Season', league: 'League', history: 'History' } as const;
+
+export const SPORTS_HUB_LABELS = {
+  team: 'Team',
+  strength: 'Team strength',
+  greatness: 'Greatness',
+  contract: 'Contract',
+  agent: 'Agent',
+  noContract: 'No contract',
+  noAgent: 'No agent',
+  actions: 'Actions',
+  practice: 'Practice',
+  therapy: 'Physical therapy',
+  surgery: 'Surgery',
+  trade: 'Request a trade',
+  retire: 'Retire',
+  enhancers: 'Performance enhancers',
+  enhancersOn: 'Taking them',
+  enhancersOff: 'Not taking them',
+  enhancersWarn: 'More form this season, less health, and the league tests. A positive test means a suspension, lost fame and a name that does not wash clean.',
+  enhancersStart: 'Start taking them',
+  enhancersStop: 'Stop taking them',
+  enhancersBlock: { age: 'Not at your age.', sport: 'You have to be playing first.', on: 'You already are.', off: 'You are not.', prison: 'Not from prison.' } as const,
+  enhancersRecord: (tests: number, positives: number) => `${tests} ${tests === 1 ? 'test' : 'tests'}, ${positives} positive`,
+  youthSwitch: 'Switch sports',
+  youthQuit: 'Quit this sport',
+  youthNote: 'Young players can try anything. Switching costs only the growth you give up, and your skills wait for you.',
+  seasonEmpty: 'No season yet. It plays as the year begins.',
+  bigMoments: 'Big moments',
+  bigMomentsNote: 'Big games and playoff moments come up here as the season runs.',
+  standings: 'Standings',
+  history: 'Season history',
+  historyEmpty: 'No seasons yet.',
+  champion: 'Champions',
+  yourTeam: 'You',
+} as const;
+
+export const BAND_TAB_LABELS = { overview: 'Overview', members: 'Members', releases: 'Releases', shows: 'Shows' } as const;
+
+export const BAND_HUB_LABELS = {
+  strength: 'Band strength',
+  chemistry: 'Chemistry',
+  buzz: 'Buzz',
+  rehearse: 'Rehearse',
+  rehearsals: (done: number, budget: number) => `${done} of ${budget} rehearsals this year`,
+  rehearseBlock: { budget: 'You have rehearsed as much as the year allows. Go all in for more.', none: 'No band.', alone: 'Nobody to rehearse with.', inactive: 'Not now.', prison: 'Not from prison.' } as const,
+  commitment: 'How hard the band works',
+  members: 'Members',
+  noMembers: 'No members.',
+  findMembers: 'Find members',
+  findFor: (part: string) => `Hold auditions for ${part.toLowerCase()}`,
+  whoCame: 'Who came to the audition',
+  poolNote: 'Better players turn up as your fame, your city and your reputation grow.',
+  hire: 'Hire',
+  replace: 'Replace',
+  replaceTitle: 'Replace this member?',
+  replaceBody: (who: string) => `${who} will take it hard, and the others will feel it. Auditions for the part open right away.`,
+  improving: 'Getting better',
+  releases: 'Releases',
+  noReleases: 'Nothing released yet.',
+  makeRelease: 'Make a release',
+  shows: 'Shows',
+  leave: 'Leave the band',
+  solo: 'Go solo',
+  rename: 'Rename the band',
+  temper: { steady: 'steady', fiery: 'fiery', flaky: 'flaky' } as const,
+  strengthWords: ['Shaky', 'Getting there', 'Solid', 'Tight'] as const,
+  age: (n: number) => `${n}`,
+} as const;
+
+export const TRAINING_LABELS = { skip: 'Tap to skip', done: 'Done', title: { practice: 'Practice', rehearsal: 'Rehearsal', training: 'Training', study: 'Studying', gym: 'The gym' } as const } as const;

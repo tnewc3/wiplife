@@ -5,7 +5,7 @@
  * the character is a woman attracted to men, and meets a man at 18.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, startRandomLife, tab } from './helpers';
+import { ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, startRandomLife, goTab } from './helpers';
 
 const LOVE = { testPack: true, seed: 'e2e-love' };
 
@@ -30,13 +30,13 @@ test('try for a baby, pregnancy on Home, a birth, the child’s page, parenting 
   await ageUpTimes(page, 18);
 
   // The person you met at 18: ask out, then try for a baby.
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Friends' }).getByRole('button').first().click();
   expect(await act(page, 'Ask out', 'Ask')).toContain('says yes');
 
   // One action a person a year: age up, then try for a baby.
   await ageUpTimes(page, 1);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Love' }).getByRole('button').first().click();
   await expect(actions(page).getByRole('button', { name: 'Try for a baby', exact: true })).toBeVisible();
   await expectNoHorizontalScroll(page);
@@ -51,7 +51,7 @@ test('try for a baby, pregnancy on Home, a birth, the child’s page, parenting 
   // The year after, the baby is born.
   await ageUpTimes(page, 1);
   await expect(page.getByTestId('pregnancy-line')).toHaveCount(0);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   const children = page.getByRole('list', { name: 'Children' });
   await expect(children.getByRole('listitem')).toHaveCount(1);
   await expect(children.getByRole('button').first()).toContainText(/Daughter|Son|Child/);
@@ -60,7 +60,7 @@ test('try for a baby, pregnancy on Home, a birth, the child’s page, parenting 
 
   // Two more years, and there is a toddler to read to.
   await ageUpTimes(page, 2);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Children' }).getByRole('button').first().click();
   await page.getByTestId('person-tab-overview').click();
   await expect(page.getByTestId('child-origin')).toContainText('Your child');
@@ -82,7 +82,7 @@ test('try for a baby, pregnancy on Home, a birth, the child’s page, parenting 
   // Children cost money through the ledger. This young parent lives with their family, who cover
   // the child's costs, so the cost shows as covered (a parent on their own sees "Your children").
   await ageUpTimes(page, 1);
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByRole('region', { name: /Last year/ })).toContainText('Your family covered');
   await expectNoHorizontalScroll(page);
 });

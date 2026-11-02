@@ -7,7 +7,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { activitiesLife, type ActivitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, openHubActivity, passAgeGate, settle, startRandomLife, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, openHubActivity, passAgeGate, settle, startRandomLife, goTab } from './helpers';
 
 async function open(page: Page, options: ActivitiesLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -18,14 +18,14 @@ async function open(page: Page, options: ActivitiesLife): Promise<void> {
 
 test('Luxury is not on the hub below the net worth threshold', async ({ page }) => {
   await open(page, { seed: 'e2e-u2-poor', age: 40, savings: 20_000 });
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   await expect(page.getByTestId('activities-category-money_luck')).toBeVisible();
   await expect(page.getByTestId('activities-category-luxury')).toHaveCount(0);
 });
 
 test('a rich life sees Luxury with Activities and Shopping, and buys through a priced button', async ({ page }) => {
   await open(page, { seed: 'e2e-u2-rich', age: 45, savings: 3_000_000 });
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   const row = page.getByTestId('activities-category-luxury');
   await expect(row).toBeVisible();
   await expectNoHorizontalScroll(page);
@@ -45,14 +45,14 @@ test('a rich life sees Luxury with Activities and Shopping, and buys through a p
   await sheet.getByTestId('do-buy_a_sailboat').click();
   await expect(sheet.getByTestId('receipt-money')).toContainText('You now have $');
   await page.keyboard.press('Escape');
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await page.getByTestId('assets-tab-things').click();
   await expect(page.getByRole('list', { name: 'Possessions' })).toContainText('sailboat');
 });
 
 test('Outdoors has its activities and shops; off-roading says it needs a vehicle', async ({ page }) => {
   await open(page, { seed: 'e2e-u2-outdoors', age: 30, savings: 20_000 });
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   await page.getByTestId('activities-category-outdoors').click();
   for (const id of ['hike', 'fish', 'camp', 'birdwatch', 'swim', 'offroad', 'garden', 'outdoor_gear', 'offroad_vehicles']) await expect(page.getByTestId(`activity-hub-${id}`)).toBeVisible();
   await expect(page.getByTestId('activities-section-outdoors-shopping')).toBeVisible();
@@ -70,10 +70,10 @@ test('Outdoors has its activities and shops; off-roading says it needs a vehicle
 
 test('Groups and Faith live under Activities, and People has only people', async ({ page }) => {
   await open(page, { seed: 'e2e-u2-people', age: 30 });
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await expect(page.getByTestId('people-groups')).toHaveCount(0);
   await expect(page.getByTestId('people-family-planning')).toBeVisible();
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   await page.getByTestId('activities-category-groups').click();
   for (const id of ['clubs', 'causes', 'civic']) await expect(page.getByTestId(`activity-hub-${id}`)).toBeVisible();
   await page.getByRole('button', { name: 'Back to Activities' }).click();
@@ -87,18 +87,18 @@ test('Groups and Faith live under Activities, and People has only people', async
 
 test('a collapsible group remembers if it is open, across screens and a reload', async ({ page }) => {
   await startRandomLife(page, { testPack: true, seed: 'e2e-u2-collapse' });
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   const parents = page.getByTestId('people-parents');
   await expect(parents.getByRole('list', { name: 'Parents' })).toBeVisible();
   await parents.getByRole('button', { name: /Parents/ }).click();
   await expect(parents.getByRole('list', { name: 'Parents' })).toBeHidden();
-  await tab(page, 'Assets').click();
-  await tab(page, 'People').click();
+  await goTab(page, 'Assets');
+  await goTab(page, 'People');
   await expect(parents.getByRole('list', { name: 'Parents' })).toBeHidden();
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await expect(page.getByTestId('people-parents').getByRole('list', { name: 'Parents' })).toBeHidden();
   await page.getByTestId('people-parents').getByRole('button', { name: /Parents/ }).click();
   await expect(page.getByTestId('people-parents').getByRole('list', { name: 'Parents' })).toBeVisible();
@@ -106,7 +106,7 @@ test('a collapsible group remembers if it is open, across screens and a reload',
 
 test('a person page has Overview, Interact and History tabs, and the rows are 56px', async ({ page }) => {
   await startRandomLife(page, { testPack: true, seed: 'e2e-u2-person' });
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   const row = page.getByRole('list', { name: 'Parents' }).getByRole('button').first();
   const box = (await row.boundingBox())!;
   expect(box.height).toBeGreaterThanOrEqual(55);

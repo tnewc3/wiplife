@@ -8,7 +8,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, expandGroups, goTab } from './helpers';
 import { sportsLife, type SportsLife } from './sportsFixtures';
 
 
@@ -20,22 +20,21 @@ async function open(page: Page, options: SportsLife): Promise<void> {
 }
 
 const openScreen = async (page: Page) => {
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('sports-screen')).toBeVisible();
+  // C2: the Overview keeps its details in groups that start closed.
+  await expandGroups(page);
 };
 
-test('the Work tab shows your sport, team and the next milestone in words, and fits a phone', async ({ page }) => {
+test('the Career tab shows your sport and team with a Greatness bar, and fits a phone', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-1' });
-  await tab(page, 'Job').click();
-  const card = page.getByTestId('sports-card');
-  await expect(card).toBeVisible();
-  await expect(page.getByTestId('sports-rung')).toHaveText(/School team player/);
-  await expect(page.getByTestId('sports-team')).not.toBeEmpty();
-  await expect(page.getByTestId('sports-fame')).toHaveText(/Unknown|Local|Rising|Famous|Legendary/);
-  await expect(page.getByTestId('sports-mood')).toHaveText(/Turned on you|Restless|Devoted/);
-  await expect(page.getByTestId('sports-next')).toContainText('Next: college player');
-  await expect(card).not.toContainText(/\b\d{2,3}\/100\b/);
+  await goTab(page, 'Job');
+  const row = page.getByTestId('role-sports');
+  await expect(row).toBeVisible();
+  await expect(row).toContainText('Basketball');
+  await expect(row.getByRole('meter', { name: 'Greatness' })).toBeVisible();
+  await expect(page.getByTestId('sports-open')).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 });
@@ -49,6 +48,7 @@ test('the Sports screen shows the ladder, team, position, season report and fame
   await expect(page.getByTestId('team-line')).toContainText('school team');
   await expect(page.getByTestId('position-line')).toContainText(/fit/);
   await expect(page.getByTestId('contract-line')).toContainText('Amateur play pays nothing');
+  await page.getByTestId('sports-tab-season').click();
   await expect(page.getByTestId('season-report')).toBeVisible();
   await expect(page.getByTestId('season-record')).toContainText('12-6');
   await expect(page.getByTestId('season-stats').getByRole('listitem').first()).toBeVisible();
@@ -65,6 +65,7 @@ test('a pro has a deal with a salary, an agent, a team in the league, and can as
   await openScreen(page);
   await expect(page.getByTestId('contract-line')).toContainText(/a rookie deal|a standard deal/i);
   await expect(page.getByTestId('contract-line')).toContainText(/\$[\d,]+ a year/);
+  await expect(page.getByTestId('sports-contract-row')).toContainText(/\$[\d,]+/);
   await expect(page.getByTestId('team-line')).toContainText('Continental Hoops League');
   await expect(page.getByTestId('agent-line')).toContainText('Quill & Marlow');
   await page.getByTestId('ask-trade').click();
@@ -92,8 +93,7 @@ test('position, training focus and commitment change with one tap', async ({ pag
 
 test('with no career the Sports screen shows the teams you can try out for, and making one puts you on the ladder', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-5', none: true, age: 11 });
-  await tab(page, 'Job').click();
-  await expect(page.getByTestId('sports-prompt')).toBeVisible();
+  await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('entry')).toBeVisible();
   await expect(page.getByRole('list', { name: 'Youth team options' }).first().getByRole('listitem')).toHaveCount(3);
@@ -101,6 +101,7 @@ test('with no career the Sports screen shows the teams you can try out for, and 
   await page.getByTestId('tryout-hockey-youth:rec').click();
   await page.getByRole('button', { name: 'Play your game' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
+  await expandGroups(page);
   await expect(page.getByRole('list', { name: 'Hockey ladder' }).locator('[aria-current="step"]')).toContainText('Youth league player');
   await expectNoHorizontalScroll(page);
 });
@@ -119,10 +120,9 @@ test('a playoff series is played in the event sheet and the run moves on to the 
   await expectNoHorizontalScroll(page);
 });
 
-test('after leaving the game, the Sports card looks back on the seasons', async ({ page }) => {
+test('after leaving the game, the Sports screen looks back on the seasons', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-7', pro: true, retired: true });
-  await tab(page, 'Job').click();
-  await expect(page.getByTestId('sports-retired')).toBeVisible();
+  await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('after-line')).toContainText('normal life');
   await expectNoHorizontalScroll(page);

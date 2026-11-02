@@ -5,7 +5,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
 import { godmodeLife } from './godmodeFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, goTab } from './helpers';
 
 const SEED = 'e2e-godmode';
 const happiness = (page: Page) => page.getByRole('meter', { name: 'Happiness' });
@@ -80,7 +80,7 @@ test('god mode: off by default, switched on in Settings, edits kept after a relo
   await page.getByRole('button', { name: 'Back' }).click();
 
   // A friend's attraction: Ben is attracted to women only; make it men too.
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Friends' }).getByRole('button', { name: /Ben Rivera/ }).click();
   await page.getByTestId('god-edit-person').click();
   await expect(page.getByRole('heading', { name: 'Edit Ben' })).toBeVisible();
@@ -109,7 +109,7 @@ test('god mode: off by default, switched on in Settings, edits kept after a relo
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
   await expect(happiness(page)).toHaveAttribute('aria-valuenow', '90');
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Friends' }).getByRole('button', { name: /Ben Rivera/ }).click();
   await page.getByTestId('god-edit-person').click();
   await page.getByRole('button', { name: 'Identity', exact: true }).click();
@@ -122,7 +122,7 @@ test('god mode: off by default, switched on in Settings, edits kept after a relo
   await page.getByRole('button', { name: 'Profile' }).click();
   await expect(page.getByTestId('god-edit-self')).toHaveCount(0);
   await page.keyboard.press('Escape');
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByRole('list', { name: 'Friends' }).getByRole('button', { name: /Ben Rivera/ }).click();
   await expect(page.getByTestId('god-edit-person')).toHaveCount(0);
 });

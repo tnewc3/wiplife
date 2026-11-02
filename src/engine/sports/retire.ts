@@ -34,7 +34,7 @@ export function routeBlock(state: LifeState, route: SportRetireRoute, content: C
   if (route === 'coaching') return canCoach(state, content) ? null : 'job';
   if (route === 'broadcast') {
     const media = content.balance.sports.retire.broadcastPath;
-    return crossBlock(state, media, content) === null ? null : 'fame';
+    return crossBlock(state, media, content, false) === null ? null : 'fame';
   }
   return null;
 }
@@ -62,7 +62,7 @@ export function takeRoute(state: LifeState, route: SportRetireRoute, content: Co
     // The career is picked up again for the crossover, then moves on to the media path.
     f.active = true;
     delete f.retired;
-    if (crossBlock(state, media, content) === null && crossOver(state, media, content)) {
+    if (crossBlock(state, media, content, false) === null && crossOver(state, media, content, false)) {
       f.main = media;
       f.second = null;
       delete f.fadedFrom;
@@ -110,7 +110,7 @@ export function retireSports(state: LifeState, route: SportRetireRoute | null, w
   if (worn > 0 && !conditionOf(state, 'worn_joints') && chance(rng, worn)) addCondition(state, 'worn_joints', b.injury.wornSeverity, content);
 
   const media = b.retire.broadcastPath;
-  if (route === 'broadcast' && crossBlock(state, media, content) === null && crossOver(state, media, content)) {
+  if (route === 'broadcast' && crossBlock(state, media, content, false) === null && crossOver(state, media, content, false)) {
     // The sport is behind you; the media path is now your career.
     const f = state.fame;
     f.main = media;

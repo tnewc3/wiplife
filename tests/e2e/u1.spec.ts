@@ -19,8 +19,7 @@ import {
   passAgeGate,
   settle,
   startRandomLife,
-  tab,
-} from './helpers';
+  tab, goTab } from './helpers';
 import { centuryLife, lateRelationshipsLife } from './u1Fixtures';
 
 const PACK = { testPack: true, seed: 'e2e-pack' };
@@ -79,7 +78,7 @@ test('Home: the header, the log by age with money lines, the Age button between 
   await expect(page.getByTestId('life-log').getByRole('heading', { name: /^Age 1\b/ })).toBeInViewport();
 
   // The Age button sits between the four tabs.
-  await expect(gameNav(page).getByRole('button')).toHaveText(['Job', 'Assets', 'AGE', 'People', 'Activities']);
+  await expect(gameNav(page).getByRole('button')).toHaveText(['Career', 'Assets', 'AGE', 'People', 'Activities']);
   const age = await ageUpButton(page).boundingBox();
   const assets = await tab(page, 'Assets').boundingBox();
   const people = await tab(page, 'People').boundingBox();
@@ -170,7 +169,7 @@ test('an event card with an icon and a meter shows both, and the outcome shows m
 
 test('Assets has in-screen tabs for money, home and things', async ({ page }) => {
   await startRandomLife(page, PACK);
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByRole('heading', { name: 'Assets', level: 1 })).toBeVisible();
   await expect(page.getByRole('tablist', { name: 'Assets' })).toBeVisible();
   await expect(page.getByTestId('savings')).toBeVisible();
@@ -193,7 +192,7 @@ test('Activities is a hub of categories, and Plan a trip is in Leisure → Vacat
   await loadSavedLife(page, activitiesLife({ seed: 'e2e-u1-hub', age: 30 }));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'Activities').click();
+  await goTab(page, 'Activities');
   for (const id of ['health', 'mind_body', 'outdoors', 'social_love', 'groups', 'faith', 'leisure', 'money_luck']) await expect(page.getByTestId(`activities-category-${id}`)).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
@@ -208,7 +207,7 @@ test('Activities is a hub of categories, and Plan a trip is in Leisure → Vacat
 
 test('People: groups, late relationships with a memorial mark, and Spend time with everyone as a group interaction', async ({ page }) => {
   await openFixture(page, lateRelationshipsLife('e2e-u1-people'));
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   // Sister, friends: living groups. The grandmother who died three years ago is under Late relationships, not Other family.
   await expect(page.getByRole('list', { name: 'Siblings' })).toContainText('Rae');
   await expect(page.getByRole('list', { name: 'Friends' })).toContainText('Marcus');

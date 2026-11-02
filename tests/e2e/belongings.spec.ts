@@ -6,7 +6,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { ageUp, expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, settle, tab } from './helpers';
+import { ageUp, expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, settle, goTab } from './helpers';
 import { belongingsLife, type BelongingsLife } from './possessionsFixtures';
 
 
@@ -55,7 +55,7 @@ test('buys a used car with cash: the price comes out of savings and the car is l
   await expect(sheet(page)).toHaveCount(0);
   await expect(page.getByTestId('belongings-vehicles')).toContainText('hatchback');
   await expect(page.getByTestId('belongings-vehicles')).toContainText('insured');
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByTestId('savings')).not.toHaveText('$600,000');
 });
 
@@ -65,7 +65,7 @@ test('buys a car on a loan: a car loan appears among the debts', async ({ page }
   await page.getByTestId('buy-vehicle').click();
   await sheet(page).getByTestId('vehicle-new-sedan').click();
   await sheet(page).getByTestId('buy-loan').click();
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByRole('list', { name: 'Debts' })).toContainText('Car loan');
 });
 
@@ -89,7 +89,7 @@ test('adopts a pet by name from a shelter, and sees it in the People tab', async
   await expectTouchTargets(page);
   await sheet(page).getByTestId('adopt-shelter').click();
   await expect(page.getByTestId('belongings-pets')).toContainText('Waffles the dog');
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   const pets = page.getByTestId('people-pets');
   await expect(pets).toContainText('Waffles the dog');
   await expect(pets.getByRole('button', { name: /^Pets/ })).toBeVisible();
@@ -97,7 +97,7 @@ test('adopts a pet by name from a shelter, and sees it in the People tab', async
 
 test('a pet’s page offers the interaction menu, an outcome card, and costs money for a treat', async ({ page }) => {
   await open(page, { seed: 'e2e-own-6', owns: true });
-  await tab(page, 'People').click();
+  await goTab(page, 'People');
   await page.getByTestId(/^pet-row-/).first().click();
   await expect(page.getByTestId('pet-name')).toHaveText('Pepper');
   await expect(page.getByTestId('pet-line')).toContainText('cat');
@@ -154,7 +154,7 @@ test('after a year, the Money tab shows what upkeep and insurance cost', async (
   test.setTimeout(90_000);
   await open(page, { seed: 'e2e-own-10', owns: true });
   await ageUp(page);
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   const ledger = page.getByRole('list', { name: /Last year/ }).or(page.getByLabel('Last year’s money'));
   await expect(ledger).toContainText('Upkeep');
   await expect(ledger).toContainText('Insurance');

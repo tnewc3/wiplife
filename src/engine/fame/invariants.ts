@@ -99,7 +99,8 @@ export function fameFailures(state: LifeState, content: ContentBundle): string[]
     if (new Set(ids).size !== ids.length) fail('fame: a bandmate appears twice');
     for (const m of band.members) {
       if (!state.people[m.id] || !state.relationships[m.id]) fail(`fame: bandmate ${m.id} is not someone you know`);
-      score(`fame.band member ${m.id} skill`, m.skill);
+      // C2: a bandmate's playing grows in fractions (rehearsal), so it is a number from 0 to 100.
+      if (typeof m.skill !== 'number' || !(m.skill >= 0 && m.skill <= 100)) fail(`fame.band member ${m.id} skill must be from 0 to 100 (got ${String(m.skill)})`);
     }
     if (band.leader !== 'you' && !ids.includes(band.leader)) fail('fame: the band is led by someone not in it');
     score('fame.band.chemistry', band.chemistry);

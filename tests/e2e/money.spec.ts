@@ -5,7 +5,7 @@
  * out and relocating from More → Home.
  */
 import { expect, test } from '@playwright/test';
-import { ageUp, ageUpTimes, expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, startRandomLife, tab } from './helpers';
+import { ageUp, ageUpTimes, expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, startRandomLife, openRow, goTab } from './helpers';
 
 const PACK = { testPack: true, seed: 'e2e-money' };
 
@@ -15,20 +15,21 @@ test('gig work from 16, the Money tab and the recap money line', async ({ page }
   await startRandomLife(page, PACK);
 
   // Too young to work.
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
   // Not open to you: the row is greyed out, and tapping it says why.
-  await page.getByTestId('way-gig').getByRole('button', { name: /Gig work/ }).click();
-  await expect(page.getByTestId('way-gig-reason')).toHaveText('You can start gig work at 16.');
+  await page.getByTestId('find-gigs').click({ force: true });
+  await expect(page.getByTestId('closed-reason')).toHaveText('You can start gig work at 16.');
   await expect(page.getByRole('button', { name: 'Start gig work' })).toHaveCount(0);
 
   // A child has no debt and no lifestyle choice.
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByTestId('savings')).toHaveText('$0');
   await expect(page.getByText('Your family decides how you live for now.')).toBeVisible();
   await expect(page.getByText('You don’t owe anyone anything.')).toBeVisible();
 
   await ageUpTimes(page, 16);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-gigs');
   await page.getByRole('button', { name: 'Start gig work' }).click();
   await expect(page.getByTestId('gig-status')).toContainText('You’re doing gig work.');
   await expect(page.getByRole('button', { name: 'Stop gig work' })).toBeVisible();
@@ -39,7 +40,7 @@ test('gig work from 16, the Money tab and the recap money line', async ({ page }
   await ageUp(page);
   await goHome(page);
   await expect(page.getByTestId('log-year-money')).toContainText(/^Money: \+\$[\d,]+ this year · savings \$[\d,]+/);
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   const ledger = page.getByRole('region', { name: 'Last year (2043)' });
   await expect(ledger).toBeVisible();
   await expect(ledger.getByText('Income')).toBeVisible();
@@ -47,7 +48,7 @@ test('gig work from 16, the Money tab and the recap money line', async ({ page }
 
   // From 18 the lifestyle is yours to choose.
   await ageUp(page);
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   const lifestyle = page.getByRole('radiogroup', { name: 'Lifestyle' });
   await expect(lifestyle.getByRole('radio', { name: /^Comfortable/ })).toHaveAttribute('aria-checked', 'true');
   await lifestyle.getByRole('radio', { name: /^Frugal/ }).click();
@@ -58,7 +59,7 @@ test('gig work from 16, the Money tab and the recap money line', async ({ page }
   // It is saved.
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await tab(page, 'Assets').click();
+  await goTab(page, 'Assets');
   await expect(page.getByRole('radiogroup', { name: 'Lifestyle' }).getByRole('radio', { name: /^Frugal/ })).toHaveAttribute('aria-checked', 'true');
 });
 
@@ -75,7 +76,8 @@ test('moving out and relocating from More → Home', async ({ page }) => {
 
   // Save up from gig work while living at home.
   await ageUpTimes(page, 16);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, 'find-gigs');
   await page.getByRole('button', { name: 'Start gig work' }).click();
   await ageUpTimes(page, 4);
 

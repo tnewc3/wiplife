@@ -5,16 +5,17 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, openRow, goTab } from './helpers';
 import { studentLife, workerLife, type SchoolLifeOptions } from './schoolLifeFixtures';
 
 
-async function open(page: Page, life: ReturnType<typeof studentLife>): Promise<void> {
+async function open(page: Page, life: ReturnType<typeof studentLife>, row = 'find-education'): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, life);
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'Job').click();
+  await goTab(page, 'Job');
+  await openRow(page, row);
 }
 
 const student = (options: SchoolLifeOptions) => studentLife(options);
@@ -105,7 +106,7 @@ test('the UK offers a choice at 16 (stay on, college, an apprenticeship or work)
 });
 
 test('the Work tab lists the boss and coworkers, each opening the interaction menu, and work actions move performance', async ({ page }) => {
-  await open(page, workerLife({ seed: 'e2e-work-life-1' }));
+  await open(page, workerLife({ seed: 'e2e-work-life-1' }), 'find-jobs');
   const people = page.getByTestId('work-people');
   await expect(people).toBeVisible();
   await expect(people).toContainText('Boss');

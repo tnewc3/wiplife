@@ -1,8 +1,9 @@
 /**
- * `npm run simulate -- [--lives 1000] [--seed sim] [--player both|all|careful|careless|spammer|criminal|star|athlete|activities] [--json report.json]`:
+ * `npm run simulate -- [--lives 1000] [--seed sim] [--player both|all|careful|careless|spammer|criminal|star|athlete|activities|hub] [--json report.json]`:
  * plays random lives headless and prints a report: the careful player's in
  * full, then (with both, the default) a careful vs careless comparison on
  * the same seeds, and (E1) the careless player's interactions beside it. `all`
+ * C2 reports the Career hub: lives with several careers at once, load and burnout, what gave under the load, skill curves (and that none falls under its floor), young players switching sports, band auditions by fame, bandmates' skill growth and performance enhancers; the `hub` player is the one that lives that way.
  * W6 reports emigration by route and country, approvals and refusals, time to citizenship, undocumented outcomes (regularized, removed, went home, still without papers), pay with and without papers, remittances through the ledger, the people you know who emigrated and children's citizenship, with the rules that must always hold.
  * W5 reports trips, destinations, encounters, temporary study/work and their effects.
  * W4b reports native and learned languages, learning/fading rates, local-job language gates and shared-language social contacts.
@@ -59,9 +60,9 @@ setAutoFreeze(false);
 
 const started = Date.now();
 const players: SimulatedPlayer[] =
-  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal', 'star', 'athlete', 'activities'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
-if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal' || p === 'star' || p === 'athlete' || p === 'activities')) {
-  console.error('--player must be all, both, careful, careless, spammer, criminal, star, athlete or activities');
+  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal', 'star', 'athlete', 'activities', 'hub'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
+if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal' || p === 'star' || p === 'athlete' || p === 'activities' || p === 'hub')) {
+  console.error('--player must be all, both, careful, careless, spammer, criminal, star, athlete, activities or hub');
   process.exit(2);
 }
 const generations = Number(values.generations);

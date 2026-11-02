@@ -25,9 +25,9 @@ test('the game layout has four tabs around the Age button, and a menu; no previe
 
   await page.getByRole('button', { name: 'Start a random life' }).click();
   const nav = page.getByRole('navigation', { name: 'Game sections' });
-  await expect(nav.getByRole('button')).toHaveText(['Job', 'Assets', 'AGE', 'People', 'Activities']);
+  await expect(nav.getByRole('button')).toHaveText(['Career', 'Assets', 'AGE', 'People', 'Activities']);
   await expect(nav.getByRole('button', { name: 'Age up' })).toBeVisible();
-  for (const tab of ['Job', 'Assets', 'People', 'Activities']) {
+  for (const tab of ['Career', 'Assets', 'People', 'Activities']) {
     await nav.getByRole('button', { name: tab }).click();
     await expect(page.getByRole('heading', { level: 1, name: tab })).toBeVisible();
     await expect(nav.getByRole('button', { name: tab })).toHaveAttribute('aria-current', 'page');

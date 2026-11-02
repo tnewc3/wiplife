@@ -68,7 +68,7 @@ for (const size of sizes) {
     await expectTouchTargets(page);
 
     // Every main page fits, and so do the menu and the profile.
-    for (const tab of ['Job', 'Assets', 'Activities']) {
+    for (const tab of ['Career', 'Assets', 'Activities']) {
       await nav.getByRole('button', { name: tab, exact: true }).click();
       await expectNoHorizontalScroll(page);
       await expectTouchTargets(page);

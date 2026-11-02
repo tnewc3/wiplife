@@ -1,0 +1,45 @@
+# C2: the words of the Career hub. History lines are about the one thing that gave; the training card is the short result you see after a practice.
+history:
+  gaveGrades:
+    importance: 1
+    variants:
+      - "Too many things at once. Your grades slipped this year, and your teachers noticed."
+      - "You were stretched thin, and school was the part that gave: assignments handed in late, a bad term."
+  gaveJob:
+    importance: 2
+    variants:
+      - "You were doing too much. Work slipped, and your boss started asking what was going on."
+      - "Something had to give, and it was your job: mistakes, late mornings and a manager who noticed."
+  gaveBench:
+    importance: 2
+    variants:
+      - "Run down from everything on your plate, you played badly and the coach sat you for a stretch."
+      - "Your coach benched you for a while. You were tired, and it showed in every game."
+  gaveBand:
+    importance: 2
+    variants:
+      - "You kept missing rehearsals, and the band got annoyed. The room was tense for weeks."
+      - "You were stretched too thin to give the band what it needed, and your bandmates said so."
+  enhancersStarted:
+    importance: 2
+    variants:
+      - "You started taking something to get an edge in {sport}. You told yourself you would stop when it was over."
+  enhancersCaught:
+    importance: 3
+    variants:
+      - "You failed a drug test. The league suspended you, the headlines were brutal, and people you trusted looked at you differently."
+      - "A positive test came back. Your season was over, and the story ran everywhere."
+  enhancersStopped:
+    importance: 1
+    variants:
+      - "You stopped taking the performance enhancers. Your body noticed first, and then your game did."
+training:
+  skill: "{skill} +{gain}"
+  stat: "{skill} +{gain}"
+  grades: "Your grades are climbing"
+  member:
+    - "Your {part} is getting tighter"
+    - "{name} is finding the groove"
+    - "{name} nailed the part that kept going wrong"
+  band: "The band is getting tighter"
+  nothing: "Nothing new today, but it all counts"
