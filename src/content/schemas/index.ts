@@ -35,6 +35,7 @@ import { laterBalanceSchema, laterRegistrySchema, laterTextSchema, reviewTextSch
 import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
 import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, frontSchema } from './crime';
+import { drugSchema, drugsBalanceSchema, drugsRegistrySchema, drugsTextSchema, operationSchema } from './drugs';
 import { sportsBalanceSchema, sportsRegistrySchema, sportsTextSchema } from './sports';
 import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, fameGenreSchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
 import { socialBalanceSchema, socialNicheSchema, socialPlatformSchema, socialRegistrySchema, socialTextSchema } from './social';
@@ -72,6 +73,7 @@ export * from './mental';
 export * from './possessions';
 export * from './teen';
 export * from './crime';
+export * from './drugs';
 export * from './fame';
 export * from './sports';
 export * from './social';
@@ -97,6 +99,8 @@ export const collectionTypes = {
   causes: { folder: 'causes', schema: causeSchema },
   cliques: { folder: 'cliques', schema: cliqueSchema },
   crews: { folder: 'crews', schema: crewSchema },
+  drugs: { folder: 'drugs', schema: drugSchema },
+  operations: { folder: 'operations', schema: operationSchema },
   cities: { folder: 'cities', schema: citySchema },
   countries: { folder: 'countries', schema: countrySchema },
   destinations: { folder: 'destinations', schema: destinationSchema },
@@ -172,6 +176,7 @@ export const singletonTypes = {
   'balance/teen': teenBalanceSchema,
   'balance/school': schoolBalanceSchema,
   'balance/crime': crimeBalanceSchema,
+  'balance/drugs': drugsBalanceSchema,
   'balance/fame': fameBalanceSchema,
   'balance/sports': sportsBalanceSchema,
   'balance/social': socialBalanceSchema,
@@ -197,6 +202,7 @@ export const singletonTypes = {
   'text/teen': teenTextSchema,
   'text/school': schoolTextSchema,
   'text/crime': crimeTextSchema,
+  'text/drugs': drugsTextSchema,
   'text/fame': fameTextSchema,
   'text/hub': hubTextSchema,
   'text/sports': sportsTextSchema,
@@ -227,6 +233,7 @@ export const singletonTypes = {
   'registries/teen': teenRegistrySchema,
   'registries/school': schoolRegistrySchema,
   'registries/crime': crimeRegistrySchema,
+  'registries/drugs': drugsRegistrySchema,
   'registries/fame': fameRegistrySchema,
   'registries/sports': sportsRegistrySchema,
   'registries/social': socialRegistrySchema,
@@ -249,6 +256,8 @@ export const contentBundleSchema = z.strictObject({
   causes: z.record(z.string(), causeSchema),
   cliques: z.record(z.string(), cliqueSchema),
   crews: z.record(z.string(), crewSchema),
+  drugs: z.record(z.string(), drugSchema),
+  operations: z.record(z.string(), operationSchema),
   cities: z.record(z.string(), citySchema),
   countries: z.record(z.string(), countrySchema),
   languages: z.record(z.string(), languageSchema),
@@ -314,6 +323,7 @@ export const contentBundleSchema = z.strictObject({
     teen: teenBalanceSchema,
     school: schoolBalanceSchema,
     crime: crimeBalanceSchema,
+    drugs: drugsBalanceSchema,
     fame: fameBalanceSchema,
     sports: sportsBalanceSchema,
     social: socialBalanceSchema,
@@ -340,6 +350,7 @@ export const contentBundleSchema = z.strictObject({
     teen: teenTextSchema,
     school: schoolTextSchema,
     crime: crimeTextSchema,
+    drugs: drugsTextSchema,
     fame: fameTextSchema,
     hub: hubTextSchema,
     sports: sportsTextSchema,
@@ -372,6 +383,7 @@ export const contentBundleSchema = z.strictObject({
     teen: teenRegistrySchema,
     school: schoolRegistrySchema,
     crime: crimeRegistrySchema,
+    drugs: drugsRegistrySchema,
     fame: fameRegistrySchema,
     sports: sportsRegistrySchema,
     social: socialRegistrySchema,

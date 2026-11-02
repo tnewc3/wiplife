@@ -29,7 +29,6 @@ amounts:
   # The black market: what a resale brings, and what a deal on the side brings (dirty money).
   resale_counterfeit: { min: 500, max: 1500 }
   resale_electronics: { min: 450, max: 1100 }
-  dealing: { min: 900, max: 3200 }
   # Lawsuits: what you claim (a settlement or a win pays a share of it) and the court costs of losing.
   claim_employer: { min: 12000, max: 42000 }
   claim_doctor: { min: 20000, max: 80000 }

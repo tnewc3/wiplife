@@ -1,0 +1,37 @@
+id: drug_bad_hour
+title: A bad hour
+text: >-
+  Somewhere in the evening your body disagrees with you. Your heart runs,
+  your hands go numb, the room tips and then settles, and someone is saying
+  your name in a voice you can barely place. It passes. It could have not.
+tone: dark
+category: drugs
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { drugs: { signs: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: stop
+    label: Take it as a warning
+    outcome:
+      text: >-
+        You lie awake after it, thinking how thin the line was. In the morning
+        you tell yourself this is where it ends, and for the moment you mean it.
+      effects:
+        - { type: drugs, action: quit }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: shrug
+    label: Shrug it off
+    outcome:
+      text: >-
+        You laugh about it by the afternoon. Part of you does not laugh, and
+        that part is paying attention.
+      effects:
+        - { type: stat, key: vice, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }

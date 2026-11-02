@@ -1,0 +1,41 @@
+id: drug_arrested_holding
+title: A stop that went further
+text: >-
+  It begins as a routine stop and ends with two officers going through
+  what you were carrying. They are neither angry nor surprised. One writes
+  while the other waits, and they take you in.
+tone: dark
+category: druglaw
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { dealing: false } }
+    - { drugs: { ops: { eq: 0 } } }
+    - { record: { within: 1 } }
+weight: { base: 10 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: lawyer
+    label: Get a lawyer
+    outcome:
+      text: >-
+        The lawyer finds what there is to find, which is not a great deal. You
+        walk out of the building into a hard bright afternoon, with a record
+        and a bill and the long list of things you will have to explain.
+      effects:
+        - { type: cost, item: lawyer_fee }
+        - { type: stat, key: stress, delta: 5 }
+  - id: accept
+    label: Accept what comes
+    outcome:
+      text: >-
+        You do not fight it. You sit in the corridor afterwards and look at
+        your hands, wondering when it became this.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: reputation, delta: -3 }

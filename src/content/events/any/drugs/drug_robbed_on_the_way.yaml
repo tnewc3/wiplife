@@ -1,0 +1,36 @@
+id: drug_robbed_on_the_way
+title: Two shapes in a doorway
+text: >-
+  It was over in a minute. A hand on your arm, a voice that did not raise
+  itself, something cold you did not look at. They knew where you were going
+  and what you carried. You stood there afterwards, counting your fingers.
+tone: dark
+category: drugs
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+weight: { base: 4 }
+followUpOnly: true
+choices:
+  - id: police
+    label: Go to the police
+    outcome:
+      text: >-
+        You tell them half of it. The officer takes a statement and gives you a
+        number, and you both know what the number is worth.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: crime, action: heat, delta: 2 }
+  - id: silence
+    label: Say nothing
+    outcome:
+      text: >-
+        You go home, lock the door, check it twice. Nothing else comes of it,
+        which is what you tell yourself every night for a month.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: happiness, delta: -2 }

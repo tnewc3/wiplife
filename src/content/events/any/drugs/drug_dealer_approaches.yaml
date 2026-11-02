@@ -1,0 +1,37 @@
+id: drug_dealer_approaches
+title: A number on a napkin
+text: >-
+  Someone you barely know leans in at the end of a night out and says they
+  know a person who can get you whatever you like. They push a number across
+  the bar on a napkin and say nothing else, as if it were a favor.
+tone: neutral
+category: drugs
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { dealer: false } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { hidden: vice, gt: 55 }, x: 2 }
+followUpOnly: true
+choices:
+  - id: keep
+    label: Keep the number
+    outcome:
+      text: >-
+        You fold it into your wallet, telling yourself you will probably never
+        use it. A few days later you do.
+      effects:
+        - { type: drugs, action: dealer }
+  - id: bin
+    label: Leave it on the bar
+    outcome:
+      text: >-
+        You push it back across the bar and the stranger shrugs, unoffended,
+        and finds someone else to be generous to.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

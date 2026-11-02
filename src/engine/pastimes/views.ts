@@ -282,7 +282,7 @@ export function getActivityTabView(state: LifeState, content: ContentBundle): { 
         return { id: a.id, label: a.label, subtitle: a.subtitle, icon: a.icon, kind: a.kind, section: a.section, opens: a.opens ?? null, count: hubCount(state, a.id), limit: a.limit, block, options };
       })
       // Hidden, not greyed out: rehab while nothing is wrong, a trip for a toddler.
-      .filter((a) => !(reg.activities.find((x) => x.id === a.id)!.hideWhenNothing && a.block?.reason === 'nothing'));
+      .filter((a) => !(reg.activities.find((x) => x.id === a.id)!.hideWhenNothing && (a.block?.reason === 'nothing' || (a.opens === 'recovery' && !Object.values(state.drugs.habits).some((h) => h.total > 0)))));
     if (activities.length === 0) continue;
     categories.push({
       id: c.id,

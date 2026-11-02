@@ -15,7 +15,7 @@ export const ACTIVITY_KINDS = ['options', 'doctor', 'vacation', 'hobbies', 'own_
 export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
 
 /** U2: where a `link` activity goes: a page that already does the job (the groups and faith of W2, therapy of M1, trips, ...). */
-export const ACTIVITY_LINKS = ['club', 'service', 'civic', 'faith', 'faith_explore', 'therapy', 'migration', 'social', 'teen', 'pets', 'vehicles'] as const;
+export const ACTIVITY_LINKS = ['club', 'service', 'civic', 'faith', 'faith_explore', 'therapy', 'migration', 'social', 'teen', 'pets', 'vehicles', 'drug_market', 'recovery'] as const;
 export type ActivityLink = (typeof ACTIVITY_LINKS)[number];
 
 /** U2: the two sections of a category's submenu. */

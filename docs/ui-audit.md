@@ -89,3 +89,13 @@ Actions that are not leisure activities (jobs, school, money, housing, family, t
 | Training | A silent number change | A 2–3 second card (skippable, instant with reduced motion) after practice, training, rehearsal, studying and the gym |
 | Gig work, Business, Time abroad cards | Expandable "ways" rows | Sheets opened from Find work and Special careers. **Time abroad** is a row under Find work |
 | Modeling | Listed in the plan | Not a career in the game (E6b has no modeling path), so there is no row |
+
+## D1: drugs
+
+| Screen | Before | Now |
+|---|---|---|
+| Activities → Black market | **The market**: a sheet with three drug goods mixed in with papers and stolen goods | **Drug market** (a page: tabs **Buy** and **Stash**; a drug is a 56px row with its price range and the law's view of it; a row's three dots open the buy sheet with the sources and amounts), and **The market** keeps its other goods |
+| Activities → Recovery | Support group, Rehab center, Counseling (each hidden while nothing was wrong) | The same three, plus **Your recovery** (a page: one row per habit with a dependence bar, years clean and a Quit button; hidden until you have used something) |
+| Career → Special careers | Sports, Music, Acting, Social media, Writing & art, Business, Crime | Adds **Dealing** (adults), which opens a sheet with tabs **Overview** (customers, standing, heat, dirty money, price and stock) and **Production** (the grow operations and labs you run, and the ones you can set up) |
+| Career → You | A row per role | A **Dealing** row appears once you deal or run an operation, with its standing bar |
+| Schedule | Eight roles | Nine: **Dealing** takes load like any other role |

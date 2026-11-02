@@ -66,6 +66,7 @@ import { checkPastimes } from './pastimes';
 import { checkTeen } from './teen';
 import { checkSchool } from './school';
 import { checkCrime } from './crime';
+import { checkDrugs } from './drugs';
 import { checkFame } from './fame';
 import { checkSocial } from './social';
 import { checkSports } from './sports';
@@ -230,6 +231,7 @@ export function checkReferences(
   errors.push(...checkTeen(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkSchool(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkCrime(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkDrugs(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkSocial(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkSports(bundle, fileOf, options.partialEvents === true));
@@ -607,6 +609,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     ...bundle.registries.crime.jobs,
     ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),
+    // D1: what the drugs step queues (an offer, a craving, a scare, an arrest, a raid, trouble in the trade...).
+    ...Object.values(bundle.registries.drugs.triggers).flatMap((r) => r.events),
     // E6b: what the fame step queues (a release's reception, a break, a fade, a deal, a ceremony, a tabloid, a stalker...).
     ...Object.values(bundle.registries.fame.triggers).flatMap((r) => r.events),
     // Batch 8: what the social step queues (a payout, a viral post, a row, a post found by a boss or a partner...).

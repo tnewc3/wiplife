@@ -18,6 +18,7 @@ export const hubBalanceSchema = z.strictObject({
     business: commitCosts,
     crime: commitCosts,
     social: commitCosts,
+    dealing: commitCosts,
   }),
   /** The total you can carry without paying for it. Above it, the points over it cost Stress and burnout and take from performance. */
   comfortable: z.number().min(20).max(100),

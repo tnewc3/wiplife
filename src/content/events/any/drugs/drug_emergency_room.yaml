@@ -1,0 +1,37 @@
+id: drug_emergency_room
+title: Under the bright lights
+text: >-
+  You wake up to the sound of a machine counting your heartbeats. The room
+  is too white, and a doctor with a tired, kind face says you are lucky, and
+  that the next conversation will not be as polite as this one.
+tone: dark
+category: drugs
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { drugs: { signs: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: listen
+    label: Listen to what they say
+    outcome:
+      text: >-
+        You hear it, all of it, including the numbers that you would rather
+        not know. A counselor leaves a card on the tray.
+      effects:
+        - { type: drugs, action: quit }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: leave
+    label: Sign yourself out
+    outcome:
+      text: >-
+        You sign the form against advice. The air outside tastes of cold
+        metal. You walk home knowing exactly how near it was.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: vice, delta: 1 }

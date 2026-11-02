@@ -16,6 +16,7 @@ import { AbroadCard } from './AbroadCard';
 import { BandScreen } from './BandScreen';
 import { BusinessCard } from './BusinessCard';
 import { CrimeCard } from './CrimeCard';
+import { DealingSheet } from '../drugs/DealingSheet';
 import { FameScreen } from './FameScreen';
 import { JobCard } from './JobCard';
 import { SchoolCard } from './SchoolCard';
@@ -44,7 +45,7 @@ function GigCard({ life }: { life: LifeState }) {
   );
 }
 
-type Opened = RoleId | 'schedule' | 'jobs' | 'gigs' | 'education' | 'sports' | 'music' | 'acting' | 'social' | 'writing' | 'business' | 'crime' | 'abroad' | null;
+type Opened = RoleId | 'schedule' | 'jobs' | 'gigs' | 'education' | 'sports' | 'music' | 'acting' | 'social' | 'writing' | 'business' | 'crime' | 'drugs' | 'abroad' | null;
 
 /** The Schedule: your total load, what each role takes, and how hard you work at each. */
 function ScheduleSheet({ life, open, onClose }: { life: LifeState; open: boolean; onClose: () => void }) {
@@ -148,7 +149,7 @@ export function CareerTab({ life }: { life: LifeState }) {
   const businessAge = content.balance.business.limits.minAge;
   const teen = age >= 14 && age < 18;
   const gigOk = work.canGig && !work.job;
-  const roleSheet = (id: RoleId): Opened => (id === 'sports' ? 'sports' : id === 'fame' ? 'music' : id === 'band' ? 'band' : id);
+  const roleSheet = (id: RoleId): Opened => (id === 'sports' ? 'sports' : id === 'fame' ? 'music' : id === 'band' ? 'band' : id === 'dealing' ? 'drugs' : id);
 
   return (
     <div className="flex flex-col gap-3">
@@ -221,6 +222,9 @@ export function CareerTab({ life }: { life: LifeState }) {
       </Sheet>
       <Sheet open={idle && (opened === 'crime')} title={CAREER_LABELS.specials.crime} onClose={close}>
         <CrimeCard life={life} />
+      </Sheet>
+      <Sheet open={idle && (opened === 'drugs' || opened === 'dealing')} title={CAREER_LABELS.specials.drugs} onClose={close}>
+        <DealingSheet life={life} />
       </Sheet>
       <Sheet open={idle && (opened === 'social')} title={CAREER_LABELS.specials.social} onClose={close}>
         <SocialCard life={life} />

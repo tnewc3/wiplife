@@ -1,0 +1,60 @@
+id: drug_craving_at_night
+title: The small hours
+text: >-
+  It arrives around two in the morning, the way it always does: a plain,
+  bodily wanting, as if your skin has remembered something your mind is
+  trying to keep quiet. The thing you need is not far away.
+tone: dark
+category: drugs
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { dependence: { gte: 40 } } }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: ride
+    label: Ride it out
+    check:
+      base: 40
+      stats: [{ key: discipline, weight: 0.4 }, { key: stress, weight: -0.2 }]
+      success:
+        text: >-
+          You sit on the kitchen floor with your back against the cupboard and
+          count your breaths until the wanting loses interest. By the morning it
+          is only a memory of itself.
+        effects:
+          - { type: drugs, action: recover, delta: -4 }
+          - { type: stat, key: discipline, delta: 2 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          You hold out until just before dawn, and then you do not. The relief
+          is real, and it is followed at once by the shame.
+        effects:
+          - { type: drugs, action: use, drug: painkillers }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: call
+    label: Call someone
+    visibleIf: { trait: sociability, gt: 30 }
+    outcome:
+      text: >-
+        You wake someone who loves you, and they come on the line already
+        awake. They talk about nothing in particular until the light changes.
+      effects:
+        - { type: drugs, action: recover, delta: -3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: give
+    label: Give in
+    outcome:
+      text: >-
+        It takes a minute, and then everything is quiet. You know exactly what
+        you have just done, and so does the part of you that is already
+        planning the next time.
+      effects:
+        - { type: drugs, action: use, drug: painkillers }
+        - { type: stat, key: happiness, delta: -2 }

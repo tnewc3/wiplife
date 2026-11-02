@@ -1,0 +1,15 @@
+id: psychedelics
+name: Psychedelics
+noun: psychedelics
+category: psychedelic
+blurb: Hours that feel like weeks. Some come back with a new way of seeing; some come back shaken.
+unit: { one: tab, many: tabs }
+price: { min: 15, max: 35 }
+effects: { happiness: 5, stress: -2, health: -1 }
+long: { health: 0.5, work: 1, school: 0.1, bonds: 0.5 }
+strength: 0.8
+tolerance: 12
+overdose: 0.0004
+severity: 2
+sources: [dealer, contact, nightlife, market]
+withdrawal: 1

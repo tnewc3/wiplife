@@ -787,6 +787,26 @@ export const targetsBalanceSchema = z.strictObject({
     memberGrowth: numberRangeSchema,
     testedPositive: shareRangeSchema,
   }),
+  /**
+   * D1: drugs, judged on the drugs player (one that may start at a party or through a dealer, buy, use, quit and relapse, and some
+   * deal or make). Nobody under 18 buys, deals or makes; no overdose comes from a first use; no overdose kills without a warning
+   * sign; most users never become addicted, some of the addicted recover and some relapse, overdose deaths are rare, and
+   * dealing pays but draws the law.
+   */
+  drugs: z.strictObject({
+    minorTrade: numberRangeSchema,
+    firstUseOverdose: numberRangeSchema,
+    deathNoSign: numberRangeSchema,
+    used: shareRangeSchema,
+    addicted: shareRangeSchema,
+    overdoseDeaths: shareRangeSchema,
+    scares: shareRangeSchema,
+    recovered: shareRangeSchema,
+    relapsed: shareRangeSchema,
+    dealers: shareRangeSchema,
+    dealingIncome: numberRangeSchema,
+    arrested: shareRangeSchema,
+  }),
   sports: z.strictObject({
     underAgePros: numberRangeSchema,
     entered: shareRangeSchema,

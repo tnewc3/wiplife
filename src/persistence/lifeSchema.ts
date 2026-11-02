@@ -1189,6 +1189,69 @@ const hub = z.strictObject({
   totals: z.strictObject({ rehearsals: int.min(0), auditions: int.min(0), hired: int.min(0), sportSwitches: int.min(0), relieved: int.min(0) }),
 });
 
+// D1: drugs.
+const drugHabit = z.strictObject({
+  dependence: z.number().min(0).max(100),
+  tolerance: z.number().min(0).max(100),
+  peak: z.number().min(0).max(100),
+  year: int,
+  uses: int.min(0),
+  total: int.min(0),
+  last: int,
+  clean: int.min(0),
+  quitYear: int.min(0),
+  recovered: z.boolean(),
+  relapses: int.min(0),
+});
+const drugs = z.strictObject({
+  last: z
+    .strictObject({
+      action: z.enum(['buy', 'use', 'quit', 'deal', 'operation', 'dealer', 'stash', 'enhancers']),
+      kind: z.string().min(1).max(30),
+      drugId: id.exactOptional(),
+      units: int.min(0).exactOptional(),
+      amount: dollars,
+      balance: dollars,
+      note: z.string().max(400),
+    })
+    .nullable(),
+  stock: z.record(id, z.strictObject({ units: int.min(1), quality: score, hidden: z.boolean() })),
+  habits: z.record(id, drugHabit),
+  dealers: z.array(id),
+  signs: z.strictObject({ count: int.min(0), last: int, drug: id.exactOptional() }),
+  synced: int.min(0).max(100),
+  dealing: z
+    .strictObject({
+      since: int,
+      drugId: id,
+      customers: int.min(0),
+      price: z.enum(['low', 'fair', 'high']),
+      standing: score,
+      year: z.strictObject({ year: int, sold: int.min(0), earned: dollars, trouble: int.min(0) }),
+    })
+    .nullable(),
+  ops: z.array(
+    z.strictObject({
+      id,
+      defId: id,
+      name: filled,
+      cityId: id,
+      drugId: id,
+      founded: int,
+      quality: score,
+      running: z.enum(['low', 'full']),
+      assets: dollars,
+      last: z.strictObject({ year: int, units: int.min(0) }),
+    }),
+  ),
+  nextOp: int.min(1),
+  year: z.strictObject({ year: int, uses: int.min(0), bought: int.min(0), spent: dollars }),
+  totals: z.strictObject({
+    uses: int.min(0), bought: int.min(0), spent: dollars, ripoffs: int.min(0), robbed: int.min(0), arrests: int.min(0), scares: int.min(0), visits: int.min(0), hooked: int.min(0),
+    quits: int.min(0), recoveries: int.min(0), relapses: int.min(0), sold: int.min(0), earned: dollars, produced: int.min(0), raids: int.min(0), overdoseDeaths: int.min(0),
+  }),
+});
+
 // Batch 8: social media. A handle is what the player typed, kept in its tidy form (checked again by the action that takes it and by the invariants).
 const socialAccount = z.strictObject({
   platform: id,
@@ -1448,6 +1511,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   pastimes,
   hobbies,
   hub,
+  drugs,
   social,
 });
 

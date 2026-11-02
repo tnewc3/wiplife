@@ -1,0 +1,164 @@
+# D1: the words of the drugs system. Story and consequences only: how it felt and what it cost, never how to do it.
+# Placeholders: {drug} the drug as a noun, {units} a count with its unit, {amount} money, {source} where it came from, {name} a person.
+history:
+  bought:
+    importance: 1
+    variants:
+      - "You bought {units} of {drug} from {source}, for {amount}, and kept it close."
+      - "{amount} for {units} of {drug}. The deal took a minute and left you thinking about it for hours."
+  boughtResale:
+    importance: 2
+    variants:
+      - "You bought {units} of {drug} to sell on, paying {amount}. It stopped being something you did for yourself."
+      - "You put {amount} into {units} of {drug}, not for you. You told yourself it was only business."
+  ripoff:
+    importance: 1
+    variants:
+      - "You paid {amount} and got nothing for it: a smile, a promise, and a number that did not answer again."
+      - "You handed {amount} to {source} and the {drug} never came. There was nobody to complain to."
+  badBatch:
+    importance: 1
+    variants:
+      - "What you bought was cut with something, and weaker than it should have been. You paid {amount} for the privilege."
+      - "The {drug} you got for {amount} looked wrong, smelled wrong, and you knew it before you tried it."
+  robbed:
+    importance: 2
+    variants:
+      - "You were robbed on the way to the deal: the cash, the {drug} and a good part of your nerve."
+      - "Two people were waiting where the deal was supposed to be. They took {amount} and more, and you were lucky it stopped there."
+  caught:
+    importance: 3
+    variants:
+      - "The deal ended with the police. You were held with {units} of {drug}, and it went on your record."
+      - "The police were already watching. What you had on you was enough, and you spent the night in a cell."
+  used:
+    importance: 1
+    variants:
+      - "You used {drug}. The evening went soft and fast, and the morning was slow."
+      - "You took {drug} and let the day go. Nobody was hurt by it, yet."
+  firstTry:
+    importance: 2
+    variants:
+      - "You tried {drug} for the first time. It was not what you had been told, in either direction."
+      - "Somebody put {drug} in front of you and you did not say no. You still remember how it felt."
+  scare:
+    importance: 2
+    variants:
+      - "You took too much {drug} and your body told you so: the shaking, the cold sweat, the long minutes of not knowing. It passed. You are not sure it will next time."
+      - "A bad hour on {drug}: your heart racing, your hands numb, a friend sitting beside you saying your name. It was a warning, and you knew it."
+  er:
+    importance: 3
+    variants:
+      - "You woke in an emergency room after using {drug}, a doctor's tired face above you, a bill for {amount} to come. They said you were lucky."
+      - "{drug} put you in hospital. It cost {amount}, a night under bright lights and a conversation with a doctor you did not want to have."
+  overdose:
+    importance: 3
+    variants:
+      - "You died of an overdose. There had been warnings, and nobody could turn them into a different ending."
+  hooked:
+    importance: 3
+    variants:
+      - "Somewhere along the way it stopped being a choice. You need {drug} now to feel like yourself, and some part of you has known for a while."
+      - "You reached for {drug} before you noticed you were reaching. It has a hold on you now."
+  craving:
+    importance: 1
+    variants:
+      - "The craving for {drug} came back in the quiet hours and sat with you until it was won, or lost."
+  withdrawal:
+    importance: 2
+    variants:
+      - "You went without {drug} and your body rebelled: the sweats, the shaking, the nights that would not end."
+  quit:
+    importance: 2
+    variants:
+      - "You stopped using {drug}. The first weeks were the worst of it, and you got through them."
+  relapsed:
+    importance: 3
+    variants:
+      - "You went back to {drug}. After all the time and all the work, it took one bad week, and the old hold was there as if it had waited."
+  recovered:
+    importance: 3
+    variants:
+      - "Years clean of {drug}. You do not call yourself cured, but you can walk past the places and the people and keep walking."
+  dealerMet:
+    importance: 2
+    variants:
+      - "You got a number for {name}, who knows where things can be had. You were not sure whether you wanted it."
+  dealingStarted:
+    importance: 3
+    variants:
+      - "You started selling {drug}. You called it a way to get by, and you stopped calling it anything much."
+  dealingStopped:
+    importance: 3
+    variants:
+      - "You stopped selling. The phone went quiet, the stock was gone, and nobody asked why."
+  dealingYear:
+    importance: 1
+    variants:
+      - "A year of dealing: {units} sold, {amount} in your pocket, and the habit of checking every window."
+  dealingTrouble:
+    importance: 2
+    variants:
+      - "Dealing brought trouble this year: somebody who owed, somebody who talked, somebody who wanted your corner."
+  opened:
+    importance: 3
+    variants:
+      - "You set up {name} for {drug}, a business only on paper. The money in, and the risk, were both real."
+  closed:
+    importance: 2
+    variants:
+      - "You shut {name} down. What was left went where it had to."
+  raided:
+    importance: 3
+    variants:
+      - "Police raided {name}. The stock was seized, the place was shut and your name was in the file."
+  fire:
+    importance: 3
+    variants:
+      - "A fire at {name} took most of it. You were not hurt, and it could so easily have been otherwise."
+  stolen:
+    importance: 2
+    variants:
+      - "Someone took what was kept at {name}. You could not exactly call the police."
+  stashFound:
+    importance: 3
+    variants:
+      - "The police found your stash of {drug}: {units}, taken, and your name on a report."
+  stashStolen:
+    importance: 2
+    variants:
+      - "Your stash of {drug} was gone when you went to look. Somebody had known where to look."
+  enhancersOut:
+    importance: 2
+    variants:
+      - "You ran out of what you had been taking to keep up, and with it went the edge."
+notes:
+  ripoff: "Taken: {source} kept your {amount} and gave you nothing."
+  badBatch: "A weak, cut batch of {drug}. {units} bought for {amount}, quality very low."
+  robbed: "Robbed. The {drug} and {amount} went."
+  caught: "Caught with {drug}. {sentence}"
+  fine: "Bought {units} of {drug} from {source} for {amount}."
+  usedLight: "You used some {drug}."
+  usedHeavy: "You used a lot of {drug}."
+  scare: "It went wrong for an hour: a warning you were not meant to ignore."
+  er: "It put you in the emergency room."
+  quit: "You stopped {drug}. The first weeks are hard."
+  relapse: "You went back to {drug}."
+  noDealer: "They did not know anyone, or would not say."
+  dealerMet: "{name} will sell to you."
+  sentenceJail: "The court sent you to prison."
+  sentenceProbation: "The court gave you probation."
+  sentenceFine: "The court fined you."
+  sentenceWarning: "The court let you off with a warning."
+  sourceDealer: "your dealer"
+  sourceContact: "a contact"
+  sourceNightlife: "someone at the club"
+  sourceMarket: "the market"
+  dealStarted: "You are selling {drug} now."
+  dealStopped: "You stopped selling."
+  dealYear: "{units} sold at {amount} this year."
+  opened: "You set up {name}."
+  closed: "You shut {name} down."
+  stashHidden: "You hid your {drug}."
+  stashOpen: "You stopped hiding your {drug}."
+  enhancersNeed: "You need a course of {drug} to keep going."

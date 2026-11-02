@@ -46,7 +46,8 @@ describe('the activity content', () => {
   const all = allPastimes(content);
   it('has at least 5 activities in every category, and at least 5 valuables', () => {
     for (const category of PASTIME_CATEGORIES) {
-      expect(all.filter((p) => p.category === category).length, category).toBeGreaterThanOrEqual(5);
+      // D1: the black market's drugs moved to the drug market, so it keeps three goods of its own.
+      expect(all.filter((p) => p.category === category).length, category).toBeGreaterThanOrEqual(category === 'black_market' ? 3 : 5);
     }
     expect(Object.values(content.valuables).filter((v) => !v.retired).length).toBeGreaterThanOrEqual(5);
   });

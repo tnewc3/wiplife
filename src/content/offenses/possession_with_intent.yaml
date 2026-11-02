@@ -1,0 +1,8 @@
+id: possession_with_intent
+name: possession with intent to sell
+class: felony
+severity: 4
+outcomes: { warning: 0, fine: 1, probation: 4, jail: 3 }
+fine: { min: 4000, max: 15000 }
+probationYears: { min: 2, max: 4 }
+jailYears: { min: 1, max: 4 }

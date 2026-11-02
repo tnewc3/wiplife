@@ -1,0 +1,47 @@
+id: drug_someone_notices
+title: "\"Are you okay?\""
+text: >-
+  Someone who knows you well has been watching the changes: the lost
+  weight, the cancelled plans, the long silences, the calls you do not return. They
+  find a moment when you are alone and ask you straight out.
+tone: serious
+category: drugs
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { dependence: { gte: 35 } } }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: honest
+    label: Tell them the truth
+    outcome:
+      text: >-
+        It comes out in pieces. They do not leave, and they do not pretend it
+        is smaller than it is. They ask what you need, and you realise you
+        have not been asked that in a long while.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: drugs, action: recover, delta: -4 }
+  - id: deny
+    label: Tell them it is nothing
+    outcome:
+      text: >-
+        You say you are only tired. They nod, and the nod says they do not
+        believe you and will not ask again for a while.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: angry
+    label: Tell them to mind their own business
+    outcome:
+      text: >-
+        It comes out harder than you meant. They leave, and what is between
+        you is a little colder when they come back.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: reputation, delta: -2 }

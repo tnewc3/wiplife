@@ -1,0 +1,20 @@
+id: cocaine
+name: Cocaine
+noun: cocaine
+category: stimulant
+blurb: Bright, fast and sure of itself, then a hollow morning that asks for more.
+unit: { one: gram, many: grams }
+price: { min: 60, max: 140 }
+cities:
+  nyc: { min: 90, max: 180 }
+  los_angeles: { min: 80, max: 170 }
+  london: { min: 70, max: 150 }
+effects: { happiness: 7, stress: -3, health: -2 }
+long: { health: 2.5, work: 3, school: 0.25, bonds: 2 }
+strength: 6
+tolerance: 10
+overdose: 0.002
+severity: 4
+sources: [dealer, contact, nightlife, market]
+produce: [lab]
+withdrawal: 8

@@ -1,0 +1,39 @@
+id: drug_raid_on_operation
+title: The door comes in
+text: >-
+  The alarm goes at four in the morning, and by the time you reach the
+  place the lights are already on and the street is full of people who are
+  not neighbors. It is over before you understand it has begun.
+tone: dark
+category: druglaw
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { record: { within: 1 } }
+    - { crime: { heat: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: lawyer
+    label: Get a lawyer and keep quiet
+    outcome:
+      text: >-
+        The lawyer talks calmly and at length about doubt. The place is gone,
+        the equipment is gone, and you are left with the sentence and the
+        long habit of watching the street.
+      effects:
+        - { type: dirtyMoney, pay: big }
+        - { type: stat, key: stress, delta: 7 }
+  - id: run
+    label: Walk away while you can
+    outcome:
+      text: >-
+        You turn around and walk, not too fast, and keep walking. Later you
+        learn they were already looking for you.
+      effects:
+        - { type: stat, key: stress, delta: 8 }
+        - { type: crime, action: heat, delta: 6 }

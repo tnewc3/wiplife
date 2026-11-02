@@ -117,6 +117,7 @@ export type Condition =
   | { belongings: BelongingsCondition }
   | { teen: TeenCondition }
   | { crime: CrimeCondition }
+  | { drugs: DrugsCondition }
   | { fame: FameCondition }
   | { social: SocialCondition }
   | { sports: SportsCondition }
@@ -258,6 +259,35 @@ export interface TeenCondition {
   grounded?: boolean;
   restricted?: RuleDomainId[];
   sealed?: boolean;
+}
+
+/**
+ * D1, drugs. Every field given must hold. tried: you have used any drug (or have not). using: you used one this year or last.
+ * dependence: your greatest dependence on any drug (0-100). addicted: it is at the addiction line or above. recovering: you
+ * quit a drug you were addicted to and have not gone back. recovered: you came back from an addiction and stayed clean.
+ * clean: the most years in a row clean of a drug you quit. relapses: times you went back. stock: units you hold of any drug.
+ * hiding: you keep a stash hidden. dealer: you know a dealer. dealing: you are dealing. customers: how many buy from you.
+ * ops: grow operations and labs you run. signs: warning signs (a bad hour, an ER visit) you have had in the last few years.
+ * drug: you have used any of these drugs. hard: you have used a drug with severity 4 or more.
+ */
+export interface DrugsCondition {
+  tried?: boolean;
+  using?: boolean;
+  dependence?: Compare;
+  addicted?: boolean;
+  recovering?: boolean;
+  recovered?: boolean;
+  clean?: Compare;
+  relapses?: Compare;
+  stock?: Compare;
+  hiding?: boolean;
+  dealer?: boolean;
+  dealing?: boolean;
+  customers?: Compare;
+  ops?: Compare;
+  signs?: Compare;
+  drug?: string[];
+  hard?: boolean;
 }
 
 /**
@@ -1126,6 +1156,29 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         .refine(atLeastOneField, 'needs at least one field'),
     }),
     z.strictObject({
+      drugs: z
+        .strictObject({
+          tried: z.boolean().optional(),
+          using: z.boolean().optional(),
+          dependence: compareSchema.optional(),
+          addicted: z.boolean().optional(),
+          recovering: z.boolean().optional(),
+          recovered: z.boolean().optional(),
+          clean: compareSchema.optional(),
+          relapses: compareSchema.optional(),
+          stock: compareSchema.optional(),
+          hiding: z.boolean().optional(),
+          dealer: z.boolean().optional(),
+          dealing: z.boolean().optional(),
+          customers: compareSchema.optional(),
+          ops: compareSchema.optional(),
+          signs: compareSchema.optional(),
+          drug: z.array(idSchema).min(1).optional(),
+          hard: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
       crime: z
         .strictObject({
           member: z.boolean().optional(),
@@ -1824,6 +1877,28 @@ export const effectSchema = z.discriminatedUnion('type', [
     .refine((e) => (e.action === 'job') === (e.size !== undefined), 'job needs size (and only job has it)')
     .refine((e) => (e.action === 'leave') || e.how === undefined, 'only leave takes how')
     .refine((e) => (e.action === 'remove' ? e.role !== undefined : e.action === 'join' || e.role === undefined), 'remove needs role; join may bring a person with it; no other action has one'),
+  /**
+   * D1, drugs. use: you take `drug` (a dose, light unless said) from nothing you hold (it was offered; a first try is still
+   * a first try). charge: the law charges you for what you hold, sell or make (the offense follows the amount and the drug).
+   * seize: a share of what you hold is taken. recover: your dependence on everything falls by `delta` (negative). quit: you
+   * stop every drug you depend on. customers / standing: dealing moves by `delta`. dealer: someone who deals joins your
+   * people. stop: you stop dealing. relapse: you go back to a drug you quit.
+   */
+  z
+    .strictObject({
+      type: z.literal('drugs'),
+      action: z.enum(['use', 'charge', 'seize', 'recover', 'quit', 'customers', 'standing', 'dealer', 'stop', 'relapse']),
+      drug: idSchema.optional(),
+      dose: z.enum(['light', 'heavy']).optional(),
+      situation: z.enum(['holding', 'selling', 'making']).optional(),
+      share: z.number().gt(0).max(1).optional(),
+      delta: z.int().min(-100).max(100).optional(),
+    })
+    .refine((e) => (e.action === 'use') === (e.drug !== undefined) || e.action === 'relapse', 'use needs drug (and only use and relapse have one)')
+    .refine((e) => e.dose === undefined || e.action === 'use', 'only use takes a dose')
+    .refine((e) => (e.action === 'charge') === (e.situation !== undefined), 'charge needs situation (and only charge has it)')
+    .refine((e) => (e.action === 'seize') === (e.share !== undefined), 'seize needs share (and only seize has it)')
+    .refine((e) => (e.action === 'recover' || e.action === 'customers' || e.action === 'standing') === (e.delta !== undefined && e.delta !== 0), 'recover, customers and standing need a non-zero delta (and only they have one)'),
   /**
    * E6a, dirty money (cash from crime you have not laundered). gain: a job's
    * take of this size, times your rank's multiplier and your city's pay level,

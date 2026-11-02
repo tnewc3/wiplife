@@ -78,6 +78,9 @@ categories:
   crimeaway: crime
   crimehome: crime
   crimelaw: crime
+  drugs: health
+  drugdeal: crime
+  druglaw: crime
   crimepast: crime
   fameentry: fame
   fame: fame

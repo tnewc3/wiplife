@@ -5,9 +5,10 @@
  * gives. A pro contract counts as a full-time job. Numbers: balance/careers.yaml hub.
  */
 import type { ContentBundle } from '../../content/schemas';
+import { impairment } from '../drugs/year';
 import type { CommitLevel, Id, LifeState, RoleId } from '../types';
 
-export const ROLE_IDS: readonly RoleId[] = ['school', 'job', 'gig', 'sports', 'fame', 'band', 'business', 'crime', 'social'];
+export const ROLE_IDS: readonly RoleId[] = ['school', 'job', 'gig', 'sports', 'fame', 'band', 'business', 'crime', 'social', 'dealing'];
 
 /** How hard you work at a role now (steady unless you chose otherwise). */
 export function commitOf(state: LifeState, role: RoleId): CommitLevel {
@@ -48,6 +49,7 @@ export function activeRoles(state: LifeState, content: ContentBundle): RoleId[] 
   if (state.fame.active && state.fame.band !== null) out.push('band');
   if (state.business.items.length > 0) out.push('business');
   if (state.crime.crew !== null) out.push('crime');
+  if (state.drugs.dealing !== null || state.drugs.ops.length > 0) out.push('dealing');
   if (state.fame.active && (state.fame.main === 'social' || state.fame.second === 'social')) out.push('social');
   return out;
 }
@@ -87,5 +89,5 @@ export function performancePenalty(state: LifeState, content: ContentBundle): nu
   const over = loadNow(state, content).over;
   const burn = Math.max(0, state.hub.burnout - h.burnout.above);
   const gave = state.hub.gave?.year === state.currentYear && state.hub.gave.what === 'job' ? h.gives.job : 0;
-  return Math.round((over * h.over.performance + burn * h.burnout.performance + gave) * 10) / 10;
+  return Math.round((over * h.over.performance + burn * h.burnout.performance + gave + impairment(state, content)) * 10) / 10;
 }

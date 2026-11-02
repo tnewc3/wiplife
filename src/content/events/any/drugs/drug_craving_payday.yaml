@@ -1,0 +1,39 @@
+id: drug_craving_payday
+title: A good day, and the wanting
+text: >-
+  Something has gone right, for once, and the first thing your mind offers
+  as a reward is the old one. It is the strangest part of it: the habit
+  lives in the good days as well as the bad.
+tone: neutral
+category: drugs
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { dependence: { gte: 30 } } }
+    - { stat: happiness, gt: 55 }
+weight: { base: 5 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: celebrate
+    label: Celebrate another way
+    outcome:
+      text: >-
+        You take yourself out to dinner and eat it slowly, and notice that the
+        wanting only lasts as long as you let it.
+      effects:
+        - { type: drugs, action: recover, delta: -3 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: treat
+    label: Treat yourself, just once
+    outcome:
+      text: >-
+        It is just once, again. The good day curdles slowly and the ordinary
+        one that follows it does not feel as light as the last.
+      effects:
+        - { type: drugs, action: use, drug: painkillers }
+        - { type: stat, key: happiness, delta: -1 }

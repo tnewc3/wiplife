@@ -1,0 +1,15 @@
+id: sedatives
+name: Sedatives
+noun: the sedatives
+category: sedative
+blurb: Small tablets that quiet the head. Sleep gets harder to find without them.
+unit: { one: strip, many: strips }
+price: { min: 15, max: 40 }
+effects: { happiness: 2, stress: -7, health: -1 }
+long: { health: 1.5, work: 2.5, school: 0.18, bonds: 1 }
+strength: 4
+tolerance: 8
+overdose: 0.0012
+severity: 3
+sources: [dealer, contact, market]
+withdrawal: 8

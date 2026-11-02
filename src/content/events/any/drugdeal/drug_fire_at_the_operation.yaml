@@ -1,0 +1,36 @@
+id: drug_fire_at_the_operation
+title: The smell of smoke
+text: >-
+  Something went wrong in the night. By the time you arrive the fire crews
+  have been and gone, the street is wet and the neighbors are standing on
+  their steps. You get there before anyone asks who the place belongs to.
+tone: dark
+category: drugdeal
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { ops: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: rebuild
+    label: Rebuild quietly
+    outcome:
+      text: >-
+        You put it back together a bit at a time, keeping your head down. Nobody
+        asks. You are fairly sure that is not the same as nobody noticing.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: crime, action: heat, delta: 3 }
+  - id: close
+    label: Walk away from it
+    outcome:
+      text: >-
+        You leave it as it is. You stand across the road in the morning and
+        look at the blackened frame, and know you were lucky.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }

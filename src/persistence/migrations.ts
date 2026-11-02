@@ -1,4 +1,5 @@
 import { emptyHub } from '../engine/hub/query';
+import { emptyDrugs } from '../engine/drugs/query';
 import { reconcileHeadcount } from '../engine/business/crew';
 import { craftRole, managerRole } from '../engine/business/headcount';
 import { defaultLines, forecastFromCustomers } from '../engine/business/products';
@@ -622,7 +623,35 @@ export const migrations: readonly Migration[] = [
       'Heir replay snapshots are upgraded the same way.',
     migrate: upgradeHubData,
   },
+  {
+    from: 40,
+    description:
+      'D1: drugs. A life gains a drugs record: nothing held, no dealers, no dealing or operations, no warning signs. A drug addiction the life already ' +
+      'had becomes a habit with the pills (dependence as its severity, so the Health page and Recovery show what they showed), kept in step with the ' +
+      'condition from then on. Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeDrugsData,
+  },
 ];
+
+/** D1: the drugs record a save from before drugs lacks, with an addiction the life had carried over as a habit. */
+function upgradeDrugsData(data: unknown): unknown {
+  if (!isRecord(data) || !isRecord(data.character)) return data;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeDrugsData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  const drugs = emptyDrugs();
+  const year = typeof data.currentYear === 'number' ? data.currentYear : 0;
+  const health = isRecord(data.health) ? data.health : undefined;
+  const conditions = health && Array.isArray(health.conditions) ? health.conditions : [];
+  const had = conditions.find((c: unknown) => isRecord(c) && c.conditionId === 'drug_addiction');
+  if (isRecord(had) && typeof had.severity === 'number') {
+    const severity = Math.min(100, Math.max(1, Math.round(had.severity)));
+    drugs.habits.painkillers = { dependence: severity, tolerance: Math.round(severity / 2), peak: severity, year, uses: 0, total: 5, last: year, clean: 0, quitYear: 0, recovered: false, relapses: 0 };
+    drugs.synced = severity;
+  }
+  return { ...data, inputLog, drugs: data.drugs ?? drugs };
+}
 
 /** C2: the hub record a save from before the Career hub lacks, and the hobby skills moved into it. */
 function upgradeHubData(data: unknown): unknown {

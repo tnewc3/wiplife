@@ -1,0 +1,8 @@
+id: drug_manufacturing
+name: manufacturing drugs
+class: felony
+severity: 5
+outcomes: { warning: 0, fine: 0.5, probation: 1.5, jail: 7 }
+fine: { min: 20000, max: 80000 }
+probationYears: { min: 3, max: 5 }
+jailYears: { min: 4, max: 12 }

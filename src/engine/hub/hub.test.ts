@@ -326,7 +326,33 @@ describe('performance enhancers', () => {
       enterPath(d, 'basketball', 'open_tryout', content);
       d.sports.draft = { year: d.currentYear, pick: 5, round: 1, teamId: draftingTeam(d, 'basketball', 5, 'chicago', content).id };
       signDraftDeal(d, content, createRng(`${seed}:sign`));
+      // D1: they are a drug: a course in hand is what a season takes.
+      d.drugs.stock[content.balance.drugs.enhancers.drug] = { units: 5, quality: 60, hidden: false };
     });
+
+  it('need a course from the drug system: none in hand means none taken, and a season uses one up and builds a habit', () => {
+    const drug = content.balance.drugs.enhancers.drug;
+    const dry = apply(pro('c2-supply'), (d) => void delete d.drugs.stock[drug]);
+    expect(enhancerBlock(dry, true, content)).toBe('supply');
+    expect(() => performAction(dry, 'start_enhancers', {}, content)).toThrow(InvalidInputError);
+    const on = apply(pro('c2-supply2'), (d) => void startEnhancers(d, content));
+    const after = apply(on, (d) => {
+      d.currentYear += 1;
+      d.character.age += 1;
+      d.hub.enhancers.tests = 0;
+      runHub(d, content);
+    });
+    expect(after.drugs.stock[drug]!.units).toBe(4);
+    expect(after.drugs.habits[drug]!.dependence).toBeGreaterThan(0);
+    // With nothing left, the edge goes.
+    const out = apply(after, (d) => {
+      delete d.drugs.stock[drug];
+      d.currentYear += 1;
+      d.character.age += 1;
+      runHub(d, content);
+    });
+    expect(out.hub.enhancers.on).toBe(false);
+  });
 
   it('are for adults who play, add form and cost health', () => {
     expect(enhancerBlock(lifeAtAge('c2-e0', 25), true, content)).toBe('sport');

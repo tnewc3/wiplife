@@ -1,0 +1,38 @@
+id: drug_someone_talked
+title: Word gets round
+text: >-
+  A customer was picked up for something else and talked, as people do. You
+  hear about it from a stranger who has no reason to lie. Now the question
+  is how much they said, and who else they said it to.
+tone: dark
+category: drugdeal
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { dealing: true } }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: stop
+    label: Close up for a while
+    outcome:
+      text: >-
+        You turn the phone off and sit still. Nothing happens, for a long
+        week. It is the kind of nothing that makes you old.
+      effects:
+        - { type: drugs, action: stop }
+        - { type: crime, action: heat, delta: -4 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: carry
+    label: Carry on as if nothing has changed
+    outcome:
+      text: >-
+        You carry on, with a steadiness you do not feel. The phone rings as
+        usual. Each time you answer it, you wonder who is on the other end.
+      effects:
+        - { type: crime, action: heat, delta: 6 }
+        - { type: stat, key: stress, delta: 6 }

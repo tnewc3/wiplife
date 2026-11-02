@@ -81,6 +81,7 @@ import { chooseSocialActions, emptySocialReport, formatSocial, rollSocialProfile
 import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
 import { peakRung } from '../../src/engine/fame/query';
 import { AttractionWatcher, attractionTargets, chooseDateActions, emptyAttractionReport, formatAttraction, type AttractionReport } from './attraction';
+import { chooseDrugActions, DrugsWatcher, drugsTargets, emptyDrugsReport, formatDrugs, rollDrugsProfile, type DrugsReport } from './drugs';
 import { chooseHubActions, emptyHubReport, formatHub, HubWatcher, hubTargets, rollHubProfile, type HubReport } from './hub';
 import { athleteChoice, chooseSportsActions, emptySportsReport, formatSports, rollAthleteProfile, SportsWatcher, sportsTargets, type SportsReport } from './sports';
 import { chooseSchoolLifeActions, chooseSchoolLifeInteractions, emptySchoolLifeReport, formatSchoolLife, rollSchoolLifeProfile, SchoolLifeWatcher, schoolLifeTargets, type SchoolLifeReport } from './school';
@@ -123,7 +124,7 @@ export interface SimulationOptions {
   country?: CountryId;
 }
 
-export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star' | 'athlete' | 'activities' | 'hub';
+export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star' | 'athlete' | 'activities' | 'hub' | 'drugs';
 
 export interface StageYears {
   years: number;
@@ -201,6 +202,8 @@ export interface SimulationReport {
   sports: SportsReport;
   /** C2: the Career hub, measured. */
   hub: HubReport;
+  /** D1: drugs, measured. */
+  drugs: DrugsReport;
   /** B1: romance by attraction, measured. */
   attraction: AttractionReport;
 }
@@ -837,7 +840,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
 
   const recurring = recurringEvents(content);
   // E6a: the criminal player lives as the careful one does (family, interactions), and also in a crew.
-  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' || playerKind === 'athlete' || playerKind === 'activities' || playerKind === 'hub' ? 'careful' : playerKind;
+  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' || playerKind === 'athlete' || playerKind === 'activities' || playerKind === 'hub' || playerKind === 'drugs' ? 'careful' : playerKind;
   const interactions = emptyInteractionReport(behaves, content);
   const family = emptyFamilyReport();
   const people = emptyPeopleReport();
@@ -862,6 +865,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const social = emptySocialReport(playerKind, content);
   const sports = emptySportsReport(playerKind, content);
   const hubReport = emptyHubReport(playerKind);
+  const drugsReport = emptyDrugsReport(playerKind);
   const attraction = emptyAttractionReport(playerKind);
   const famousAtTarget: number[] = [];
   const peopleTimer = new PipelineTimer(people);
@@ -917,6 +921,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const socialProfile = rollSocialProfile(socialRng);
     const sportsWatcher = new SportsWatcher(sports, content);
     const hubWatcher = new HubWatcher(hubReport, content);
+    const drugsWatcher = new DrugsWatcher(drugsReport, content);
+    const drugsRng = createRng(`${seed}:drugs`);
+    const drugsProfile = rollDrugsProfile(drugsRng, content);
     const hubRng = createRng(`${seed}:hub`);
     const hubProfile = rollHubProfile(hubRng);
     const attractionWatcher = new AttractionWatcher(attraction);
@@ -1156,6 +1163,17 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
           hubWatcher.acted(actionId, life);
         }
       }
+      // ...and on drugs (D1): a dealer, buying, using, quitting and relapsing, dealing and making...
+      if (playerKind === 'drugs') {
+        for (const [actionId, params] of chooseDrugActions(life, content, drugsRng, drugsProfile)) {
+          if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+          const beforeAction = life;
+          life = takeLifeAction(life, actionId, params);
+          money.actionsTaken[actionId]++;
+          drugsWatcher.acted(actionId, beforeAction, life);
+          if (actionId === 'buy_drug' && params.drugSource) drugsWatcher.bought(params.drugSource, life);
+        }
+      }
       // ...and on their mind (M1)...
       for (const [actionId, params] of careless ? [] : chooseMentalActions(life, content, mentalRng, mentalProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
@@ -1298,6 +1316,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       socialWatcher.observe(yearBefore, life);
       sportsWatcher.observe(yearBefore, life);
       hubWatcher.observe(yearBefore, life);
+      drugsWatcher.observe(yearBefore, life);
       attractionWatcher.observe(life);
       possessionsWatcher.observe(yearBefore, life, content);
       pastimesWatcher.observe(yearBefore, life);
@@ -1355,6 +1374,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     socialWatcher.finish(life);
     sportsWatcher.finish(life);
     hubWatcher.finish(life);
+    drugsWatcher.finish(life);
     attractionWatcher.finish(life);
     possessionsWatcher.finish(life);
     pastimesWatcher.finish(life);
@@ -1716,6 +1736,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     social,
     sports,
     hub: hubReport,
+    drugs: drugsReport,
     attraction,
     consistency: {
       violations,
@@ -1869,6 +1890,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatSocial(report.social, content), '  targets (src/content/balance/targets.yaml):', ...socialTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatSports(report.sports, content), '  targets (src/content/balance/targets.yaml):', ...sportsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatHub(report.hub, content), '  targets (src/content/balance/targets.yaml):', ...hubTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatDrugs(report.drugs, content), '  targets (src/content/balance/targets.yaml):', ...drugsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatAttraction(report.attraction), '  targets (src/content/balance/targets.yaml):', ...attractionTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));

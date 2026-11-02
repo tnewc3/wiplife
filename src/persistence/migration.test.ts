@@ -422,3 +422,40 @@ describe('C2 saves', () => {
     expect(lifeStateSchema.safeParse(after).success).toBe(true);
   });
 });
+
+describe('D1 saves', () => {
+  it('upgrades a save from before drugs: an empty record, an addiction it had becomes a habit, heir snapshots too', () => {
+    const life = lifeAtAge('d1-migrate', 30);
+    const old = cloneJson(life) as unknown as Record<string, unknown>;
+    delete old.drugs;
+    (old.health as { conditions: unknown[] }).conditions.push({ conditionId: 'drug_addiction', since: life.currentYear - 2, severity: 44, treated: false });
+    const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 40 }).data as typeof life;
+    expect(after.drugs.stock).toEqual({});
+    expect(after.drugs.dealing).toBeNull();
+    expect(after.drugs.habits.painkillers!.dependence).toBe(44);
+    expect(after.drugs.synced).toBe(44);
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ drugs: { dealers: [] } });
+    expect(lifeStateSchema.safeParse(after).success).toBe(true);
+    // A life with no addiction gets an empty record.
+    const clean = cloneJson(life) as unknown as Record<string, unknown>;
+    delete clean.drugs;
+    const upgraded = migrateEnvelope({ ...makeEnvelope(clean, content.contentVersion), schemaVersion: 40 }).data as typeof life;
+    expect(upgraded.drugs.habits).toEqual({});
+    expect(loadedLifeSchema(content).safeParse(upgraded).success).toBe(true);
+  });
+
+  it('keeps a life with drugs through a save, and turns away damaged drug data', () => {
+    const life = produce(lifeAtAge('d1-save', 30), (d) => {
+      d.drugs.stock.cocaine = { units: 3, quality: 60, hidden: true };
+      d.drugs.habits.cocaine = { dependence: 30, tolerance: 20, peak: 30, year: d.currentYear, uses: 2, total: 6, last: d.currentYear, clean: 0, quitYear: 0, recovered: false, relapses: 0 };
+      d.drugs.signs = { count: 1, last: d.currentYear, drug: 'cocaine' };
+      d.drugs.last = { action: 'buy', kind: 'fine', drugId: 'cocaine', units: 3, amount: 270, balance: 90, note: 'Bought.' };
+    });
+    expect(lifeStateSchema.parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.drugs.habits.cocaine!.dependence = 101))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.drugs.stock.cocaine!.units = 0))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void ((d.drugs as unknown as Record<string, unknown>).extra = 1))).success).toBe(false);
+    expect(loadedLifeSchema(content).safeParse(produce(life, (d) => void (d.drugs.stock.nope = { units: 1, quality: 1, hidden: false }))).success).toBe(false);
+  });
+});

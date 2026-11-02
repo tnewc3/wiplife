@@ -1,0 +1,39 @@
+id: drug_arrested_stash_found
+title: The search
+text: >-
+  The officers do not knock for long. Before you have your shoes on they
+  are in the room you thought was safe, opening the drawer you thought was
+  hidden. One of them looks up at you, almost gently.
+tone: dark
+category: druglaw
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { record: { within: 1 } }
+    - { crime: { heat: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: lawyer
+    label: Call a lawyer
+    outcome:
+      text: >-
+        The lawyer asks one question at a time and writes down the answers. The
+        charge is reduced, the stash is gone and the months ahead are a long
+        low-ceilinged wait.
+      effects:
+        - { type: cost, item: lawyer_fee }
+        - { type: stat, key: stress, delta: 5 }
+  - id: say
+    label: Say nothing at all
+    outcome:
+      text: >-
+        You say nothing. It is the only thing you have done all day that feels
+        like your own decision.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: discipline, delta: 1 }

@@ -15,6 +15,7 @@ import { looksFailures } from './looks/invariants';
 import { possessionsFailures } from './possessions/invariants';
 import { pastimesFailures } from './pastimes/invariants';
 import { hubFailures } from './hub/invariants';
+import { drugsFailures } from './drugs/invariants';
 import { socialFailures } from './social/invariants';
 import { teenFailures } from './teen/invariants';
 import { schoolFailures } from './school/invariants';
@@ -276,6 +277,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   failures.push(...possessionsFailures(state, content));
   failures.push(...pastimesFailures(state, content));
   failures.push(...hubFailures(state, content));
+  failures.push(...drugsFailures(state, content));
   failures.push(...socialFailures(state, content));
 
   // The teen years (T1), including that no romance involves anyone under 18.

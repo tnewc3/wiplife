@@ -1,0 +1,49 @@
+id: drug_offered_by_a_friend
+title: A friend has something
+text: >-
+  A friend, tired and wired after a bad week, has something in a pocket and a
+  look on their face that says they would rather not use it alone. They do not
+  push. They only leave it on the table between you.
+tone: serious
+category: drugs
+rarity: common
+lifeStages: [teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { drugs: { addicted: false } }
+    - { drugs: { dealing: false } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { stat: stress, gt: 60 }, x: 1.6 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: join
+    label: Join them
+    outcome:
+      text: >-
+        You share it, and the week goes quiet. Afterwards you are closer than
+        you were, and a little more careful of each other's faces.
+      effects:
+        - { type: drugs, action: use, drug: painkillers }
+        - { type: stat, key: stress, delta: -2 }
+  - id: talk
+    label: Talk to them about the week instead
+    outcome:
+      text: >-
+        You push it to one side and ask what happened. It takes a while to
+        reach the real answer, but you both get there, and nobody takes
+        anything that night.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: leave
+    label: Leave
+    outcome:
+      text: >-
+        You go home. The next time you see them it is slightly awkward, and
+        then it is not.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

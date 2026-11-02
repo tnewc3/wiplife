@@ -1,0 +1,49 @@
+id: drug_regular_wants_more
+title: A regular
+text: >-
+  One of your regulars is back sooner than usual and wants more than they
+  did last time. They are polite about it. Their hands are not quite steady,
+  and you cannot tell whether it is the habit talking or the habit that you
+  are feeding.
+tone: serious
+category: drugdeal
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { dealing: true } }
+    - { drugs: { customers: { gte: 3 } } }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: sell
+    label: Sell them what they ask
+    outcome:
+      text: >-
+        You sell it. They are gone before you finish counting, and the thing
+        you tell yourself is that they would simply have found it somewhere else.
+      effects:
+        - { type: dirtyMoney, gain: small }
+        - { type: drugs, action: customers, delta: 1 }
+        - { type: stat, key: kindness, delta: -1 }
+  - id: less
+    label: Sell them less than they ask
+    outcome:
+      text: >-
+        You hold some back, and say it is a short week. They look at you for a
+        moment too long, and go.
+      effects:
+        - { type: dirtyMoney, gain: petty }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: refuse
+    label: Tell them to go home
+    outcome:
+      text: >-
+        You say it plainly, and they stare as if you had spoken another
+        language. It loses you a customer and, a little, your peace.
+      effects:
+        - { type: drugs, action: customers, delta: -1 }
+        - { type: stat, key: kindness, delta: 2 }

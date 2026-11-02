@@ -325,7 +325,9 @@ export function checkPastimes(bundle: ContentBundle, fileOf: (typeKey: Collectio
   const counts = new Map<string, number>();
   for (const def of Object.values(bundle.pastimes)) if (!def.retired) counts.set(def.category, (counts.get(def.category) ?? 0) + 1);
   for (const category of ['mind_body', 'salon_spa', 'surgery', 'shopping', 'movies', 'nightlife', 'outdoor', 'luxury', 'love', 'social', 'hobby', ...RISK_CATEGORIES]) {
-    if ((counts.get(category) ?? 0) < 5) errors.push({ file: 'pastimes/', message: `${category}: at least 5 activities are required (Batch 2a and 2b acceptance), found ${counts.get(category) ?? 0}` });
+    // D1: the black market's drugs moved to the drug market (src/content/drugs), so it keeps three goods of its own.
+    const need = category === 'black_market' ? 3 : 5;
+    if ((counts.get(category) ?? 0) < need) errors.push({ file: 'pastimes/', message: `${category}: at least ${need} activities are required (Batch 2a and 2b acceptance${need === 3 ? ', D1' : ''}), found ${counts.get(category) ?? 0}` });
   }
   return errors;
 }

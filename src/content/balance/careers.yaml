@@ -183,6 +183,7 @@ hub:
     business:  { back: 14, steady: 26, all: 44 }
     crime:     { back: 8,  steady: 16, all: 28 }
     social:    { back: 5,  steady: 12, all: 22 }
+    dealing:   { back: 6,  steady: 14, all: 26 }
   # The total you can carry without paying for it.
   comfortable: 62
   over:

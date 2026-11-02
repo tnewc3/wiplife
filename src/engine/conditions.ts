@@ -15,6 +15,7 @@ import { circleSupport } from './mental/query';
 import { belongingsHolds } from './possessions/holds';
 import { teenHolds } from './teen/holds';
 import { crimeHolds } from './crime/holds';
+import { drugsHolds } from './drugs/holds';
 import { fameHolds } from './fame/holds';
 import { socialHolds } from './social/holds';
 import { sportsHolds } from './sports/holds';
@@ -307,6 +308,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('family' in condition) return familyHolds(condition.family, state, ctx.content?.balance.relationships.adultAge);
   if ('belongings' in condition) return belongingsHolds(condition.belongings, state, ctx.cast, ctx.content);
   if ('teen' in condition) return teenHolds(condition.teen, state);
+  if ('drugs' in condition) return drugsHolds(condition.drugs, state, ctx.content);
   if ('crime' in condition) return crimeHolds(condition.crime, state, ctx.content?.balance.crime.ranks.length ?? 5, ctx.content);
   if ('fame' in condition) return fameHolds(condition.fame, state, ctx.content);
   if ('social' in condition) return socialHolds(condition.social, state, ctx.content);

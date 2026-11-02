@@ -1,0 +1,48 @@
+id: drug_tempted_old_friend
+title: Someone from before
+text: >-
+  You run into an old acquaintance from back then. They look well, which
+  is almost worse. They are easy and warm, they remember the good nights and
+  they offer you a drink somewhere you both know.
+tone: serious
+category: drugs
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { recovering: true } }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: go
+    label: Go, just to catch up
+    check:
+      base: 35
+      stats: [{ key: discipline, weight: 0.4 }]
+      success:
+        text: >-
+          You go, and you stay on soda water, and it is stranger than you
+          expected: two people being kind to the people they used to be. You
+          leave first.
+        effects:
+          - { type: stat, key: happiness, delta: 1 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: >-
+          It is easier than it should be. A night, then a morning, then the
+          familiar flat voice that says it was never going to last.
+        effects:
+          - { type: drugs, action: relapse }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: no
+    label: Say you cannot, and mean it
+    outcome:
+      text: >-
+        You say you are trying to stay out of it these days. They nod, a
+        little puzzled, and wish you well. You walk home the long way.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
