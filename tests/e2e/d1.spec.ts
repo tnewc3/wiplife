@@ -94,7 +94,8 @@ test('nobody under 18 can open the drug market', async ({ page }) => {
   await settle(page);
   await goTab(page, 'Activities');
   await page.getByTestId('activities-category-black_market').click();
-  await page.getByTestId('activity-hub-drug_market').click();
+  // The row is greyed out (aria-disabled) and tapping it says why.
+  await page.getByTestId('activity-hub-drug_market').click({ force: true });
   await expect(page.getByTestId('activity-hub-why-drug_market')).toBeVisible();
   await expect(page.getByTestId('drug-market')).toHaveCount(0);
 });
