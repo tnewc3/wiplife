@@ -20,6 +20,7 @@ const RUNS: readonly { player: SimulatedPlayer; lives: number }[] = [
   { player: 'criminal', lives: 2 },
   { player: 'star', lives: 2 },
   { player: 'athlete', lives: 2 },
+  { player: 'drugs', lives: 2 },
 ];
 
 /** JSON with sorted keys, so the hash doesn't depend on the order properties were added. */
