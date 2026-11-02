@@ -107,6 +107,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     { events: r.crime.jobs },
     ...Object.values(r.crime.triggers),
+    // D1: what the drugs step queues.
+    ...Object.values(r.drugs.triggers),
     // E6b: what the fame step queues.
     ...Object.values(r.fame.triggers),
     // Batch 8: what the social step queues.
