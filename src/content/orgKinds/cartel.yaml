@@ -10,6 +10,6 @@ initiation:
   blurb: Workers are cheap. A runner carries something that matters, and the first run decides if you stay one.
 jobs: [move_the_product, supply_the_dealers, supply_the_gangs, guard_the_route, launder_the_take, lie_low]
 codes:
-  - { id: no_loose_ends, text: "What you know stays with you. A cartel does not leave witnesses to its business.", check: arrest, standing: 14 }
-  - { id: stay_invisible, text: "A cartel that makes the news has already lost something. Attention gets people replaced.", check: heat, over: 60, standing: 10 }
+  - { id: no_loose_ends, text: "What you know stays with you. A cartel does not leave witnesses to its business.", check: arrest, standing: 5 }
+  - { id: stay_invisible, text: "A cartel that makes the news has already lost something. Attention gets people replaced.", check: heat, over: 60, standing: 4 }
 supplies: true

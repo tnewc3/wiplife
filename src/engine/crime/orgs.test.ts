@@ -9,6 +9,7 @@ import { lifeAtAge } from '../testFixtures';
 import type { LifeState } from '../types';
 import { applyEdit } from '../godmode/apply';
 import { nextUint32 } from '../rng';
+import { quote, sourcesFor, suppliedByCartel } from '../drugs/market';
 import { demote, joinBlock, joinCrew, promote } from './crew';
 import { holdings, myOrg } from './orgs';
 import { getOrgView } from './orgView';
@@ -253,7 +254,7 @@ describe('leading', () => {
     ok(life);
     let ended = false;
     for (let i = 0; i < 40 && !ended; i++) {
-      const next = performAction(apply(life, (d) => void (d.orgs.cities[d.crime.crew!.cityId]!.find((o) => o.id === rival.id)!.tried = undefined)), 'org_move', { orgId: rival.id, move: 'truce' }, content);
+      const next = performAction(apply(life, (d) => void delete d.orgs.cities[d.crime.crew!.cityId]!.find((o) => o.id === rival.id)!.tried), 'org_move', { orgId: rival.id, move: 'truce' }, content);
       const o = next.orgs.cities[next.crime.crew!.cityId]!.find((x) => x.id === rival.id)!;
       if (o.status === 'truce') {
         ended = true;
@@ -337,7 +338,7 @@ describe('cartels supply drugs (D1)', () => {
     const view = getOrgView(life, content)!;
     const job = view.members[0]!.jobs.find((j) => j.effect === 'supply')!;
     expect(job).toBeDefined();
-    for (const m of view.members) life = apply(life, (d) => void (d.crime.crew!.roster![m.id]!.job = view.members[0]!.jobs.some((j) => j.id === job.id) ? job.id : undefined));
+    for (const m of view.members) life = apply(life, (d) => void (d.crime.crew!.roster![m.id]!.job = job.id));
     const before = life.orgs.totals.supplied;
     let more = life;
     for (let i = 0; i < 6; i++) more = yearStep(more);
@@ -380,10 +381,19 @@ describe('cartels supply drugs (D1)', () => {
     expect(withSupply / without).toBeGreaterThan(content.balance.orgs.supply.cartelShare > 0 ? 1 : 0);
   });
 
-  it('a dealer who belongs to a cartel buys at the supplier’s price', () => {
-    const base = leader('cartel');
-    expect(content.balance.orgs.supply.dealerPrice).toBeLessThan(1);
-    expect(base.crime.crew).not.toBeNull();
+  it('a dealer who belongs to a cartel, or to a gang that buys from one, can buy at the supplier’s price without knowing a dealer', () => {
+    const drug = Object.keys(content.drugs).find((id) => content.drugs[id]!.sources.includes('dealer'))!;
+    const none = apply(lifeAtAge('o1-plain', 30), (d) => void (d.character.cityId = cityWith('cartel')));
+    expect(sourcesFor(none, drug, content)).not.toContain('dealer');
+    const cartel = leader('cartel');
+    expect(sourcesFor(cartel, drug, content)).toContain('dealer');
+    const normal = quote(none, drug, 'dealer', 3, false, content)!.unit;
+    expect(quote(cartel, drug, 'dealer', 3, false, content)!.unit).toBeLessThan(normal * 1.0001);
+    const gang = leader('street_gang');
+    expect(sourcesFor(gang, drug, content)).not.toContain('dealer');
+    const supplied = apply(gang, (d) => void (d.crime.crew!.supplier = d.orgs.cities[d.crime.crew!.cityId]!.find((o) => content.orgKinds[o.kind]!.supplies)!.id));
+    expect(sourcesFor(supplied, drug, content)).toContain('dealer');
+    expect(suppliedByCartel(apply(supplied, (d) => void (d.orgs.cities[d.crime.crew!.cityId]!.find((o) => o.id === d.crime.crew!.supplier)!.status = 'war')), content)).toBe(false);
   });
 });
 

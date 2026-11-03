@@ -12,7 +12,7 @@
 import { ORG_KINDS, type ContentBundle, type OrgKind } from '../../src/content/schemas';
 import { isLifeActionAvailable, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
 import { holdings } from '../../src/engine/crime/orgs';
-import { crewDef, isLeader, topRank } from '../../src/engine/crime/query';
+import { crewDef, isLeader } from '../../src/engine/crime/query';
 import { expandCost } from '../../src/engine/crime/decisions';
 import { chance, pick, type RngState } from '../../src/engine/rng';
 import type { LifeState } from '../../src/engine/types';
@@ -182,8 +182,6 @@ export class OrgsWatcher {
       k.entered++;
     }
     k.years++;
-    const peakIndex = Math.min(k.peak.length, Math.max(1, after.crime.peak));
-    void peakIndex;
     if (isLeader(after, this.content)) {
       if (!this.led) {
         this.led = true;
@@ -218,8 +216,6 @@ export class OrgsWatcher {
     const { r } = this;
     r.lives++;
     if (!this.everIn && life.crime.past.length === 0) return;
-    const best = (kind: OrgKind): number => 0 * kind.length;
-    void best;
     const ranks = [...life.crime.past.map((p) => ({ crew: p.crewId, rank: p.topRank })), ...(life.crime.crew ? [{ crew: life.crime.crew.defId, rank: life.crime.peak }] : [])];
     for (const x of ranks) {
       const def = crewDef(this.content, x.crew);
@@ -237,7 +233,6 @@ export class OrgsWatcher {
       if (life.crime.totals.arrests > this.arrestsAtLead) r.leaderArrestedLives++;
       if (life.death && this.content.registries.crime.deathCauses.includes(life.death.causeId)) r.leaderDeaths++;
     }
-    void topRank;
   }
 }
 

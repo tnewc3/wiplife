@@ -38,7 +38,9 @@ test('the Organization screen', async ({ page }) => {
   await shoot(page, 'members');
   await page.locator('[data-testid^="org-member-more-"]').first().click();
   await shoot(page, 'member-actions');
-  await page.keyboard.press('Escape');
+  // (A tap outside closes the sheet of actions only.)
+  await page.mouse.click(195, 30);
+  await page.waitForTimeout(200);
   await page.getByTestId('org-tab-territory').click();
   await shoot(page, 'territory');
   await page.getByTestId('org-tab-rivals').click();

@@ -29,6 +29,7 @@ import {
   TRAIT_LABELS,
   WEALTH_LABELS,
   GOD_CAREER_LABELS,
+  ORG_LABELS,
 } from '../../labels';
 import { Group, DollarField, RemoveButton, Row, Select, Toggle } from './controls';
 import { changeCount, cloneView, toPayload } from './draft';
@@ -467,7 +468,7 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
         <SingleChoice label={base.self ? GOD_FIELD_LABELS.familyWealth : GOD_FIELD_LABELS.wealth} value={v.wealth} columns={2} choices={(Object.keys(WEALTH_LABELS) as FamilyWealth[]).map((w) => ({ value: w, label: WEALTH_LABELS[w] }))} onChange={(w) => up((d) => (d.wealth = w))} />
       </Group>
 
-      {v.career && (v.career.sports || v.career.music || v.career.fame) && (
+      {v.career && (v.career.sports || v.career.music || v.career.fame || v.career.crime) && (
         <Group {...groupProps('career')}>
           {v.career.sports && (
             <Row testId="god-career-sports">
@@ -490,6 +491,30 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
                 <ScoreSlider key={m.id} label={`${m.name} · ${m.part}`} value={m.skill} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.music!.members[i]!.skill = x))} />
               ))}
               {v.career.music.releases > 0 && <Toggle label={GOD_CAREER_LABELS.clearReleases} checked={v.career.music.clearReleases} onChange={(x) => up((d) => (d.career!.music!.clearReleases = x))} />}
+            </Row>
+          )}
+          {v.career.crime && (
+            <Row testId="god-career-crime">
+              <p className="font-semibold">{GOD_CAREER_LABELS.crime}{v.career.crime.crew ? `: ${v.career.crime.crew}` : ''}</p>
+              {v.career.crime.ranks > 0 && <ScoreSlider label={`${GOD_CAREER_LABELS.crimeRank} (1 to ${v.career.crime.ranks})`} value={v.career.crime.rank} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 1 }} onChange={(x) => up((d) => (d.career!.crime!.rank = Math.max(1, Math.min(d.career!.crime!.ranks, x))))} />}
+              {v.career.crime.ranks > 0 && <ScoreSlider label={GOD_CAREER_LABELS.crimeStanding} value={v.career.crime.standing} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.crime!.standing = x))} />}
+              <ScoreSlider label={GOD_CAREER_LABELS.crimeHeat} value={v.career.crime.heat} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.crime!.heat = x))} />
+              <DollarField label={GOD_CAREER_LABELS.crimeDirty} value={v.career.crime.dirty} format={(n) => money(n)} onChange={(x) => up((d) => (d.career!.crime!.dirty = Math.max(0, x)))} />
+              {v.career.crime.cut !== null && (
+                <Select
+                  label={GOD_CAREER_LABELS.crimeCut}
+                  value={v.career.crime.cut}
+                  options={(['low', 'fair', 'high'] as const).map((c) => ({ value: c, label: ORG_LABELS.cut[c] }))}
+                  onChange={(x) => up((d) => (d.career!.crime!.cut = x as 'low' | 'fair' | 'high'))}
+                />
+              )}
+              {v.career.crime.members.map((m, i) => (
+                <div key={m.id} className="flex flex-col gap-1">
+                  <ScoreSlider label={`${m.name} · ${GOD_CAREER_LABELS.crimeSkill}`} value={m.skill} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.crime!.members[i]!.skill = x))} />
+                  <ScoreSlider label={`${m.name} · ${GOD_CAREER_LABELS.crimeLoyalty}`} value={m.loyalty} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.career!.crime!.members[i]!.loyalty = x))} />
+                </div>
+              ))}
+              {v.career.crime.war && <Toggle label={GOD_CAREER_LABELS.endWar} checked={v.career.crime.endWar} onChange={(x) => up((d) => (d.career!.crime!.endWar = x))} />}
             </Row>
           )}
           {v.career.fame && (

@@ -10,6 +10,6 @@ initiation:
   blurb: Associates are tested before they are members. Nobody tells you what the test is until it starts.
 jobs: [corner_dealing, street_robbery, protect_the_block, collect_on_the_block, recruit_associates, lie_low]
 codes:
-  - { id: stay_loud, text: "Quiet years cost you respect. A gang that is not seen is a gang that is forgotten.", check: idle, standing: 8 }
-  - { id: no_names, text: "Nobody gives the police a name. Not under pressure and not for a deal.", check: arrest, standing: 6 }
+  - { id: stay_loud, text: "Quiet years cost you respect. A gang that is not seen is a gang that is forgotten.", check: idle, standing: 4 }
+  - { id: no_names, text: "Nobody gives the police a name. Not under pressure and not for a deal.", check: arrest, standing: 3 }
 buys: true

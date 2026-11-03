@@ -41,12 +41,25 @@ export function nightlifeOpen(state: LifeState, content: ContentBundle): boolean
   });
 }
 
+/**
+ * O1: a cartel supplies the dealers and gangs below it. You are supplied when you are in a cartel (or in a gang or club that
+ * buys from one that is not at war with you): the dealer source is open to you without knowing a dealer, at the supply price.
+ */
+export function suppliedByCartel(state: LifeState, content: ContentBundle): boolean {
+  const crew = state.crime.crew;
+  const kind = crew ? content.crews[crew.defId]?.kind : undefined;
+  if (!crew || !kind || crew.cityId !== state.character.cityId) return false;
+  if (content.orgKinds[kind]?.supplies) return true;
+  const supplier = crew.supplier === undefined ? undefined : state.orgs.cities[crew.cityId]?.find((o) => o.id === crew.supplier);
+  return content.orgKinds[kind]?.buys === true && supplier !== undefined && supplier.status !== 'war';
+}
+
 /** The sources open to you for a drug now. */
 export function sourcesFor(state: LifeState, drugId: Id, content: ContentBundle): DrugSource[] {
   const def = drugDef(content, drugId);
   if (!def || !isAdult(state, content) || isIncarcerated(state)) return [];
   return def.sources.filter((s) => {
-    if (s === 'dealer') return liveDealers(state).length > 0;
+    if (s === 'dealer') return liveDealers(state).length > 0 || suppliedByCartel(state, content);
     if (s === 'contact') return contactPeople(state, content).length > 0 || liveDealers(state).length > 0;
     if (s === 'nightlife') return nightlifeOpen(state, content);
     return true;
@@ -65,7 +78,8 @@ export function quote(state: LifeState, drugId: Id, source: DrugSource, units: n
   if (!def) return null;
   const q = content.balance.drugs.sources[source].quality.mean;
   const discount = resale && units >= content.balance.drugs.dealing.resaleMin ? content.balance.drugs.buy.bulkDiscount : 0;
-  const unit = Math.max(1, Math.round(unitPrice(state, def, source, q, content) * (1 - discount)));
+  const supply = source === 'dealer' && suppliedByCartel(state, content) ? content.balance.orgs.supply.dealerPrice : 1;
+  const unit = Math.max(1, Math.round(unitPrice(state, def, source, q, content) * (1 - discount) * supply));
   return { unit, total: unit * units, discount };
 }
 

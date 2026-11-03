@@ -10,6 +10,6 @@ initiation:
   blurb: A prospect does what the club asks, for as long as it asks. The patch is a vote, and it is not always yes.
 jobs: [club_run, protect_the_clubhouse, side_business_work, corner_dealing, recruit_hangarounds, lie_low]
 codes:
-  - { id: club_first, text: "The club comes before everything else you have. Years of absence get remembered.", check: idle, standing: 8 }
-  - { id: no_snitching, text: "Nobody talks to the police about the club or about a brother.", check: arrest, standing: 10 }
+  - { id: club_first, text: "The club comes before everything else you have. Years of absence get remembered.", check: idle, standing: 4 }
+  - { id: no_snitching, text: "Nobody talks to the police about the club or about a brother.", check: arrest, standing: 3 }
 buys: true

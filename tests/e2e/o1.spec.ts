@@ -9,6 +9,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
 import { ageUp, expectNoHorizontalScroll, expectTouchTargets, goTab, openRow, passAgeGate, settle } from './helpers';
 import { orgLife, type OrgLife } from './o1Fixtures';
+import { teenLife } from './teenFixtures';
 
 async function open(page: Page, options: OrgLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -57,8 +58,10 @@ test('a leader gives a member a job from the row’s action sheet, and the year 
   await ageUp(page);
   await settle(page);
   await openOrg(page);
-  await page.getByTestId('org-recap').getByRole('button').click().catch(() => undefined);
+  await page.getByTestId('org-tab-overview').click();
   await expect(page.getByTestId('org-recap')).toBeVisible();
+  await page.getByTestId('org-recap').getByRole('button').click();
+  await expect(page.getByTestId('org-recap-list')).toContainText(/paid you|supplied|Did well|Went badly|Arrested|Hurt|Out of action|Killed/);
 });
 
 test('your cut changes from a sheet, and an attack on a neighborhood is ordered at a cost', async ({ page }) => {
@@ -96,9 +99,12 @@ test('someone who does not run the organization sees it but cannot decide', asyn
 });
 
 test('nobody under 18 has the screen: the Crime row is closed for a teenager', async ({ page }) => {
-  await open(page, { seed: 'e2e-o1-teen', age: 16 });
+  await passAgeGate(page, { testPack: true });
+  await loadSavedLife(page, teenLife({ seed: 'e2e-o1-teen', age: 16 }));
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await settle(page);
   await goTab(page, 'Job');
-  await page.getByTestId('special-crime').click();
+  await page.getByTestId('special-crime').click({ force: true });
   await expect(page.getByTestId('closed-reason')).toBeVisible();
   await expect(page.getByTestId('org-screen')).toHaveCount(0);
 });

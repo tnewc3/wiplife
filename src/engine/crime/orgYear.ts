@@ -163,11 +163,10 @@ function memberYear(state: LifeState, content: ContentBundle, id: Id, m: OrgMemb
     case 'earn':
     case 'supply': {
       const size = content.balance.crime.jobs.sizes[job.size ?? 'small'];
-      let take = 0;
-      let units = 0;
+      let take: number;
       if (job.effect === 'supply') {
         const drug = drugFor(state, content);
-        units = Math.max(1, Math.round(b.supply.units[job.danger] * skillFactor(m)));
+        const units = Math.max(1, Math.round(b.supply.units[job.danger] * skillFactor(m)));
         take = drug ? units * drug.price * payLevel(state, content) * share : 0;
         if (works) {
           ctx.recap.units += units;

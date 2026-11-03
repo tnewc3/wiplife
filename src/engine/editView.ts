@@ -4,9 +4,10 @@
  */
 import { TRAIT_KEYS, type ContentBundle, type CountryId, type DebtKind } from '../content/schemas';
 import { faithOf } from './belonging/faith';
+import { topRank } from './crime/query';
 import { attachedDebtIds } from './possessions/query';
 import { ageOf } from './relationships';
-import type { FamilyWealth, GenderCategory, Id, LifeState, Person, Personality, Pronouns, RelationshipKind, RelationshipStatus } from './types';
+import type { CutLevel, FamilyWealth, GenderCategory, Id, LifeState, Person, Personality, Pronouns, RelationshipKind, RelationshipStatus } from './types';
 
 export type TraitScores = Record<keyof Personality, number | null>;
 
@@ -56,6 +57,8 @@ export interface EditView {
     sports: { sport: string; position: Id; positions: { id: Id; label: string }[]; greatness: number; skills: { id: Id; label: string; level: number }[]; salary: number | null; seasons: number; clearHistory: boolean } | null;
     music: { band: string; buzz: number; chemistry: number; members: { id: Id; name: string; part: string; skill: number }[]; releases: number; clearReleases: boolean } | null;
     fame: { path: string; fame: number; image: number; fans: number; mood: number; agent: Id | null; hasContract: boolean; endContract: boolean } | null;
+    /** O1: your crime career: rank, standing, heat, dirty money, your cut, the members' skill and loyalty, and a war you can end. */
+    crime: { crew: string; rank: number; ranks: number; standing: number; heat: number; dirty: number; cut: CutLevel | null; members: { id: Id; name: string; skill: number; loyalty: number }[]; war: boolean; endWar: boolean } | null;
   } | null;
 }
 
@@ -146,8 +149,9 @@ export function getEditView(state: LifeState, target: 'self' | Id, content: Cont
 
 /** C2: the careers an edit can change. */
 function careerOf(state: LifeState, content: ContentBundle): NonNullable<EditView['career']> | null {
+  const crime = crimeOf(state, content);
   const f = state.fame;
-  if (!f.active || f.main === null) return null;
+  if (!f.active || f.main === null) return crime ? { sports: null, music: null, fame: null, crime } : null;
   const main = content.famePaths[f.main];
   const mainPath = f.paths[f.main];
   const sport = state.sports.sport !== null && f.main === state.sports.sport ? main?.sport : undefined;
@@ -177,5 +181,26 @@ function careerOf(state: LifeState, content: ContentBundle): NonNullable<EditVie
         }
       : null,
     fame: mainPath && main ? { path: main.name, fame: Math.round(mainPath.fame), image: f.image, fans: f.fans, mood: f.mood, agent: f.agent?.agentId ?? null, hasContract: f.contract !== null, endContract: false } : null,
+    crime,
+  };
+}
+
+/** O1: the crime career an edit can change: yours, in an organization or carrying heat or dirty money, for an adult. */
+function crimeOf(state: LifeState, content: ContentBundle): NonNullable<NonNullable<EditView['career']>['crime']> | null {
+  const k = state.crime;
+  if (state.character.age < content.balance.relationships.adultAge) return null;
+  if (!k.crew && k.heat === 0 && state.finances.dirty === 0) return null;
+  const crew = k.crew;
+  return {
+    crew: crew ? (content.crews[crew.defId]?.name ?? '') : '',
+    rank: k.rank,
+    ranks: crew ? topRank(content, crew.defId) : 0,
+    standing: k.standing,
+    heat: k.heat,
+    dirty: state.finances.dirty,
+    cut: crew ? (crew.cut ?? 'fair') : null,
+    members: crew ? Object.entries(crew.roster ?? {}).sort(([a], [b]) => (a < b ? -1 : 1)).map(([id, m]) => ({ id, name: `${state.people[id]?.name.first ?? ''} ${state.people[id]?.name.last ?? ''}`.trim(), skill: Math.round(m.skill), loyalty: Math.round(m.loyalty) })) : [],
+    war: crew?.war !== undefined,
+    endWar: false,
   };
 }
