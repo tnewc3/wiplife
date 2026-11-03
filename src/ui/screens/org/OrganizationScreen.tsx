@@ -9,6 +9,7 @@ import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { ListRow, RowList } from '../../components/ListRow';
 import { MiniBar } from '../../components/MiniBar';
 import { SegmentedTabs } from '../../components/SegmentedTabs';
+import { CrimeCard } from '../work/CrimeCard';
 import { Sheet } from '../../components/Sheet';
 import { HEAT_WORDS, money, ORG_LABELS, STANDING_WORDS } from '../../labels';
 
@@ -168,6 +169,9 @@ function Overview({ life, view, setPanel }: { life: LifeState; view: OrgView; se
         {view.war && <ListRow title={ORG_LABELS.rows.war} value={view.war.name} testId="org-row-war" />}
         {view.informant && <ListRow title={ORG_LABELS.rows.informant} subtitle={view.informant.name} ending={view.leader ? 'dots' : 'none'} onMore={() => setPanel({ kind: 'informant' })} moreLabel="Deal with the informant" moreTestId="org-informant-more" testId="org-row-informant" />}
       </RowList>
+      <CollapsibleGroup id="org-crime-card" title={ORG_LABELS.rows.record} defaultOpen testId="org-crime-record">
+        <CrimeCard life={life} />
+      </CollapsibleGroup>
       <CollapsibleGroup id="org-recap" title={ORG_LABELS.rows.recap} count={view.recap ? view.recap.year : 0} testId="org-recap">
         {view.recap === null ? (
           <p className="text-sm text-muted">{ORG_LABELS.recap.none}</p>

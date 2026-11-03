@@ -2727,6 +2727,7 @@ export const ORG_LABELS = {
     informant: 'Someone is talking',
     dirty: 'Dirty money',
     recap: 'Last year',
+    record: 'Your crime record',
     codes: 'The code',
   },
   noSupplier: 'No cartel. Street supply pays half.',
