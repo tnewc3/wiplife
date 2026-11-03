@@ -2,7 +2,7 @@ id: discipline_skimming
 title: Short on the count
 text: >-
   The numbers are off by exactly the amount {member.name} would take, if
-  {member.they} {member:were|were} the sort. {member.They} {member:has|have}
+  {member.they} {member:is|are} the sort. {member.They} {member:has|have}
   been loyal for a long time, and tired for longer. Now there is a decision about
   what you do when someone you trust has been taking from you.
 tone: dark

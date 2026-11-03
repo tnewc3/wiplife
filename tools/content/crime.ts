@@ -141,7 +141,8 @@ export function checkCrime(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
   }
   for (const city of active(bundle.cities)) {
     const hoods = city.neighborhoods ?? [];
-    if (hoods.length < 4) err(fileOf('cities', city.id), `${city.id}: needs at least four neighborhoods for organizations to hold`);
+    const crewsHere = active(bundle.crews).some((c) => c.cities.includes(city.id));
+    if (crewsHere && hoods.length < 4) err(fileOf('cities', city.id), `${city.id}: needs at least four neighborhoods for organizations to hold`);
     if (new Set(hoods.map((h) => h.id)).size !== hoods.length) err(fileOf('cities', city.id), `${city.id}: duplicate neighborhood ids`);
     if (new Set(hoods.map((h) => h.name)).size !== hoods.length) err(fileOf('cities', city.id), `${city.id}: duplicate neighborhood names`);
     if (STEREOTYPE_WORDS.test(hoods.map((h) => h.name).join(' '))) err(fileOf('cities', city.id), `${city.id}: a neighborhood name says nothing about race, religion, nationality or background`);

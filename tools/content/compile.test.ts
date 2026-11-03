@@ -1462,17 +1462,17 @@ describe('the teen years (T1)', () => {
 describe('crime careers (E6a)', () => {
   const read = (file: string) => readFile(path.join(dir, file), 'utf8');
 
-  it('accepts the real content: five crews, six businesses, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
+  it('accepts the real content: thirteen crews, six businesses, the crime events, and no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
-    expect(Object.keys(result.bundle.crews)).toHaveLength(5);
+    expect(Object.keys(result.bundle.crews)).toHaveLength(13);
     expect(Object.keys(result.bundle.fronts)).toHaveLength(6);
     const categories = ['crimeoffers', 'crime', 'crimeaway', 'crimehome', 'crimelaw', 'crimepast'];
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && categories.includes(e.category));
     for (const city of Object.values(result.bundle.cities)) expect(Object.values(result.bundle.crews).filter((c) => c.cities.includes(city.id)).length, city.id).toBeGreaterThanOrEqual(2);
     expect(events.length).toBeGreaterThanOrEqual(54);
     // (Batch 2b adds the loan shark's four events to the crime category crimelaw.)
-    expect(events.length).toBeLessThanOrEqual(66);
+    expect(events.length).toBeLessThanOrEqual(100);
     expect(result.warnings).toEqual([]);
   });
 
@@ -1560,9 +1560,9 @@ describe('crime careers (E6a)', () => {
     const crew = await read('crews/cinder_row_outfit.yaml');
     await write('crews/cinder_row_outfit.yaml', crew.replace('[chicago, houston, small_town, toronto, small_town_ca, manchester, small_town_uk, monterrey, small_town_mx]', '[chicago, houston, atlantis]'));
     expect(await expectErrors()).toContain('unknown city "atlantis"');
-    await write('crews/cinder_row_outfit.yaml', crew.replace('rivals: [marrow_street_crew, harrowgate_freight]', 'rivals: [nobody_at_all]'));
+    await write('crews/cinder_row_outfit.yaml', crew.replace('rivals: [marrow_street_crew, harrowgate_freight, ash_lane_runners, tallow_street_set]', 'rivals: [nobody_at_all]'));
     expect(await expectErrors()).toContain('unknown rival crew "nobody_at_all"');
-    await write('crews/cinder_row_outfit.yaml', crew.replace('cities: [chicago, houston, small_town, toronto, small_town_ca, manchester, small_town_uk, monterrey, small_town_mx]', 'cities: [small_town]').replace('rivals: [marrow_street_crew, harrowgate_freight]', 'rivals: [marrow_street_crew]'));
+    await write('crews/cinder_row_outfit.yaml', crew.replace('cities: [chicago, houston, small_town, toronto, small_town_ca, manchester, small_town_uk, monterrey, small_town_mx]', 'cities: [small_town]').replace('rivals: [marrow_street_crew, harrowgate_freight, ash_lane_runners, tallow_street_set]', 'rivals: [marrow_street_crew]'));
     expect(await expectErrors()).toContain('works in none of');
     await write('crews/cinder_row_outfit.yaml', crew);
     const event = await read('events/any/crime/close_call_followed.yaml');
@@ -1572,7 +1572,7 @@ describe('crime careers (E6a)', () => {
 
   it('keeps crews and businesses made up, and crime at the level of story', { timeout: 90_000 }, async () => {
     const crew = await read('crews/velvet_hand.yaml');
-    await write('crews/velvet_hand.yaml', crew.replace('A crew of smooth talkers', 'An Italian mafia of smooth talkers'));
+    await write('crews/velvet_hand.yaml', crew.replace('A family of smooth talkers', 'An Italian mafia of smooth talkers'));
     expect(await expectErrors()).toContain('says nothing about race, religion, nationality or background');
     await write('crews/velvet_hand.yaml', crew);
     const front = await read('fronts/dots_lucky_lanes.yaml');

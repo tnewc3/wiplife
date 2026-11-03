@@ -46,9 +46,9 @@ choices:
     label: Stay independent
     outcome:
       text: >-
-        The man across from you looks at you for a while, then at the table. He
-        says that is a decision and that he will remember it. You are not sure
-        whether it was a threat.
+        The person across from you looks at you for a while, then at the table.
+        They say that is a decision, and that it will be remembered. You are not
+        sure whether it was a threat.
       effects:
         - { type: stat, key: stress, delta: 4 }
         - { type: flag, key: turned_down_a_crew, value: true }
