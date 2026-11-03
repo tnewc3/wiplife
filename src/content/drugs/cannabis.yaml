@@ -1,0 +1,16 @@
+id: cannabis
+name: Cannabis
+noun: cannabis
+category: cannabis
+blurb: Slow, warm and easy to underestimate. It makes a long evening short and a long week blurry.
+unit: { one: bag, many: bags }
+price: { min: 20, max: 45 }
+effects: { happiness: 4, stress: -4, health: 0 }
+long: { health: 0.5, work: 1.5, school: 0.12, bonds: 0.5 }
+strength: 0.8
+tolerance: 4
+overdose: 0.0001
+severity: 1
+sources: [dealer, contact, nightlife, market]
+produce: [grow]
+withdrawal: 3

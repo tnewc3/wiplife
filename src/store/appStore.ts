@@ -111,7 +111,7 @@ export interface AppState {
   /** The person open on the People tab, if any (E5: or a pet, by its possession id). */
   personId: string | null;
   /** U1: a page open over the current tab (Assets → Properties, Profile → Health, Activities → Social media...), if any; Back returns to the tab. */
-  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'social' | null;
+  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'social' | 'drugMarket' | 'recovery' | null;
   /** U2: the part of the Groups page that is open: the clubs, the causes, the civic groups, your faith, or other faiths to explore (Activities → Groups and Faith). */
   groupsFocus: GroupsFocus;
   /** U2: the in-screen tab of the Assets tab that is open (it survives a page opened over it). */
@@ -228,6 +228,11 @@ export interface AppState {
   setGroupOpen: (id: string, open: boolean) => Promise<void>;
   /** Batch 8: opens the Social screen (Activities, and Job for creators). */
   openSocial: () => void;
+  /** D1: the drug market (buy and stash) and the recovery page, opened from Activities. */
+  openDrugMarket: (tab?: 'buy' | 'stash') => void;
+  drugTab: 'buy' | 'stash';
+  setDrugTab: (tab: 'buy' | 'stash') => void;
+  openRecovery: () => void;
   /** U1: Assets → Possessions (E5). */
   openBelongings: () => void;
   /** U1: Activities → Teen years (T1). */
@@ -538,6 +543,7 @@ export function createAppStore({
         editorTarget: null,
         moreView: null,
         groupsFocus: 'club',
+        drugTab: 'buy',
         assetsSection: 'money',
         activityCategory: null,
         interactSheet: null,
@@ -1039,6 +1045,24 @@ export function createAppStore({
             });
           }
         },
+
+        openDrugMarket: (tab = 'buy') =>
+          set((s) => {
+            if (s.life) {
+              s.moreView = 'drugMarket';
+              s.drugTab = tab;
+            }
+          }),
+
+        setDrugTab: (tab) =>
+          set((s) => {
+            s.drugTab = tab;
+          }),
+
+        openRecovery: () =>
+          set((s) => {
+            if (s.life) s.moreView = 'recovery';
+          }),
 
         openSocial: () =>
           set((s) => {

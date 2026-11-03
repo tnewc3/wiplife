@@ -1,0 +1,34 @@
+id: drug_stash_stolen
+title: The empty space
+text: >-
+  You go to check the place you keep it and the place is empty. There is no
+  mess and no sign of anything forced, which means someone knew exactly where
+  to look. You cannot call anyone about it, and they know that too.
+tone: serious
+category: drugdeal
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { ops: { eq: 0 } } }
+weight: { base: 6 }
+followUpOnly: true
+choices:
+  - id: ask
+    label: Quietly ask around
+    outcome:
+      text: >-
+        You ask the people who might know. No one knows anything, with perfect
+        sincerity, and a name is never offered.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+  - id: move
+    label: Change where you keep things
+    outcome:
+      text: >-
+        You move what is left and tell nobody. It is a tidy decision, and it
+        leaves you slightly lonelier than before.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

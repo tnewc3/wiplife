@@ -16,7 +16,7 @@ import { fittingResults, queueResult } from './result';
  * nothing is charged twice. The common checks (between years, input
  * validation, the input log) live in ./index.ts.
  */
-import { LIFESTYLES, type FindDateWay, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PastimeQuality, type PastimeRoute, type PastimeStake, type PetSourceId, type SchoolPath, type TeenFocusId, type Tier } from '../../content/schemas';
+import { LIFESTYLES, type DealPrice, type DrugSource, type UseDose, type FindDateWay, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PastimeQuality, type PastimeRoute, type PastimeStake, type PetSourceId, type SchoolPath, type TeenFocusId, type Tier } from '../../content/schemas';
 import { canStartDebtPlan, isIndependent, payDebt, spend, startDebtPlan } from '../finance';
 import { buyHome, joinableParent, moveInCost, moveTo, purchaseQuote, refreshHousingCost, sellHome } from '../housing';
 import { afterMove } from '../career';
@@ -33,6 +33,7 @@ import { PERSONAL_ACTION_IDS, PERSONAL_ACTIONS } from './personal';
 import { POSSESSION_ACTION_IDS, POSSESSION_ACTIONS } from './possessions';
 import { TEEN_ACTION_IDS, TEEN_ACTIONS } from './teen';
 import { CRIME_ACTION_IDS, CRIME_ACTIONS } from './crime';
+import { DRUG_ACTION_IDS, DRUG_ACTIONS } from './drugs';
 import { FAME_ACTION_IDS, FAME_ACTIONS } from './fame';
 import { SOCIAL_ACTION_IDS, SOCIAL_ACTIONS } from './social';
 import { SPORTS_ACTION_IDS, SPORTS_ACTIONS } from './sports';
@@ -50,7 +51,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...LANGUAGE_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS, ...HUB_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...LANGUAGE_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...DRUG_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS, ...HUB_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'set_body', 'write_will'];
@@ -116,6 +117,15 @@ export interface LifeActionParams {
   /** E6a: dirty money: the business to launder through, and how much (whole dollars). */
   frontId?: string;
   amount?: number;
+  /** D1: drugs: the drug, where it is bought, how many units, whether it is for resale, the dose, a dealing price, an operation and how it runs. */
+  drugId?: string;
+  drugSource?: DrugSource;
+  units?: number;
+  resale?: boolean;
+  dose?: UseDose;
+  dealPrice?: DealPrice;
+  opId?: string;
+  running?: 'low' | 'full';
   /** E6b: fame: a path and the way in, a project's kind and creative choices, your commitment and scene, an agent. */
   pathId?: string;
   routeId?: string;
@@ -369,6 +379,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...POSSESSION_ACTIONS,
   ...TEEN_ACTIONS,
   ...CRIME_ACTIONS,
+  ...DRUG_ACTIONS,
   ...FAME_ACTIONS,
   ...SOCIAL_ACTIONS,
   ...SPORTS_ACTIONS,

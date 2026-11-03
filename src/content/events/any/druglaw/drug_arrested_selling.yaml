@@ -1,0 +1,40 @@
+id: drug_arrested_selling
+title: Everything at once
+text: >-
+  They come early, and in numbers, and they know where everything is. There
+  is no scramble and no chase, only a long morning in which every room of your
+  life is turned out onto the floor and photographed.
+tone: dark
+category: druglaw
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { dealing: true } }
+    - { record: { within: 1 } }
+weight: { base: 10 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: lawyer
+    label: Hire the best lawyer you can reach
+    outcome:
+      text: >-
+        The lawyer is expensive and unhurried and gets the charges down a rung.
+        It is a sentence you can live inside. Everything else about your life
+        is rearranged.
+      effects:
+        - { type: dirtyMoney, pay: big }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: drugs, action: stop }
+  - id: plea
+    label: Plead and hope for mercy
+    outcome:
+      text: >-
+        You say the words in a quiet room to a judge who has heard them before.
+        The people you worked with stop calling. It is not a surprise.
+      effects:
+        - { type: stat, key: stress, delta: 7 }
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: drugs, action: stop }

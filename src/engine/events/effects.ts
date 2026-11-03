@@ -37,6 +37,7 @@ import { applyIntroduce, applyKnowledge, applyTie, noteIdentityAccepted } from '
 import { shiftMood } from '../interactions/mood';
 import { applyPossessionEffect } from '../possessions/effects';
 import { applyTeenEffect } from '../teen/effects';
+import { applyDrugsEffect } from '../drugs/effects';
 import { applyCrimeEffect, applyDirtyMoneyEffect } from '../crime/effects';
 import { applyFameEffect, applyFamePayEffect } from '../fame/effects';
 import { applyBandEffect } from '../fame/band';
@@ -404,6 +405,7 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
 
   // E6a: a life in a crew, and dirty money.
   crime: (state, effect, ctx) => applyCrimeEffect(state, effect, ctx.cast, ctx.content),
+  drugs: (state, effect, ctx) => applyDrugsEffect(state, effect, ctx.content),
   dirtyMoney: (state, effect, ctx) => applyDirtyMoneyEffect(state, effect, ctx.rng, ctx.content),
 
   // E6b: fame in arts and media, and money from the work.

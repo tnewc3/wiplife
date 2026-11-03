@@ -1,0 +1,112 @@
+# D1: drug numbers. Prices are US dollars (scaled by the city and the country). Everything is a story-level abstraction:
+# odds, prices, effects and consequences. See docs/careers-crime-and-ui.md (D1) for the rules these serve.
+ages: { use: 16, adult: 18 }
+threshold: 25
+legacyDrug: painkillers
+cityPrice: 0.8
+sources:
+  dealer:    { price: 1.0,  quality: { mean: 62, sd: 14 }, ripoff: 0.03, bad: 0.07, robbed: 0.02, arrest: 0.01 }
+  contact:   { price: 0.9,  quality: { mean: 56, sd: 16 }, ripoff: 0.05, bad: 0.10, robbed: 0.03, arrest: 0.015 }
+  nightlife: { price: 1.4,  quality: { mean: 48, sd: 18 }, ripoff: 0.10, bad: 0.16, robbed: 0.04, arrest: 0.03 }
+  market:    { price: 1.15, quality: { mean: 52, sd: 20 }, ripoff: 0.12, bad: 0.18, robbed: 0.07, arrest: 0.04 }
+buy:
+  amounts: [1, 3, 10, 30]
+  heat: 0.0015
+  record: 1.4
+  recordMax: 3
+  robbedCash: 0.3
+  badQuality: 18
+  cap: 400
+  bulkDiscount: 0.35
+  heatBuy: 1
+  heatResale: 6
+  introduce: 0.35
+  dealerAge: { min: 22, max: 50 }
+  dealersMax: 3
+stash:
+  hideCost: 2
+  hideFind: 0.45
+  search: 0.25
+  theft: 0.04
+use:
+  perYear: 24
+  doses:
+    light: { units: 1, effect: 1, risk: 1, dependence: 1 }
+    heavy: { units: 3, effect: 1.5, risk: 3, dependence: 2 }
+  quality: 0.5
+  blunt: 0.6
+  vice:
+    - { at: 0, x: 0.4 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 2 }
+  mixing: 1.8
+  repeats: 0.8
+  first: 0.35
+  reputation: 3
+habit:
+  heavyUses: 8
+  maxUses: 30
+  clean: { dependence: 7, tolerance: 25 }
+  decay: 4
+  craving: 40
+  drift: 0.006
+  cost: 9000
+  notice: { at: 35, chance: 0.4 }
+overdose:
+  tolerance: 0.8
+  bad: 3
+  dependence: 0.6
+  outcomes: { scare: 0.55, er: 0.35, death: 0.10 }
+  signsForDeath: 1
+  signsFade: 4
+  er: { health: 14, bill: 6000, stress: 10 }
+  scare: { health: 4, stress: 6 }
+  rollEvery: 10
+recovery:
+  quit: { dependence: 15, stress: 6, happiness: -4 }
+  recoveredYears: 3
+  relapse: { base: 0.18, fall: 0.3, stress: 0.0015, floor: 0.004, supported: 0.5 }
+  relapseShare: 0.6
+  withdrawalYear: 8
+  activities: [go_to_a_support_group, call_your_sponsor, see_a_counselor, check_into_rehab]
+dealing:
+  customers: { start: 5, max: 120, growth: 0.25, loss: 0.1, perUnit: 7 }
+  prices: { low: 0.8, fair: 1.0, high: 1.3 }
+  demand: { low: 1.35, fair: 1.0, high: 0.7 }
+  heat: { base: 4, perTenUnits: 1.2, high: 2 }
+  trouble: { robbery: 0.08, rival: 0.08, snitch: 0.05 }
+  owed: 0.06
+  standing: { perYear: 4, loss: 12 }
+  stress: 5
+  kindness: 0.8
+  resaleMin: 10
+production:
+  quality: { up: 6, down: 8 }
+  runs: { low: 0.4, full: 1 }
+  heat: 1.2
+  fireLoss: 0.5
+  seize: 0.8
+  runHeat: 8
+  wholesale: 0.5
+  stress: 5
+  max: 2
+legal:
+  possession: [drug_possession_minor, drug_possession, drug_possession, drug_possession_serious, drug_possession_serious]
+  intent: possession_with_intent
+  dealing: drug_dealing
+  trafficking: drug_trafficking
+  manufacturing: drug_manufacturing
+  intentAt: 6
+  traffickingAt: 40
+  soldTrafficking: 120
+enhancers:
+  drug: steroids
+  units: 1
+events:
+  offered: 0.08
+  craving: 0.5
+  withdrawal: 0.5
+  noticed: 0.4
+  tempted: 0.25
+  approach: 0.05
+  maxQueued: 3

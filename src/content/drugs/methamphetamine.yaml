@@ -1,0 +1,16 @@
+id: methamphetamine
+name: Methamphetamine
+noun: meth
+category: stimulant
+blurb: Days of tireless certainty, and a body and a life that pay for every one of them.
+unit: { one: gram, many: grams }
+price: { min: 40, max: 90 }
+effects: { happiness: 6, stress: -2, health: -4 }
+long: { health: 4.5, work: 5, school: 0.4, bonds: 3 }
+strength: 9
+tolerance: 14
+overdose: 0.003
+severity: 5
+sources: [dealer, contact, market]
+produce: [lab]
+withdrawal: 12

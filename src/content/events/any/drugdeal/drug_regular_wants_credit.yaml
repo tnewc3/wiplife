@@ -1,0 +1,47 @@
+id: drug_regular_wants_credit
+title: "\"I'll have it Friday\""
+text: >-
+  A customer you have known a while is short, and asks for it on the
+  understanding that they will settle up on Friday. They have said it before.
+  They have also sometimes come through. Both of you know how this goes.
+tone: serious
+category: drugdeal
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { dealing: true } }
+    - { drugs: { customers: { gte: 2 } } }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: front
+    label: Let them have it on credit
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          Friday comes and they do. It builds a loyalty, of a kind, and a slightly
+          dangerous idea that you are the sort of person who is owed.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: drugs, action: customers, delta: 2 }
+      failure:
+        text: >-
+          Friday comes and goes, and then so do they. You write it off, and
+          cannot say who you are more angry with.
+        effects:
+          - { type: dirtyMoney, gain: petty }
+          - { type: stat, key: stress, delta: 3 }
+  - id: cash
+    label: Cash only
+    outcome:
+      text: >-
+        You say that is the rule, and they accept it, with some grace. Everyone
+        understands where they stand.
+      effects:
+        - { type: dirtyMoney, gain: petty }

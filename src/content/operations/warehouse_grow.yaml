@@ -1,0 +1,13 @@
+id: warehouse_grow
+name: Warehouse grow
+kind: grow
+blurb: A whole unit on an industrial estate. Real volume, real overhead and a lot more to lose.
+drugs: [cannabis]
+startup: 85000
+upkeep: 28000
+capacity: 400
+quality: { start: 55, max: 90 }
+raid: 0.09
+fire: 0.03
+theft: 0.06
+names: ["Estate Unit Nine", "Harbor Fields", "North Gate Growers", "Sable Yard", "Ironbridge Supply", "Deepwater Farms"]

@@ -20,6 +20,8 @@ import { StatPanel } from '../home/StatPanel';
 import { BelongingsScreen } from '../more/BelongingsScreen';
 import { FamilyScreen } from '../more/FamilyScreen';
 import { GroupsScreen } from '../more/GroupsScreen';
+import { DrugMarketScreen } from '../drugs/DrugMarketScreen';
+import { RecoveryScreen } from '../drugs/RecoveryScreen';
 import { HealthScreen } from '../more/HealthScreen';
 import { HousingScreen } from '../more/HousingScreen';
 import { LaterScreen } from '../more/LaterScreen';
@@ -46,6 +48,8 @@ const PAGE_TITLES = {
   belongings: 'Possessions',
   teen: 'Teen years',
   social: 'Social media',
+  drugMarket: 'Drug market',
+  recovery: 'Recovery',
 } as const;
 
 function PageHeader({ title, onBack, backLabel }: { title: string; onBack: () => void; backLabel: string }) {
@@ -101,6 +105,8 @@ export function GameScreen({ life }: { life: LifeState }) {
       groups: <GroupsScreen life={life} />,
       teen: <TeenScreen life={life} />,
       social: <SocialScreen life={life} />,
+      drugMarket: <DrugMarketScreen life={life} />,
+      recovery: <RecoveryScreen life={life} />,
     }[moreView]
   ) : tab === 'home' ? (
     <HomeTab life={life} />

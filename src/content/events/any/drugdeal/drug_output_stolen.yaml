@@ -1,0 +1,35 @@
+id: drug_output_stolen
+title: The year's work, gone
+text: >-
+  The people you trusted with the keys did not do anything dramatic. They
+  simply took the best of the year's work in the night and left the rest where
+  it was, a kind of insult. There is no one to complain to.
+tone: dark
+category: drugdeal
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { ops: { gte: 1 } } }
+weight: { base: 6 }
+followUpOnly: true
+choices:
+  - id: swallow
+    label: Swallow it
+    outcome:
+      text: >-
+        You swallow it. The place runs on, a little worse, and you check the
+        locks more than before.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+  - id: close
+    label: Shut the place down
+    outcome:
+      text: >-
+        You have had enough. You lock the door for the last time, and the
+        street outside looks the way it did before you ever started.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 1 }

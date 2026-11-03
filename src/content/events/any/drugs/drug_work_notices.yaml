@@ -1,0 +1,38 @@
+id: drug_work_notices
+title: Missed mornings
+text: >-
+  It has been showing at work: the late starts, the blank stares in
+  meetings, the work that comes back with mistakes you would once have caught.
+  Your manager asks to see you, and keeps the door closed.
+tone: serious
+category: drugs
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { career: { employed: true, retired: false } }
+    - { drugs: { dependence: { gte: 35 } } }
+weight: { base: 6 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: own
+    label: Admit you have been struggling
+    outcome:
+      text: >-
+        You tell them enough of the truth. They offer time off and a number to
+        call, and they say the job will still be here. You hope that is true.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: drugs, action: recover, delta: -3 }
+  - id: blame
+    label: Blame something else
+    outcome:
+      text: >-
+        You say it is family, or health, or a rough patch. They write it down,
+        and the way they write it down tells you it is on file.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: reputation, delta: -3 }

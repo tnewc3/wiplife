@@ -1,0 +1,15 @@
+id: ecstasy
+name: Ecstasy
+noun: ecstasy
+category: party
+blurb: Warm, loud and generous for a night, and a flat grey day or two after.
+unit: { one: dose, many: doses }
+price: { min: 15, max: 40 }
+effects: { happiness: 7, stress: -3, health: -2 }
+long: { health: 1, work: 1.5, school: 0.12, bonds: 1 }
+strength: 2
+tolerance: 7
+overdose: 0.0012
+severity: 3
+sources: [dealer, contact, nightlife, market]
+withdrawal: 3

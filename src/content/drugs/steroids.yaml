@@ -1,0 +1,15 @@
+id: steroids
+name: Performance enhancers
+noun: performance enhancers
+category: enhancer
+blurb: A season's course of something that buys an edge and charges for it later, in the body and in the headlines.
+unit: { one: course, many: courses }
+price: { min: 250, max: 700 }
+effects: { happiness: 1, stress: 0, health: -1 }
+long: { health: 2, work: 0, school: 0, bonds: 0.5 }
+strength: 1.5
+tolerance: 5
+overdose: 0.0003
+severity: 3
+sources: [dealer, contact, market]
+withdrawal: 2

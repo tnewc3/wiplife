@@ -60,9 +60,9 @@ setAutoFreeze(false);
 
 const started = Date.now();
 const players: SimulatedPlayer[] =
-  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal', 'star', 'athlete', 'activities', 'hub'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
-if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal' || p === 'star' || p === 'athlete' || p === 'activities' || p === 'hub')) {
-  console.error('--player must be all, both, careful, careless, spammer, criminal, star, athlete, activities or hub');
+  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal', 'star', 'athlete', 'activities', 'hub', 'drugs'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
+if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal' || p === 'star' || p === 'athlete' || p === 'activities' || p === 'hub' || p === 'drugs')) {
+  console.error('--player must be all, both, careful, careless, spammer, criminal, star, athlete, activities, hub or drugs');
   process.exit(2);
 }
 const generations = Number(values.generations);

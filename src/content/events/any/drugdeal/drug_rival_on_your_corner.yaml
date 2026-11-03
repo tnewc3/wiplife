@@ -1,0 +1,56 @@
+id: drug_rival_on_your_corner
+title: Someone new on the corner
+text: >-
+  There is someone new where your regulars used to find you, polite and
+  well-supplied and watching your customers with the unhurried look of a person
+  doing arithmetic. Two of them have already changed their habits.
+tone: dark
+category: drugdeal
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { dealing: true } }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: undercut
+    label: Cut your prices and keep your customers
+    outcome:
+      text: >-
+        You keep them, at a margin that makes you wince. It also makes the
+        other person notice you, which is a different kind of trouble.
+      effects:
+        - { type: drugs, action: standing, delta: -4 }
+        - { type: crime, action: heat, delta: 4 }
+  - id: warn
+    label: Make it clear this is yours
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: riskTaking, weight: 0.2 }]
+      success:
+        text: >-
+          You say it quietly and mean it, and they hear what you mean. The
+          corner is yours again. For now.
+        effects:
+          - { type: drugs, action: customers, delta: 1 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          They do not take it as well as you hoped. You spend a week looking
+          over your shoulder and a night in an emergency room.
+        effects:
+          - { type: stat, key: health, delta: -6 }
+          - { type: stat, key: stress, delta: 7 }
+  - id: leave
+    label: Let them have it, and stop
+    outcome:
+      text: >-
+        You put the phone down and mean it. The relief is odd and real, like
+        setting down something you had stopped noticing was heavy.
+      effects:
+        - { type: drugs, action: stop }
+        - { type: stat, key: stress, delta: -4 }

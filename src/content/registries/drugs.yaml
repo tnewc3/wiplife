@@ -1,0 +1,32 @@
+# The events the drugs step queues (D1). Every event listed must be followUpOnly: it only happens this way. Each is picked
+# by weight among those whose requirements fit now. The step (src/engine/drugs/step.ts) says when each trigger fires.
+#
+# offered     someone puts something in front of you (a party, a friend)
+# craving     a habit past the line asks for more; withdrawal: a first year without
+# noticed     the people close to you notice
+# tempted     you are quitting and it is within reach
+# approach    a dealer finds you (or someone who knows one)
+# scare       a bad hour: the warning sign an overdose needs first; er: the emergency room
+# ripoff, robbed   a deal went wrong (queued by the buy action for the year after)
+# arrest      the police arrested you (the court already decided; {sentence} says what)
+# customer, rival, snitch   dealing's trouble
+# raid, fire, theft         an operation or a stash
+triggers:
+  offered: { events: [drug_offered_at_a_party, drug_offered_by_a_friend] }
+  craving: { events: [drug_craving_at_night, drug_craving_payday] }
+  withdrawal: { events: [drug_withdrawal_bad_week, drug_withdrawal_alone] }
+  noticed: { events: [drug_someone_notices, drug_work_notices] }
+  tempted: { events: [drug_tempted_old_friend, drug_tempted_hard_day] }
+  approach: { events: [drug_dealer_approaches] }
+  scare: { events: [drug_bad_hour, drug_friend_calls_for_help] }
+  er: { events: [drug_emergency_room, drug_ambulance_night] }
+  ripoff: { events: [drug_taken_for_nothing] }
+  robbed: { events: [drug_robbed_on_the_way] }
+  arrest: { events: [drug_arrested_holding, drug_arrested_selling, drug_arrested_stash_found] }
+  customer: { events: [drug_regular_wants_more, drug_regular_wants_credit] }
+  rival: { events: [drug_rival_on_your_corner] }
+  snitch: { events: [drug_someone_talked] }
+  raid: { events: [drug_raid_on_operation] }
+  fire: { events: [drug_fire_at_the_operation] }
+  theft: { events: [drug_stash_stolen, drug_output_stolen] }
+deathCauses: [overdose]

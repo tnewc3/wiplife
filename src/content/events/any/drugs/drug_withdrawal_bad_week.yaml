@@ -1,0 +1,43 @@
+id: drug_withdrawal_bad_week
+title: A week of it
+text: >-
+  The first days without are the worst of it: the shaking, the sweats,
+  the nights that will not end and the days that do not start. Everything
+  that was dull before is now much too loud.
+tone: dark
+category: drugs
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { recovering: true } }
+    - { drugs: { dependence: { gte: 20 } } }
+weight: { base: 10 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: through
+    label: Get through it
+    outcome:
+      text: >-
+        You do it one hour at a time, and then one day at a time. On the
+        seventh morning you notice the sun in the kitchen, which you had not
+        seen in months.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: drugs, action: recover, delta: -5 }
+  - id: doctor
+    label: Ask a doctor for help
+    outcome:
+      text: >-
+        The doctor does not lecture. They write down what to expect, what to
+        take and when to call, and the week is still bad but it has an end.
+      effects:
+        - { type: cost, item: treatment_help }
+        - { type: stat, key: health, delta: 1 }
+        - { type: drugs, action: recover, delta: -6 }
+        - { type: stat, key: stress, delta: 2 }

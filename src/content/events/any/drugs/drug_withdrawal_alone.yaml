@@ -1,0 +1,38 @@
+id: drug_withdrawal_alone
+title: Nobody to tell
+text: >-
+  You have stopped, and nobody knows how hard it is. Everyone around you
+  thinks you are simply tired, or in a mood, or going through something.
+  Telling them would mean saying the word.
+tone: serious
+category: drugs
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { recovering: true } }
+weight: { base: 6 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: tell
+    label: Tell someone
+    outcome:
+      text: >-
+        You say it out loud to someone you trust, who goes still and then says
+        only that they are glad you told them. It is easier to carry with two.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: drugs, action: recover, delta: -3 }
+  - id: keep
+    label: Keep it to yourself
+    outcome:
+      text: >-
+        You hold it by yourself, which is its own kind of work. It leaves you
+        thin and snappish for weeks.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -2 }

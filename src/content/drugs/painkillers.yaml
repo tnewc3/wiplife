@@ -1,0 +1,15 @@
+id: painkillers
+name: Prescription painkillers
+noun: the pills
+category: opioid
+blurb: A prescription that outlived the injury. They sand off the pain and the rest of the day with it.
+unit: { one: strip, many: strips }
+price: { min: 25, max: 70 }
+effects: { happiness: 4, stress: -5, health: -1 }
+long: { health: 2, work: 3, school: 0.2, bonds: 1.5 }
+strength: 5
+tolerance: 9
+overdose: 0.0015
+severity: 3
+sources: [dealer, contact, market]
+withdrawal: 9

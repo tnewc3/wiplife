@@ -48,7 +48,7 @@ describe('the Activities tab content', () => {
     const ids = (category: string, section = 'activities') => reg.activities.filter((a) => a.category === category && a.section === section).map((a) => a.id);
     expect(ids('featured')).toEqual(['own_thing']);
     expect(ids('health')).toEqual(['doctor', 'er', 'eyes', 'dentist', 'therapist', 'alt_medicine', 'donate', 'cosmetic']);
-    expect(ids('recovery')).toEqual(['support_group', 'rehab', 'counseling']);
+    expect(ids('recovery')).toEqual(['support_group', 'rehab', 'counseling', 'recovery_program']);
     expect(ids('mind_body')).toEqual(['gym', 'walk', 'meditate', 'yoga', 'read']);
     expect(ids('outdoors')).toEqual(['hike', 'fish', 'camp', 'birdwatch', 'swim', 'offroad', 'garden']);
     expect(ids('outdoors', 'shopping')).toEqual(['outdoor_gear', 'offroad_vehicles']);

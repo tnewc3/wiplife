@@ -61,7 +61,7 @@ describe('the risk and legal content', () => {
   it('has at least 5 options in every category, each with outcome wordings', () => {
     for (const category of RISK_CATEGORIES) {
       const defs = all.filter((p) => p.category === category);
-      expect(defs.length, category).toBeGreaterThanOrEqual(5);
+      expect(defs.length, category).toBeGreaterThanOrEqual(category === 'black_market' ? 3 : 5);
       for (const d of defs) for (const tier of Object.values(d.tiers)) for (const list of [tier?.text, tier?.together]) if (list) expect(list.length, d.id).toBeGreaterThanOrEqual(2);
     }
   });
@@ -82,7 +82,7 @@ describe('the risk and legal content', () => {
     const ids = getActivitiesView(teen, content).groups.flatMap((g) => g.entries.map((e) => e.id));
     expect(ids).toContain('shoplift');
     expect(ids).toContain('vandalize');
-    for (const id of ['burglary', 'steal_a_car', 'hold_up_a_store', 'run_a_scam', 'buy_pills', 'buy_illegal_drugs', 'deal_on_the_side', 'play_the_slots', 'take_a_bank_loan', 'sue_your_employer', 'borrow_from_a_loan_shark']) expect(ids, id).not.toContain(id);
+    for (const id of ['burglary', 'steal_a_car', 'hold_up_a_store', 'run_a_scam', 'buy_a_fake_id', 'play_the_slots', 'take_a_bank_loan', 'sue_your_employer', 'borrow_from_a_loan_shark']) expect(ids, id).not.toContain(id);
   });
 });
 
@@ -188,20 +188,11 @@ describe('the black market', () => {
     expect(caught / uses).toBeGreaterThan(0.03);
     expect(caught / uses).toBeLessThan(0.35);
   });
-  it('can start a drug addiction and a possession charge through the health and legal systems, never for a minor', () => {
-    expect(content.pastimes.buy_pills!.minAge).toBe(18);
-    expect(content.pastimes.buy_illegal_drugs!.minAge).toBe(18);
-    let addicted = 0;
-    let charged = 0;
-    for (let i = 0; i < 300; i++) {
-      const life = produce(rich(lifeAtAge(`b2b-drugs-${i}`, 30)), (d) => void (d.character.hidden.vice = 80));
-      const after = settle(act(life, 'buy_illegal_drugs'));
-      if (after.health.conditions.some((c) => c.conditionId === 'drug_addiction')) addicted++;
-      if (after.legal.record.some((e) => e.offenseId === 'drug_possession')) charged++;
-      expect(checkInvariants(after, content)).toEqual([]);
-    }
-    expect(addicted).toBeGreaterThan(0);
-    expect(charged).toBeGreaterThan(0);
+  it('has no drug goods of its own any more: they moved to the drug market (D1), which addiction and the law reach through the same systems', () => {
+    expect(content.pastimes.buy_pills).toBeUndefined();
+    expect(content.pastimes.buy_illegal_drugs).toBeUndefined();
+    expect(content.pastimes.deal_on_the_side).toBeUndefined();
+    expect(content.registries.activities.activities.some((a) => a.id === 'drug_market' && a.opens === 'drug_market' && a.adultsOnly)).toBe(true);
   });
 });
 

@@ -2157,10 +2157,7 @@ describe('risk and legal activities (Batch 2b)', { timeout: 90_000 }, () => {
     const burglary = await read('pastimes/burglary.yaml');
     await write('pastimes/burglary.yaml', burglary.replace('minAge: 18', 'minAge: 15'));
     expect(await expectErrors()).toContain('a minor can only do petty crime');
-    const pills = await read('pastimes/buy_pills.yaml');
     await write('pastimes/burglary.yaml', burglary);
-    await write('pastimes/buy_pills.yaml', pills.replace('minAge: 18', 'minAge: 15'));
-    expect(await expectErrors()).toContain('not for an activity a minor can do');
   });
 
   it('keeps crime, the black market, gambling, lawsuits and loans at the level of story', async () => {
@@ -2170,12 +2167,6 @@ describe('risk and legal activities (Batch 2b)', { timeout: 90_000 }, () => {
     await write('pastimes/shoplift.yaml', shoplift.replace('Nobody looks twice.', 'Nobody looks twice, and the forged receipt holds.'));
     expect(await expectErrors()).toContain('instruction wording');
     await write('pastimes/shoplift.yaml', shoplift);
-    const drugs = await read('pastimes/buy_illegal_drugs.yaml');
-    await write('pastimes/buy_illegal_drugs.yaml', drugs.replace('The night is bright and big', 'Two grams, a cut with sugar, and the night is bright and big'));
-    expect(await expectErrors()).toContain('instruction wording');
-    await write('pastimes/buy_illegal_drugs.yaml', drugs.replace('A deal in a car park', 'Where to buy it: a car park'));
-    expect(await expectErrors()).toContain('instruction wording');
-    await write('pastimes/buy_illegal_drugs.yaml', drugs);
     const loan = await read('pastimes/take_a_payday_loan.yaml');
     await write('pastimes/take_a_payday_loan.yaml', loan.replace('The shop is bright and the form is short.', 'You can use a burner phone and avoid detection.'));
     expect(await expectErrors()).toContain('instruction wording');
@@ -2253,5 +2244,56 @@ describe('event card registries (U1)', { timeout: 90_000 }, () => {
     const noCredit = await check({ ...real, credits: real.credits.replace('public/icons/fire.svg', 'public/icons/other.svg') });
     expect(noCredit.ok).toBe(false);
     if (!noCredit.ok) expect(formatErrors(noCredit.errors)).toContain('icon "fire" is not credited in CREDITS.md');
+  });
+});
+
+
+describe('drugs (D1)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content: nine drugs, four operations, twenty-eight events, and no warnings', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(Object.keys(result.bundle.drugs)).toHaveLength(9);
+    expect(Object.keys(result.bundle.operations)).toHaveLength(4);
+    const events = Object.values(result.bundle.events).filter((e) => !e.retired && ['drugs', 'drugdeal', 'druglaw'].includes(e.category));
+    expect(events).toHaveLength(28);
+    expect(result.warnings.filter((w) => /drug/.test(JSON.stringify(w)))).toEqual([]);
+  });
+
+  it('keeps drugs at the level of story: no methods, doses or ways around the police', { timeout: 90_000 }, async () => {
+    const heroin = await read('drugs/heroin.yaml');
+    await write('drugs/heroin.yaml', heroin.replace('A warm nowhere to disappear into.', 'Here is how to take it, 20 mg, step by step.'));
+    expect(await expectErrors()).toContain('instruction wording');
+    await write('drugs/heroin.yaml', heroin);
+    const text = await read('text/drugs.yaml');
+    await write('text/drugs.yaml', text.replace('You bought {units} of {drug} from {source}', 'You bought {units} of {drug} and learned how to avoid detection'));
+    expect(await expectErrors()).toContain('instruction wording');
+  });
+
+  it('wants the trade to be for adults and a death to need a warning sign', { timeout: 90_000 }, async () => {
+    const claims = await read('events/any/drugdeal/drug_someone_talked.yaml');
+    await write('events/any/drugdeal/drug_someone_talked.yaml', claims.replace('    - { age: { gte: 18 } }\n', ''));
+    expect(await expectErrors()).toContain('require age 18');
+    await write('events/any/drugdeal/drug_someone_talked.yaml', claims);
+    const er = await read('events/any/drugs/drug_emergency_room.yaml');
+    await write('events/any/drugs/drug_emergency_room.yaml', er.replace('    - { drugs: { signs: { gte: 1 } } }\n', ''));
+    expect(await expectErrors()).toContain('must require a warning sign');
+    await write('events/any/drugs/drug_emergency_room.yaml', er);
+    const bad = er.replace('      effects:\n        - { type: drugs, action: quit }', '      effects:\n        - { type: death, cause: overdose }');
+    await write('events/any/drugs/drug_emergency_room.yaml', bad);
+    expect(await expectErrors()).toContain('never from an event');
+  });
+
+  it('wants the offenses, the enhancer drug and the operations to agree with the balance', { timeout: 90_000 }, async () => {
+    const balance = await read('balance/drugs.yaml');
+    await write('balance/drugs.yaml', balance.replace('intent: possession_with_intent', 'intent: nonesuch'));
+    expect(await expectErrors()).toContain('unknown offense "nonesuch"');
+    await write('balance/drugs.yaml', balance.replace('drug: steroids', 'drug: cannabis'));
+    expect(await expectErrors()).toContain('must be a drug of the enhancer category');
+    await write('balance/drugs.yaml', balance);
+    const op = await read('operations/backroom_grow.yaml');
+    await write('operations/backroom_grow.yaml', op.replace('drugs: [cannabis]', 'drugs: [heroin]'));
+    expect(await expectErrors()).toContain('does not list "grow" in produce');
   });
 });

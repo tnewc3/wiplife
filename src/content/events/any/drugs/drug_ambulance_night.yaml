@@ -1,0 +1,38 @@
+id: drug_ambulance_night
+title: Someone else's ambulance
+text: >-
+  You were not the one on the stretcher this time, but you rode in the
+  back anyway, holding a hand that had gone slack. The paramedic worked
+  calmly, saying a name over and over until the hand squeezed back.
+tone: dark
+category: drugs
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { signs: { gte: 1 } } }
+weight: { base: 4 }
+followUpOnly: true
+choices:
+  - id: change
+    label: Let it change you
+    outcome:
+      text: >-
+        You think about it for weeks. When you look at what you have been
+        doing, you see it from the paramedic's side for the first time.
+      effects:
+        - { type: drugs, action: quit }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: bury
+    label: Bury it
+    outcome:
+      text: >-
+        You do not talk about it. You do not talk about much of anything for a
+        while, and the quiet around you thickens.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: happiness, delta: -3 }

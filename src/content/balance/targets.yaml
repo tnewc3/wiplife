@@ -88,6 +88,11 @@ legal:
     disorderly_conduct: { min: 0.12, max: 0.35 }
     drug_dealing: { min: 0.03, max: 0.12 }
     drug_possession: { min: 0.03, max: 0.2 }
+    drug_possession_minor: { min: 0, max: 0.2 }
+    drug_possession_serious: { min: 0, max: 0.1 }
+    drug_manufacturing: { min: 0, max: 0.05 }
+    drug_trafficking: { min: 0, max: 0.05 }
+    possession_with_intent: { min: 0, max: 0.08 }
     dui: { min: 0.06, max: 0.18 }
     fraud: { min: 0.02, max: 0.12 }
     probation_violation: { min: 0.01, max: 0.06 }
@@ -470,6 +475,26 @@ hub:
   memberGrowth: { min: 2, max: 40 }
   # Of those who took performance enhancers at the pro level, the share that failed a test.
   testedPositive: { min: 0, max: 1 }
+
+# D1: drugs, judged on the drugs player. Ranges sit around the first 300-life run; they are tightened after the 10,000-life run.
+drugs:
+  # Nobody under 18 holds a stash, deals or runs an operation.
+  minorTrade: { min: 0, max: 0 }
+  # An overdose never comes from a first use, and never kills without a warning sign first.
+  firstUseOverdose: { min: 0, max: 0 }
+  deathNoSign: { min: 0, max: 0 }
+  # Measured over 10,000 drugs-player lives (ten shards of 1,000; per shard: used 91.4-94.3%, addicted 39.4-43.8% of users, scare or ER
+  # 11.8-17.6%, recovered 41.6-49.6% of the addicted, relapsed 48.9-57.6%, dealt 35.9-42.5%, dirty money a dealing life $32.6k-45.1k,
+  # arrested 58.3-63.8%, 4 overdose deaths in 9,275 users). The ranges are the measured ones with room either side.
+  used: { min: 0.85, max: 1 }
+  addicted: { min: 0.3, max: 0.55 }
+  overdoseDeaths: { min: 0, max: 0.01 }
+  scares: { min: 0.07, max: 0.25 }
+  recovered: { min: 0.3, max: 0.65 }
+  relapsed: { min: 0.4, max: 0.7 }
+  dealers: { min: 0.25, max: 0.5 }
+  dealingIncome: { min: 20000, max: 80000 }
+  arrested: { min: 0.45, max: 0.72 }
 
 sports:
   # Nobody under 18 is ever in the pros or under a pro contract.

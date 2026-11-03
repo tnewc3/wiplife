@@ -1,0 +1,48 @@
+id: drug_offered_at_a_party
+title: Passed around
+text: >-
+  The music is loud and the room is warm, and somebody you half know is
+  working their way along the sofa with something small in their palm. When it
+  gets to you, the whole conversation seems to pause to see what you will do.
+tone: neutral
+category: drugs
+rarity: common
+lifeStages: [teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { drugs: { addicted: false } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { hidden: vice, gt: 55 }, x: 2 }
+    - { if: { trait: discipline, gt: 65 }, x: 0.5 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: take
+    label: Take it
+    outcome:
+      text: >-
+        You do, and for a few hours it is exactly as good as everyone said. You
+        also notice how easy it was to say yes.
+      effects:
+        - { type: drugs, action: use, drug: ecstasy }
+        - { type: stat, key: vice, delta: 2 }
+  - id: smoke
+    label: Take a hit of something milder
+    outcome:
+      text: >-
+        Something softer goes round instead, and you take it. The evening
+        slows down, and you laugh more than you meant to.
+      effects:
+        - { type: drugs, action: use, drug: cannabis }
+  - id: decline
+    label: Say no, and stay anyway
+    outcome:
+      text: >-
+        Nobody makes a thing of it. One person looks at you a bit longer than
+        the others, and then the thing moves on down the sofa.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: vice, delta: -1 }

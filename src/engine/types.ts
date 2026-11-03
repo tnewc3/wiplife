@@ -2,6 +2,7 @@ import type { BrowStyle, ClothingColor, Earrings, EyeColor, EyeShape, Eyewear, F
 import type { TravelState } from './travel/types';
 import type { MigrationState } from './migration/types';
 import type { CountryId } from '../content/schemas';
+import type { DealPrice } from '../content/schemas/drugs';
 import type { LanguageSkill } from '../content/schemas/languages';
 import type { LanguageLearning } from './languages';
 import type { AddedTeam, TeamSetup } from './sports/setup';
@@ -1315,13 +1316,127 @@ export interface LifeState {
   social: SocialState;
   /** C2: the Career hub: skills, the time each role takes, total load and burnout, performance enhancers and a band's audition pool. */
   hub: HubState;
+  /** D1: drugs: what you hold, your habits (tolerance, dependence), the dealers you know, dealing, and the grow operations and labs you run. */
+  drugs: DrugsState;
+}
+
+/** D1: a drug you hold: units, the average quality (0–100) and whether it is kept hidden. */
+export interface DrugStock {
+  units: number;
+  quality: number;
+  hidden: boolean;
+}
+
+/** D1: your habit with one drug. */
+export interface DrugHabit {
+  /** 0–100; at the balance's threshold the addiction shows as a condition. */
+  dependence: number;
+  /** 0–100; it blunts the effects and raises the risk of a heavy dose. */
+  tolerance: number;
+  /** The highest dependence you have had. */
+  peak: number;
+  /** Uses in `year` (a new year starts from nothing). */
+  year: number;
+  uses: number;
+  /** All uses, and the year of the last (0 for never). */
+  total: number;
+  last: number;
+  /** Whole years in a row with no use, while dependence is above 0 or you quit. */
+  clean: number;
+  /** You stopped on purpose, in `quitYear` (0 for never), and you count as recovered once you pass the years clean. */
+  quitYear: number;
+  recovered: boolean;
+  relapses: number;
+}
+
+/** D1: what you sell. */
+export interface DealingState {
+  since: number;
+  /** The drug you mostly sell. */
+  drugId: Id;
+  /** The people who buy from you (a count; they are not on your People list). */
+  customers: number;
+  price: DealPrice;
+  /** 0–100: how much those who supply you and buy from you trust you. */
+  standing: number;
+  /** Units sold and money earned (dirty) this year. */
+  year: { year: number; sold: number; earned: number; trouble: number };
+}
+
+/** D1: a grow operation or a lab (a W3 business type). */
+export interface DrugOp {
+  id: Id;
+  defId: Id;
+  name: string;
+  cityId: Id;
+  drugId: Id;
+  founded: number;
+  /** 0–100. */
+  quality: number;
+  running: 'low' | 'full';
+  /** What the fit-out is worth now (whole dollars). */
+  assets: number;
+  /** The last year's output (units) and the year it ran. */
+  last: { year: number; units: number };
+}
+
+/** D1: lifetime counts for the simulation and the Health and Recovery screens. */
+export interface DrugTotals {
+  uses: number;
+  bought: number;
+  spent: number;
+  ripoffs: number;
+  robbed: number;
+  arrests: number;
+  scares: number;
+  visits: number;
+  hooked: number;
+  quits: number;
+  recoveries: number;
+  relapses: number;
+  sold: number;
+  earned: number;
+  produced: number;
+  raids: number;
+  overdoseDeaths: number;
+}
+
+/** D1: what your latest drug action came to, for the screen to show (the words, the amount and your balance after). */
+export interface DrugResult {
+  action: 'buy' | 'use' | 'quit' | 'deal' | 'operation' | 'dealer' | 'stash' | 'enhancers';
+  kind: string;
+  drugId?: Id;
+  units?: number;
+  /** Money spent (positive) or gained (negative), whole dollars, and the savings afterwards. */
+  amount: number;
+  balance: number;
+  note: string;
+}
+
+export interface DrugsState {
+  /** The result of the latest action (null before any). */
+  last: DrugResult | null;
+  stock: Record<Id, DrugStock>;
+  habits: Record<Id, DrugHabit>;
+  /** Dealers you know (people with the `dealer` tag who sell to you). */
+  dealers: Id[];
+  /** Warning signs (a bad hour, an ER visit): a death from an overdose needs one first. The year of the latest. */
+  signs: { count: number; last: number; drug?: Id };
+  /** The severity the addiction condition was last set to by the drugs step (0: none), so a change from outside is noticed. */
+  synced: number;
+  dealing: DealingState | null;
+  ops: DrugOp[];
+  nextOp: number;
+  /** This year's buying and using, for limits and the year's recap. */
+  year: { year: number; uses: number; bought: number; spent: number };
+  totals: DrugTotals;
 }
 
 /** C2: how much of yourself you give a role. */
 export type CommitLevel = 'back' | 'steady' | 'all';
 
 /** C2: the roles that take your time (each has a cost by commitment in balance/careers.yaml hub). */
-export type RoleId = 'school' | 'job' | 'gig' | 'sports' | 'fame' | 'band' | 'business' | 'crime' | 'social';
+export type RoleId = 'school' | 'job' | 'gig' | 'sports' | 'fame' | 'band' | 'business' | 'crime' | 'social' | 'dealing';
 
 /** C2: a skill that lives in the hub (a hobby): where it stands, the highest it has been, and the last year it was used. */
 export interface SkillRecord {

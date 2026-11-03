@@ -15,7 +15,7 @@ import { mySport } from '../sports/query';
 import type { CommitLevel, Id, LifeState, RoleId } from '../types';
 import { schoolLineOf } from './schoolLine';
 
-export type RoleOpens = 'school' | 'job' | 'gig' | 'sports' | 'fame' | 'band' | 'business' | 'crime' | 'social';
+export type RoleOpens = 'school' | 'job' | 'gig' | 'sports' | 'fame' | 'band' | 'business' | 'crime' | 'social' | 'dealing';
 
 export interface RoleRowView {
   id: RoleId;
@@ -23,7 +23,7 @@ export interface RoleRowView {
   title: string;
   subtitle: string;
   /** The one key bar (null when the role has none). `label` is a key into the UI's bar words. */
-  bar: { key: 'greatness' | 'buzz' | 'grades' | 'performance' | 'rank' | 'fame'; value: number } | null;
+  bar: { key: 'greatness' | 'buzz' | 'grades' | 'performance' | 'rank' | 'fame' | 'standing'; value: number } | null;
   commit: CommitLevel;
   share: number;
   opens: RoleOpens;
@@ -52,7 +52,7 @@ export interface HubView {
   gave: { year: number; what: 'grades' | 'job' | 'bench' | 'band' } | null;
   skills: SkillRowView[];
   /** Special careers you could look at, and whether each is open. */
-  special: { id: 'sports' | 'music' | 'acting' | 'social' | 'writing' | 'business' | 'crime'; icon: string; open: boolean; minAge: number }[];
+  special: { id: 'sports' | 'music' | 'acting' | 'social' | 'writing' | 'business' | 'crime' | 'drugs'; icon: string; open: boolean; minAge: number }[];
 }
 
 function band(value: number, cuts: readonly [number, number, number]): 0 | 1 | 2 | 3 {
@@ -134,6 +134,10 @@ export function getHubView(state: LifeState, content: ContentBundle): HubView {
     } else if (id === 'crime') {
       const c = state.crime;
       row({ icon: 'sunglasses', title: content.crews[c.crew!.defId]?.name ?? '', subtitle: '', bar: { key: 'rank', value: Math.round((c.rank / 5) * 100) } });
+    } else if (id === 'dealing') {
+      const d = state.drugs.dealing;
+      const first = state.drugs.ops[0];
+      row({ icon: 'money_with_wings', title: d ? (content.drugs[d.drugId]?.name ?? '') : (first?.name ?? ''), subtitle: '', bar: d ? { key: 'standing', value: d.standing } : null });
     } else {
       row({ icon: 'mobile_phone', title: pathDef(content, 'social')?.name ?? '', subtitle: '', bar: { key: 'fame', value: Math.round(state.fame.paths.social?.fame ?? 0) } });
     }
@@ -164,6 +168,7 @@ export function getHubView(state: LifeState, content: ContentBundle): HubView {
       { id: 'writing', icon: 'memo', open: specialOpen('arts'), minAge: pathDef(content, 'arts')?.minAge ?? 8 },
       { id: 'business', icon: 'office_building', open: state.character.age >= content.balance.business.limits.minAge, minAge: content.balance.business.limits.minAge },
       { id: 'crime', icon: 'sunglasses', open: state.character.age >= 18, minAge: 18 },
+      { id: 'drugs', icon: 'money_with_wings', open: state.character.age >= content.balance.drugs.ages.adult, minAge: content.balance.drugs.ages.adult },
     ],
   };
 }

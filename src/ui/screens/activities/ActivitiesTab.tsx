@@ -63,6 +63,8 @@ function useLink(): (opens: ActivityLink) => void {
   const openSocial = useAppStore((s) => s.openSocial);
   const openTeen = useAppStore((s) => s.openTeen);
   const openBelongings = useAppStore((s) => s.openBelongings);
+  const openDrugMarket = useAppStore((s) => s.openDrugMarket);
+  const openRecovery = useAppStore((s) => s.openRecovery);
   return (opens) => {
     switch (opens) {
       case 'club':
@@ -77,6 +79,8 @@ function useLink(): (opens: ActivityLink) => void {
       case 'teen': return openTeen();
       case 'pets':
       case 'vehicles': return openBelongings();
+      case 'drug_market': return openDrugMarket();
+      case 'recovery': return openRecovery();
     }
   };
 }

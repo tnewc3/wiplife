@@ -1,0 +1,46 @@
+id: drug_taken_for_nothing
+title: Nothing in the bag
+text: >-
+  You go back over it in your head: the handshake, the quick smile, the way
+  they said they would be right back. There is nothing to report, and nobody
+  to report it to. You were taken, and the only person who knows is you.
+tone: serious
+category: drugs
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+weight: { base: 4 }
+followUpOnly: true
+choices:
+  - id: let
+    label: Let it go
+    outcome:
+      text: >-
+        You decide it is how the lesson is learned, and try to believe you
+        learned something. You feel a little stupid for a week.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: find
+    label: Go looking for them
+    check:
+      base: 30
+      stats: [{ key: riskTaking, weight: 0.2 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          You find them two nights later, and they are more ashamed than
+          frightened. They give something back and swear it will not happen
+          again. It will.
+        effects:
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: >-
+          You find them, and they are not alone. You leave with your pride
+          bruised, and in better shape than you had any right to.
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 4 }

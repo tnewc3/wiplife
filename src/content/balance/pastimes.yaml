@@ -123,9 +123,6 @@ costs:
   counterfeit_goods: 500
   stolen_electronics: 350
   fake_id: 180
-  pills: 120
-  illegal_drugs: 220
-  dealing_stock: 400
   # Gambling: the base stake (the stake you choose multiplies it: risk.yaml stakes).
   casino_slots: 40
   casino_blackjack: 80

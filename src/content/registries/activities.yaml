@@ -42,6 +42,8 @@ activities:
   - { id: rehab, category: recovery, label: Rehab center, subtitle: "A stay away from it all, to get clean.", icon: hospital, kind: options, minAge: 18, limit: 2, adultsOnly: true, hideWhenNothing: true }
   - { id: counseling, category: recovery, label: Counseling, subtitle: "A counselor, one hour at a time.", icon: speech_balloon, kind: options, minAge: 12, limit: 8 }
 
+  - { id: recovery_program, category: recovery, label: Your recovery, subtitle: "Quit a drug, count the years clean, and watch for the old pull.", icon: reminder_ribbon, kind: link, opens: recovery, minAge: 16, limit: 1, hideWhenNothing: true }
+
   # ---------------------------------------------------------------- Mind & body
   - { id: gym, category: mind_body, label: Gym, subtitle: "Light or hard workouts, classes and runs.", icon: flexed_biceps, kind: options, minAge: 8, limit: 14 }
   - { id: walk, category: mind_body, label: Walk, subtitle: "Fresh air and nowhere to be.", icon: person_walking, kind: options, minAge: 6, limit: 12 }
@@ -88,6 +90,7 @@ activities:
   - { id: fine_goods, category: money_luck, section: shopping, label: Fine goods, subtitle: "A good watch, a tailored suit, a painting for the wall.", icon: gem_stone, kind: options, minAge: 18, limit: 8, adultsOnly: true, sharedRepeats: false }
 
   # ---------------------------------------------------------------- Black market and crime
+  - { id: drug_market, category: black_market, label: Drug market, subtitle: "A dealer, a contact, the club or the market. Prices and risks vary.", icon: syringe, kind: link, opens: drug_market, minAge: 18, limit: 1, adultsOnly: true }
   - { id: black_market, category: black_market, label: The market, subtitle: "Goods, papers and pills. Trouble comes with them.", icon: money_with_wings, kind: options, minAge: 16, limit: 24, sharedRepeats: false }
   - { id: crime, category: crime, label: Crimes, subtitle: "Teens only get the small ones. A juvenile record is sealed at 18.", icon: police_car_light, kind: options, minAge: 13, limit: 40, sharedRepeats: false }
 

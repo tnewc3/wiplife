@@ -56,6 +56,8 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
   const busy = useAppStore((s) => s.aging);
   const act = useAppStore((s) => s.takeLifeAction);
   const openPet = useAppStore((s) => s.openPet);
+  const openDrugMarket = useAppStore((s) => s.openDrugMarket);
+  const stash = Object.entries(life.drugs.stock).filter(([id]) => content.drugs[id]);
   const setTab = useAppStore((s) => s.setTab);
   const [sheet, setSheet] = useState<Sheeted>(null);
   const [confirming, setConfirming] = useState<Confirming>(null);
@@ -211,6 +213,27 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
           Buy a vehicle
         </Button>
       </Card>
+
+      {stash.length > 0 && (
+        <Card role="region" aria-labelledby="stash-title" data-testid="belongings-stash">
+          <h3 id="stash-title" className="text-lg font-bold">
+            Stash
+          </h3>
+          <ul className="mt-1 flex flex-col divide-y divide-border" aria-label="Your stash">
+            {stash.map(([id, s]) => (
+              <li key={id} className="flex min-w-0 justify-between gap-3 py-2">
+                <span className="min-w-0 break-words">{content.drugs[id]!.name}</span>
+                <span className="shrink-0 text-muted tabular-nums">
+                  {s.units} · {s.hidden ? 'hidden' : 'not hidden'}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Button variant="secondary" block className="mt-2" data-testid="open-stash" onClick={() => openDrugMarket('stash')}>
+            Open the stash
+          </Button>
+        </Card>
+      )}
 
       <Card role="region" aria-labelledby="valuables-title" data-testid="belongings-valuables">
         <h3 id="valuables-title" className="text-lg font-bold">

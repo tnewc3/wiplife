@@ -1,0 +1,15 @@
+id: heroin
+name: Heroin
+noun: heroin
+category: opioid
+blurb: A warm nowhere to disappear into. It takes hold fast, and it is the hardest to walk back from.
+unit: { one: bag, many: bags }
+price: { min: 30, max: 80 }
+effects: { happiness: 6, stress: -8, health: -3 }
+long: { health: 4, work: 5, school: 0.4, bonds: 3.5 }
+strength: 11
+tolerance: 16
+overdose: 0.004
+severity: 5
+sources: [dealer, contact, market]
+withdrawal: 14

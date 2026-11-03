@@ -1,0 +1,59 @@
+id: drug_tempted_hard_day
+title: A hard day, and the old thought
+text: >-
+  The day goes wrong in small ways, then big ones. By the evening you are
+  worn to the bone, and the old thought arrives with its usual reasonable
+  voice: one would help, one would hurt no one.
+tone: dark
+category: drugs
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { recovering: true } }
+    - { stat: stress, gt: 55 }
+weight: { base: 8 }
+followUpOnly: true
+recurring: true
+choices:
+  - id: meeting
+    label: Find a meeting
+    outcome:
+      text: >-
+        You go, although you do not want to. You listen to a stranger describe
+        a day like yours, and by the end of the hour you have forgotten the old
+        voice was in the room.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: drugs, action: recover, delta: -3 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: walk
+    label: Walk until it passes
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.35 }]
+      success:
+        text: >-
+          You walk for two hours, and the streets do their ordinary work. By the
+          time you get home the thought has lost its voice.
+        effects:
+          - { type: stat, key: stress, delta: -3 }
+          - { type: stat, key: fitness, delta: 1 }
+      failure:
+        text: >-
+          The walk takes you to the place you meant not to go. You stand across
+          the street for a long while, and then you cross it.
+        effects:
+          - { type: drugs, action: relapse }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: give
+    label: Give in
+    outcome:
+      text: >-
+        You do. It is over fast, and it feels like falling down stairs you had
+        climbed for a long time.
+      effects:
+        - { type: drugs, action: relapse }
+        - { type: stat, key: happiness, delta: -4 }

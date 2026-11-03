@@ -1,0 +1,39 @@
+id: drug_friend_calls_for_help
+title: A call at dawn
+text: >-
+  The phone goes at dawn. It is someone you used with, saying a friend of
+  theirs will not wake up, and that they did not know who else to call. By the
+  time you are on the line the worst of it is over, but not for everyone.
+tone: dark
+category: drugs
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { age: { gte: 18 } }
+    - { drugs: { tried: true } }
+    - { drugs: { signs: { gte: 1 } } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: ambulance
+    label: Tell them to call an ambulance, now
+    outcome:
+      text: >-
+        You stay on the phone while they do. Help arrives. Afterwards you sit
+        on the edge of the bed with the phone in your hand, shaking, aware of
+        how near it came to you.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: stat, key: vice, delta: -3 }
+  - id: hang
+    label: Say you cannot get involved
+    outcome:
+      text: >-
+        You say it, and you hang up, and you hate the sound of your own voice.
+        You do not find out what happened for a day.
+      effects:
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: kindness, delta: -2 }

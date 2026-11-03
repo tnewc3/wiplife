@@ -32,12 +32,15 @@ import { runLanguages } from './languages';
  * releases come out, fame rises or fades, and the year's pay is set aside for the ledger.
  * The business step (W3) follows the fame step and runs before the ledger: each business's year (demand, revenue, costs, staff, profit),
  * the share paid to you as income for the ledger and any money you must put in to cover a loss, and failure when the money runs out.
- * The crime step (E6a) follows the legal step: heat fades, a crew's year passes,
+ * The drugs step (D1) follows the legal step and comes before the crime step: habits have their year (and an overdose, after warning signs),
+ * a stash can be found, dealing and the operations run their year, and the heat they add counts in the crime step's police roll.
+ * The crime step (E6a) follows the drugs step: heat fades, a crew's year passes,
  * the police may open an investigation or make an arrest, and the year's jobs
  * and trouble are queued as events.
  */
 import type { ContentBundle } from '../content/schemas';
 import { runCrime } from './crime/step';
+import { runDrugs } from './drugs/step';
 import { runFame } from './fame/step';
 import { runSocial } from './social/step';
 import { runHeritage } from './estate/heritage';
@@ -76,6 +79,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'family', run: runFamily },
   { id: 'heritage', run: runHeritage },
   { id: 'legal', run: runLegal },
+  { id: 'drugs', run: runDrugs },
   { id: 'crime', run: runCrime },
   { id: 'social', run: runSocial },
   { id: 'fame', run: runFame },

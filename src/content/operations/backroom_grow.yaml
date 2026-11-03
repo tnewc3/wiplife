@@ -1,0 +1,13 @@
+id: backroom_grow
+name: Back-room grow
+kind: grow
+blurb: A rented space with lights, fans and a lot of patience. Small, steady, and easy to smell.
+drugs: [cannabis]
+startup: 18000
+upkeep: 6000
+capacity: 60
+quality: { start: 45, max: 75 }
+raid: 0.05
+fire: 0.025
+theft: 0.04
+names: ["Greenhouse Row", "The Quiet Room", "Lantern Street Garden", "Back Forty", "Evergreen Supply", "Old Mill Plants"]

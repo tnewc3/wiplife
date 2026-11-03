@@ -1,0 +1,13 @@
+id: kitchen_lab
+name: Kitchen lab
+kind: lab
+blurb: A small, hidden operation run out of a rented house. Cheap to start, brutal on the neighbors and on you.
+drugs: [methamphetamine]
+startup: 30000
+upkeep: 10000
+capacity: 80
+quality: { start: 35, max: 65 }
+raid: 0.08
+fire: 0.07
+theft: 0.04
+names: ["The Rental on Carrow Lane", "Dry Creek Cottage", "Pine Hollow Place", "Back Lot Four", "The Tin Barn", "Marsh End House"]

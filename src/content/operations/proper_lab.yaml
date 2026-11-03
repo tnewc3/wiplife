@@ -1,0 +1,13 @@
+id: proper_lab
+name: Back-unit lab
+kind: lab
+blurb: A purpose-fitted unit behind a legitimate front. Large output, large exposure, and people who expect results.
+drugs: [cocaine, methamphetamine]
+startup: 160000
+upkeep: 55000
+capacity: 300
+quality: { start: 55, max: 90 }
+raid: 0.11
+fire: 0.05
+theft: 0.07
+names: ["Fenwick Chemical Supply", "Delta Freight Annex", "Kestrel Industrial", "Blackwater Services", "Granite Row Works", "Tallow & Pine Trading"]
