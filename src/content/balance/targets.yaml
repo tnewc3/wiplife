@@ -336,18 +336,18 @@ school:
   romanceTeacher: { min: 0, max: 0 }
   romanceUnder18: { min: 0, max: 0 }
 
-# O1: organized crime. Placeholders set wide until the 10,000-life run; tightened to it afterwards (see docs/technical.md, O1).
+# O1: organized crime. Set from 10,002 criminal-player lives (three shards of 3,334): about three in ten join one (street gang, mafia family, cartel and motorcycle club each in the hundreds), about one in twenty joiners leads, a leader holds about 1.2 neighborhoods, nearly all leaders are arrested at least once, five members and one leader died violently, and cartels supplied about 81,000 units. See docs/technical.md (O1).
 orgs:
   underAge: { min: 0, max: 0 }
   invariantFailures: { min: 0, max: 0 }
-  eachKindJoined: { min: 1, max: 100000 }
-  leaders: { min: 0, max: 1 }
-  hoodsHeld: { min: 0, max: 10 }
-  memberDeathShare: { min: 0, max: 0.2 }
-  leaderArrested: { min: 0, max: 1 }
-  leaderDeaths: { min: 0, max: 0.5 }
-  supplied: { min: 0, max: 1000000000 }
-  truce: { min: 0, max: 1 }
+  eachKindJoined: { min: 100, max: 100000 }
+  leaders: { min: 0.02, max: 0.12 }
+  hoodsHeld: { min: 0.8, max: 2.0 }
+  memberDeathShare: { min: 0, max: 0.02 }
+  leaderArrested: { min: 0.7, max: 1 }
+  leaderDeaths: { min: 0, max: 0.05 }
+  supplied: { min: 10000, max: 1000000000 }
+  truce: { min: 0.005, max: 0.06 }
 
 # E6a: crime careers. Set from 10,000 criminal-player lives (four runs of 2,500 lives): about four lives in ten reach 30
 # having entered a crew (the criminal player says yes to every offer), a third of those reach the third rank and

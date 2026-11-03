@@ -17,6 +17,7 @@
 import type { ContentBundle } from '../../src/content/schemas';
 import { isLifeActionAvailable, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
 import { frontsFor } from '../../src/engine/crime/money';
+import { topRank } from '../../src/engine/crime/query';
 import { netWorth } from '../../src/engine/finance';
 import { chance, type RngState } from '../../src/engine/rng';
 import type { LifeState } from '../../src/engine/types';
@@ -232,7 +233,9 @@ export class CrimeWatcher {
       r.crewWealth.push(wealth);
       r.crewLives.push({ earned: k.totals.earned, arrested: k.totals.arrests > 0 });
       r.peak[Math.max(0, Math.min(r.peak.length, Math.max(k.peak, ...k.past.map((p) => p.topRank), 1)) - 1)]!++;
-      if (Math.max(k.peak, ...k.past.map((p) => p.topRank), 0) >= this.content.balance.crime.ranks.length) r.leaders++;
+      // (O1: a street gang has four ranks, so its top rank is its own.)
+      const ran = (crewId: string | undefined, rank: number) => crewId !== undefined && rank >= topRank(this.content, crewId);
+      if (ran(k.crew?.defId, k.peak) || k.past.some((p) => ran(p.crewId, p.topRank))) r.leaders++;
       if (k.totals.arrests > 0) r.arrestedLives++;
       if (this.everInvestigated) r.investigatedLives++;
       if (this.everPrison) r.prisonLives++;
