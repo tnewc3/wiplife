@@ -11,7 +11,10 @@ import { isLifeActionAvailable, performAction } from '../actions';
 import { InvalidInputError } from '../creation/input';
 import { conditionOf } from '../health';
 import { startEnhancers, enhancerBlock } from '../hub/enhancers';
+import { tendFans } from '../fame/people';
 import { checkInvariants } from '../invariants';
+import { beginYear } from '../life';
+import { runCare } from '../later/care';
 import { getDealingView, getDrugMarketView, getRecoveryView } from '../selectors';
 import { lifeAtAge } from '../testFixtures';
 import type { LifeState } from '../types';
@@ -669,5 +672,37 @@ describe('views, saves and the minor rule', () => {
     expect(checkInvariants(bad, content).some((f) => /minor holds/.test(f))).toBe(true);
     const bad2 = apply(kid, (d) => void (d.drugs.dealing = { since: d.currentYear, drugId: 'cannabis', customers: 3, price: 'fair', standing: 10, year: { year: d.currentYear, sold: 0, earned: 0, trouble: 0 } }));
     expect(checkInvariants(bad2, content).some((f) => /minor is dealing/.test(f))).toBe(true);
+  });
+});
+
+describe('rules the 10,000-life run found when more lives spend years in prison', () => {
+  it('a family carer who dies while you are in prison is let go', () => {
+    const life = apply(adult('care', 80), (d) => {
+      const id = Object.keys(d.people)[0]!;
+      d.people[id]!.alive = false;
+      d.housing.kind = 'incarcerated';
+      d.later.care = { since: d.currentYear, option: 'family', providerId: id, declined: [] };
+    });
+    const after = apply(life, (d) => void runCare(d, content));
+    expect(after.later.care?.option).toBeNull();
+    expect(after.later.care?.providerId).toBeUndefined();
+  });
+
+  it('a stalker who is gone is dropped with the fan list, even in prison', () => {
+    const life = apply(adult('stalker', 40), (d) => {
+      const id = Object.keys(d.people)[0]!;
+      d.fame.people.super = [id];
+      d.fame.stalker = { id, since: d.currentYear - 1, stage: 'watching' };
+      d.people[id]!.alive = false;
+      tendFans(d, content, d.rng);
+    });
+    expect(life.fame.stalker).toBeNull();
+    expect(life.fame.people.super).toEqual([]);
+  });
+
+  it('a death set by the year itself goes straight to the end of the year, with no events left to show', () => {
+    const life = beginYear(apply(adult('odphase', 30), (d) => void (d.death = { year: d.currentYear, age: d.character.age, causeId: 'overdose' })), content);
+    expect(life.phase).toBe('yearEnd');
+    expect(life.pending).toEqual([]);
   });
 });

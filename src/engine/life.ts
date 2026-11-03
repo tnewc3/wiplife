@@ -314,6 +314,8 @@ export function beginYear(state: LifeState, content: ContentBundle, steps: reado
   }
   return produce(next, (draft) => {
     draft.recap = { year: draft.currentYear, age: draft.character.age, statsBefore, statsAfter: null };
+    // D1: a death set by the year itself (an overdose) goes straight to the year's end; events queued after it never show.
+    if (draft.death) draft.pending = [];
     draft.phase = draft.pending.length > 0 ? 'events' : 'yearEnd';
   });
 }

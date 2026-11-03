@@ -189,8 +189,12 @@ function applyDeltas(state: LifeState, deltas: Partial<Record<'health' | 'happin
 /** Step part: the need begins, is answered, and each year of care passes. */
 export function runCare(state: LifeState, content: ContentBundle): void {
   const b = content.balance.later.care;
-  if (state.housing.kind === 'incarcerated') return;
   const care = state.later.care;
+  if (state.housing.kind === 'incarcerated') {
+    // (D1: more lives end up in prison; a provider who dies meanwhile can't stay on as the one who looks after you.)
+    if (care?.option === 'family' && care.providerId !== undefined && state.people[care.providerId]?.alive !== true) providerGone(state, content);
+    return;
+  }
   if (care === null) {
     const p = careChance(state, content);
     if (p > 0 && chance(state.rng, p)) {

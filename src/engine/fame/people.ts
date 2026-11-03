@@ -37,6 +37,8 @@ export function tendFans(state: LifeState, content: ContentBundle, rng: RngState
   for (const type of ['super', 'hater', 'critic'] as const) {
     f.people[type] = f.people[type].filter((id) => fanAlive(state, id));
   }
+  // (D1: more lives spend years in prison, where the stalker's year does not run; a stalker who is gone is dropped here too.)
+  if (f.stalker && !fanAlive(state, f.stalker.id)) f.stalker = null;
   if (!f.active || f.main === null) return;
   const fameNow = f.paths[f.main]!.fame;
   for (const type of ['super', 'hater', 'critic'] as const) {
