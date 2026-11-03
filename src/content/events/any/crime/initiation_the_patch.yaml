@@ -1,0 +1,54 @@
+id: initiation_the_patch
+title: Earning the patch
+text: >-
+  A year of fetching, listening and showing up has made you a prospect in
+  {crew}, and now the club votes. {member.name} says that a patch is a thing
+  you wear until you die, and that the vote is at the clubhouse, tonight,
+  without you in the room.
+tone: serious
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [motorcycle_club] } }
+    - { crime: { initiating: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: wait_for_the_vote
+    label: Wait outside for the vote
+    check:
+      base: 60
+      stats: [{ key: sociability, weight: 0.25 }, { crime: standing, weight: 0.3 }, { key: discipline, weight: 0.1 }]
+      success:
+        text: >-
+          It is unanimous, which nobody expected. Somebody hands you the patch
+          and does not smile, and then everyone does. You are a patched member of
+          {crew}, and you will be asked to prove it every year.
+        effects:
+          - { type: crime, action: promote }
+          - { type: flag, key: passed_an_initiation, value: true }
+          - { type: relationship, role: member, affection: 7 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          One no is enough. You are told you can stay a prospect, that it is
+          nothing personal, and that someone will be watching for whatever
+          earns a second vote.
+        effects:
+          - { type: crime, action: standing, delta: -8 }
+          - { type: flag, key: failed_an_initiation, value: true }
+  - id: ask_to_wait
+    label: Ask them to wait another season
+    outcome:
+      text: >-
+        The vote is put off. Some think that shows wisdom and some think it shows
+        doubt. {member.name} says nothing and rides off.
+      effects:
+        - { type: crime, action: standing, delta: -3 }

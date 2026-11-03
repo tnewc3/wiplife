@@ -1584,4 +1584,5 @@ export function getArchivedPortrait(entry: ArchivedLife, content: ContentBundle)
 /** C2: the Career hub, the band screen and performance enhancers. */
 export { getBandHubView, getEnhancerView, getHubView, skillRows, type BandHubView, type EnhancerView, type HubView, type RoleRowView, type SkillRowView } from './hub/views';
 export { trainingLines, type TrainingLine } from './hub/training';
+export { getOrgView, type OrgView, type OrgMemberView, type OrgHoodView, type OrgRivalView, type OrgRecapView, type OrgJobOption } from './crime/orgView';
 export { getDealingView, getDrugMarketView, getRecoveryView, type DealingView, type DrugMarketView, type DrugRowView, type HabitRowView, type OpRowView, type OpTypeView, type RecoveryView } from './drugs/views';

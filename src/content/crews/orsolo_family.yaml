@@ -1,0 +1,8 @@
+id: orsolo_family
+name: the Orsolo Family
+kind: mafia
+blurb: Three generations of the same surname and one rule, which is that you do not talk. Dinner is at six and nobody is late.
+cities: [nyc, chicago, toronto, montreal, london, los_angeles, houston]
+ranks: [associate, soldier, capo, underboss, boss]
+rivals: [marrow_street_crew, velvet_hand, larkspur_collective]
+traits: { discipline: 10, kindness: -6, ambition: 6 }

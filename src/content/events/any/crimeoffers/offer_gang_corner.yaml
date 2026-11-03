@@ -1,0 +1,49 @@
+id: offer_gang_corner
+title: A name on the block
+text: >-
+  {friend.name} has been spending more time on the corner than anyone with a
+  job should. Tonight {friend.they} {friend:waves|wave} you over to a group
+  you have only ever walked past. They know your name already. Somebody says
+  there is room for one more, if you are the kind of person who stays when
+  things get loud.
+tone: dark
+category: crimeoffers
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { crime: { offered: [street_gang] } }
+weight:
+  base: 0.35
+  modifiers:
+    - { if: { flag: turned_down_a_crew }, x: 0.6 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.8 }
+    - { if: { trait: sociability, gt: 60 }, x: 1.3 }
+    - { if: { finances: { income: { lt: 20000 } } }, x: 1.4 }
+cast:
+  friend: { kind: friend, presence: city, age: { min: 20, max: 40 }, ageOffset: { min: -6, max: 8 } }
+choices:
+  - id: stay
+    label: Stay and see what they ask
+    outcome:
+      text: >-
+        Nobody tells you what the test is. They just look at you until you
+        understand that staying was the answer. By the time you go home you are
+        in {crew}, and {friend.name} is already telling people it was
+        {friend.their} idea.
+      effects:
+        - { type: crime, action: join, kind: street_gang, role: friend }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: stress, delta: 3 }
+  - id: walk_on
+    label: Keep walking
+    outcome:
+      text: >-
+        You keep your eyes ahead and your pace steady. Behind you somebody
+        laughs, not unkindly, and {friend.name} does not look at you the next
+        time you pass.
+      effects:
+        - { type: relationship, role: friend, affection: -4 }
+        - { type: flag, key: turned_down_a_crew, value: true }

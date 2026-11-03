@@ -1,0 +1,67 @@
+id: job_club_rally
+title: The rally
+text: >-
+  Every club in the region is at the same rally, which is a polite way of
+  saying every rivalry is in the same field. {member.name} says to keep
+  your colours on, your mouth shut and your temper in your pocket.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [motorcycle_club] } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: keep_calm
+    label: Keep it calm
+    check:
+      base: 68
+      stats: [{ key: discipline, weight: 0.3 }, { key: confidence, weight: 0.2 }, { key: luck, weight: 0.1 }]
+      success:
+        text: >-
+          A hard word at the wrong table gets a soft answer from you. The rally
+          ends without a fight, and {crew} gets credit for the calm.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: standing, delta: 5 }
+          - { type: relationship, role: member, affection: 3 }
+      failure:
+        text: >-
+          It is a small thing, a spilled drink, and then it is a very large
+          thing. By morning everybody has a bruise and everyone's patch is
+          considered insulted.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 5 }
+          - { type: crime, action: rivalry, delta: 8 }
+          - { type: stat, key: health, delta: -3 }
+  - id: hit_back
+    label: Answer them in kind
+    check:
+      base: 55
+      stats: [{ key: fitness, weight: 0.25 }, { key: riskTaking, weight: 0.2 }]
+      success:
+        text: >-
+          You finish it. The other club finds a new table to sit at, and your
+          own club lets you know, in the way it does, that it was glad.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: standing, delta: 7 }
+          - { type: crime, action: heat, delta: 6 }
+          - { type: crime, action: rivalry, delta: 8 }
+      failure:
+        text: >-
+          You were three against one for about ten seconds and then more. You come
+          out of the field with a broken hand and a reputation that does not
+          include winning.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: standing, delta: -3 }
+          - { type: stat, key: health, delta: -7 }

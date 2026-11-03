@@ -1,0 +1,38 @@
+id: prison_a_name_to_ask_for
+title: A name to ask for
+text: >-
+  {inmate.name} has noticed you keep your head down and your mouth shut,
+  which on this block is a skill. One evening {inmate.they} {inmate:slides|slide}
+  a name and a number across the table and says that when you are out, someone
+  there will remember who you were inside.
+tone: dark
+category: prison
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { legal: { incarcerated: true } }
+once: true
+weight: { base: 3 }
+cast:
+  inmate: { kind: acquaintance, age: { min: 22, max: 60 }, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: take_it
+    label: Memorise the number
+    outcome:
+      text: >-
+        You do not write it down. You say it to yourself at night until it
+        becomes something you cannot forget even if you want to.
+      effects:
+        - { type: flag, key: has_an_inside_contact, value: true }
+        - { type: relationship, role: inmate, affection: 8, trust: 4 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: refuse
+    label: Slide it back
+    outcome:
+      text: >-
+        {inmate.name} shrugs, takes it back, and does not mention it again. It is
+        a small refusal, and one you will be asked about by no one.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }

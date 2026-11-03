@@ -81,6 +81,7 @@ import { chooseSocialActions, emptySocialReport, formatSocial, rollSocialProfile
 import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
 import { peakRung } from '../../src/engine/fame/query';
 import { AttractionWatcher, attractionTargets, chooseDateActions, emptyAttractionReport, formatAttraction, type AttractionReport } from './attraction';
+import { chooseOrgActions, emptyOrgsReport, formatOrgs, OrgsWatcher, orgsTargets, type OrgsReport } from './orgs';
 import { chooseDrugActions, DrugsWatcher, drugsTargets, emptyDrugsReport, formatDrugs, rollDrugsProfile, type DrugsReport } from './drugs';
 import { chooseHubActions, emptyHubReport, formatHub, HubWatcher, hubTargets, rollHubProfile, type HubReport } from './hub';
 import { athleteChoice, chooseSportsActions, emptySportsReport, formatSports, rollAthleteProfile, SportsWatcher, sportsTargets, type SportsReport } from './sports';
@@ -204,6 +205,8 @@ export interface SimulationReport {
   hub: HubReport;
   /** D1: drugs, measured. */
   drugs: DrugsReport;
+  /** O1: organized crime, measured. */
+  orgs: OrgsReport;
   /** B1: romance by attraction, measured. */
   attraction: AttractionReport;
 }
@@ -866,6 +869,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const sports = emptySportsReport(playerKind, content);
   const hubReport = emptyHubReport(playerKind);
   const drugsReport = emptyDrugsReport(playerKind);
+  const orgsReport = emptyOrgsReport(playerKind, content);
   const attraction = emptyAttractionReport(playerKind);
   const famousAtTarget: number[] = [];
   const peopleTimer = new PipelineTimer(people);
@@ -890,6 +894,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       pastimes.invariantFailures += failures.filter((f) => /activit|receipt|valuable|debt|former name|character\.name/i.test(f)).length;
       possessions.invariantFailures += failures.filter((f) => /possession|\bpet\b|vehicle|car loan|vacation|renovation|insurance|upkeep/i.test(f)).length;
       crime.invariantFailures += failures.filter((f) => /crime|crew|dirty/i.test(f)).length;
+      orgsReport.invariantFailures += failures.filter((f) => /^org/i.test(f) || /^crime: .*(roster|rank)/i.test(f)).length;
       migration.invariantFailures += failures.filter((f) => /^migration/i.test(f)).length;
       fame.invariantFailures += failures.filter((f) => /^fame|fame\./i.test(f)).length;
       social.invariantFailures += failures.filter((f) => /account on|handle|social\.|platforms? paid|pay set aside|this year's posts|unknown platform/i.test(f)).length;
@@ -922,6 +927,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const sportsWatcher = new SportsWatcher(sports, content);
     const hubWatcher = new HubWatcher(hubReport, content);
     const drugsWatcher = new DrugsWatcher(drugsReport, content);
+    const orgsWatcher = new OrgsWatcher(orgsReport, content);
+    const orgsRng = createRng(`${seed}:orgs`);
     const drugsRng = createRng(`${seed}:drugs`);
     const drugsProfile = rollDrugsProfile(drugsRng, content);
     const hubRng = createRng(`${seed}:hub`);
@@ -1129,6 +1136,12 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
           money.actionsTaken[actionId]++;
           if (actionId === 'launder_money') crimeWatcher.laundered(beforeAction, life, params.frontId!);
         }
+        // ...and, when it runs an organization (O1), on its members, its territory and its rivals.
+        for (const [actionId, params] of chooseOrgActions(life, content, orgsRng)) {
+          if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+          life = takeLifeAction(life, actionId, params);
+          orgsWatcher.decided(actionId);
+        }
       }
       // ...and on a career in arts and media (E6b): the star player goes after one and lines up a project every year...
       if (playerKind === 'star') {
@@ -1317,6 +1330,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       sportsWatcher.observe(yearBefore, life);
       hubWatcher.observe(yearBefore, life);
       drugsWatcher.observe(yearBefore, life);
+      orgsWatcher.observe(yearBefore, life);
       attractionWatcher.observe(life);
       possessionsWatcher.observe(yearBefore, life, content);
       pastimesWatcher.observe(yearBefore, life);
@@ -1375,6 +1389,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     sportsWatcher.finish(life);
     hubWatcher.finish(life);
     drugsWatcher.finish(life);
+    orgsWatcher.finish(life);
     attractionWatcher.finish(life);
     possessionsWatcher.finish(life);
     pastimesWatcher.finish(life);
@@ -1737,6 +1752,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     sports,
     hub: hubReport,
     drugs: drugsReport,
+    orgs: orgsReport,
     attraction,
     consistency: {
       violations,
@@ -1891,6 +1907,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatSports(report.sports, content), '  targets (src/content/balance/targets.yaml):', ...sportsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatHub(report.hub, content), '  targets (src/content/balance/targets.yaml):', ...hubTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatDrugs(report.drugs, content), '  targets (src/content/balance/targets.yaml):', ...drugsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatOrgs(report.orgs, content), '  targets (src/content/balance/targets.yaml):', ...orgsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatAttraction(report.attraction), '  targets (src/content/balance/targets.yaml):', ...attractionTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));

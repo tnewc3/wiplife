@@ -19,3 +19,11 @@ schools:
   elite: Whitmore College
   trade: Valley Trade School
   grad: Heartland Graduate School
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: main_street, name: Main Street, income: 2, attention: 33 }
+  - { id: the_mill_quarter, name: The Mill Quarter, income: 2, attention: 17 }
+  - { id: depot_road, name: Depot Road, income: 1, attention: 45 }
+  - { id: creekside_lots, name: Creekside Lots, income: 2, attention: 30 }
+  - { id: fairground_edge, name: Fairground Edge, income: 3, attention: 36 }

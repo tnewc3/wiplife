@@ -1,0 +1,41 @@
+id: offer_from_the_inside
+title: The name you were given
+text: >-
+  You are out, and the number you were given inside still works. The
+  person who answers remembers the story you told in the yard. They say
+  there are people who look after their own, and that they are always
+  willing to meet someone who has done time.
+tone: dark
+category: crimeoffers
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { flag: has_an_inside_contact }
+    - { legal: { incarcerated: false } }
+    - { crime: { offered: [street_gang, mafia, motorcycle_club] } }
+once: true
+weight: { base: 6 }
+choices:
+  - id: meet
+    label: Go and meet them
+    outcome:
+      text: >-
+        It is a different room from the one you pictured, and the same kind of
+        people. By the end of the evening you are in {crew}, and it feels, for
+        a moment, like the one place that is not asking where you have been.
+      effects:
+        - { type: crime, action: join }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: stress, delta: 2 }
+  - id: hang_up
+    label: Hang up and do not call again
+    outcome:
+      text: >-
+        The line goes quiet. You put the number somewhere you will not look,
+        and you do not throw it away.
+      effects:
+        - { type: flag, key: turned_down_a_crew, value: true }
+        - { type: stat, key: discipline, delta: 2 }

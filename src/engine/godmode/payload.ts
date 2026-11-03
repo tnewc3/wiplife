@@ -127,6 +127,19 @@ export const editPayloadSchema = z.strictObject({
         })
         .partial()
         .optional(),
+      /** O1: crime. Your rank, standing, the heat on you and the dirty money you hold; the organization's cut; a member's skill and loyalty; ending a war. */
+      crime: z
+        .strictObject({
+          rank: z.int('Must be a whole number').min(1).max(5),
+          standing: score,
+          heat: score,
+          dirty: z.int('Must be a whole number').min(0).max(1_000_000_000),
+          cut: z.enum(['low', 'fair', 'high']),
+          members: z.array(z.strictObject({ id: personId, skill: score, loyalty: score })).max(30),
+          war: z.literal('end'),
+        })
+        .partial()
+        .optional(),
     })
     .optional(),
 });

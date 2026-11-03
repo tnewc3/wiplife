@@ -19,3 +19,11 @@ schools:
   elite: Universidad Tapatía
   trade: Instituto Técnico Minerva
   grad: Escuela de Posgrado del Occidente
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: barrio_del_alfarero, name: Barrio del Alfarero, income: 1, attention: 57 }
+  - { id: calle_cantera, name: Calle Cantera, income: 2, attention: 27 }
+  - { id: los_tejados, name: Los Tejados, income: 1, attention: 52 }
+  - { id: colonia_arroyo_seco, name: Colonia Arroyo Seco, income: 4, attention: 29 }
+  - { id: plaza_naranjal, name: Plaza Naranjal, income: 2, attention: 30 }

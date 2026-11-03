@@ -1,0 +1,53 @@
+id: truce_sitdown_offered
+title: A message from across the line
+text: >-
+  The other side sends word through a person nobody likes but everybody trusts:
+  they would like to stop. Not for good, and not for free. There will be a table,
+  a time and a neutral room. {member.name} says it could be a trap, or a way out
+  of a war that no one in {crew} can afford to keep fighting.
+tone: serious
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { war: true } }
+    - { crime: { away: false } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: go
+    label: Go to the sit-down
+    check:
+      base: 62
+      stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.2 }, { crime: standing, weight: 0.15 }]
+      success:
+        text: >-
+          It is not friendly. It is not a trap either. By the end, both sides
+          have agreed to stop, and nobody believes it will last longer than it needs to.
+        effects:
+          - { type: crime, action: truce }
+          - { type: flag, key: made_peace_in_a_war, value: true }
+          - { type: crime, action: standing, delta: 6 }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: >-
+          Nobody leaves angry and nobody leaves satisfied. The room agrees on one
+          thing, which is that the other side is not serious.
+        effects:
+          - { type: crime, action: rivalry, delta: 5 }
+          - { type: crime, action: standing, delta: -3 }
+  - id: refuse
+    label: Refuse to sit down
+    outcome:
+      text: >-
+        The messenger leaves. Within a day everyone in the area knows you
+        turned down peace, and half of them think you were right.
+      effects:
+        - { type: crime, action: rivalry, delta: 6 }
+        - { type: crime, action: standing, delta: 2 }

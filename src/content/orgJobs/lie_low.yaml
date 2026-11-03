@@ -1,0 +1,8 @@
+id: lie_low
+name: Lie low
+blurb: Out of sight for a year. No money, and a lot less police interest.
+kinds: [street_gang, mafia, cartel, motorcycle_club]
+effect: lie_low
+danger: low
+done: "{member} kept out of sight all year, and it cooled things."
+bust: "{member} could not stay out of trouble even while lying low."

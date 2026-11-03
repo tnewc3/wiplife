@@ -602,6 +602,55 @@ const crimeCrew = z.strictObject({
   informant: id.exactOptional(),
   away: z.strictObject({ since: int, standing: score, suspicion: score }).exactOptional(),
   returned: int.exactOptional(),
+  // O1: the roster, your cut, the cartel you buy from, the war, the order to take a neighborhood, last year's results and the initiation.
+  roster: z
+    .record(
+      z.string(),
+      z.strictObject({ skill: score, loyalty: score, heat: score, rank: int.min(1), job: id.exactOptional(), since: int, jailed: int.exactOptional() }),
+    )
+    .exactOptional(),
+  cut: z.enum(['low', 'fair', 'high']).exactOptional(),
+  supplier: id.exactOptional(),
+  war: id.exactOptional(),
+  plan: z.strictObject({ expand: id.exactOptional() }).exactOptional(),
+  recap: z
+    .strictObject({
+      year: int,
+      results: z.array(z.strictObject({ id, name: z.string(), job: z.string(), outcome: z.enum(['done', 'bust', 'arrested', 'hurt', 'killed', 'quit', 'turned', 'idle']), amount: z.number() })),
+      jobs: dollars.min(0),
+      hoods: dollars.min(0),
+      hoodCount: int.min(0),
+      kept: dollars.min(0),
+      cleaned: dollars.min(0),
+      units: int.min(0),
+      notes: z.array(z.string()),
+    })
+    .exactOptional(),
+  initiated: z.boolean().exactOptional(),
+});
+const orgs = z.strictObject({
+  cities: z.record(
+    z.string(),
+    z.array(
+      z.strictObject({
+        id,
+        defId: id.exactOptional(),
+        name: z.string().min(1).max(60),
+        kind: z.enum(['street_gang', 'mafia', 'cartel', 'motorcycle_club']),
+        cityId: id,
+        strength: score,
+        attitude: z.int().min(-100).max(100),
+        war: score,
+        status: z.enum(['neutral', 'war', 'truce', 'allied']),
+        truceSince: int.exactOptional(),
+        supplier: id.exactOptional(),
+        tried: int.exactOptional(),
+      }),
+    ),
+  ),
+  hoods: z.record(z.string(), z.record(z.string(), id.nullable())),
+  next: int.min(1),
+  totals: z.strictObject({ income: int.min(0), supplied: int.min(0), fights: int.min(0), wars: int.min(0), killed: int.min(0), informants: int.min(0), promoted: int.min(0), cut: int.min(0) }),
 });
 const crime = z.strictObject({
   crew: crimeCrew.nullable(),
@@ -1502,6 +1551,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   possessions,
   teen,
   crime,
+  orgs,
   fame,
   sports,
   league,

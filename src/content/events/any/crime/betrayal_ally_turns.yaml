@@ -1,0 +1,53 @@
+id: betrayal_ally_turns
+title: An ally changes sides
+text: >-
+  You stood next to them for a year. Now there are people from your alliance
+  talking to the people it was formed against, and {member.name} brings word that
+  the deal is off, that it was off before anyone told you, and that you are on the
+  wrong side of it.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { war: true } }
+    - { crime: { away: false } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: hit_back
+    label: Answer the betrayal
+    check:
+      base: 54
+      stats: [{ key: riskTaking, weight: 0.2 }, { crime: standing, weight: 0.2 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          They did not think you would move so fast. By the end of the month the
+          betrayal leaves them worse off than they were before, and {crew} knows who did that.
+        effects:
+          - { type: crime, action: standing, delta: 8 }
+          - { type: crime, action: strength, delta: 3 }
+          - { type: crime, action: heat, delta: 8 }
+      failure:
+        text: >-
+          You hit back and they were ready. What you wanted to be a lesson is
+          merely a loss, and a long one.
+        effects:
+          - { type: crime, action: standing, delta: -6 }
+          - { type: crime, action: strength, delta: -4 }
+          - { type: crime, action: territory, delta: -1 }
+  - id: absorb_it
+    label: Take the loss and rebuild
+    outcome:
+      text: >-
+        You do not forget it, and you do not show that you have not. The
+        organization is quieter for the rest of the year.
+      effects:
+        - { type: crime, action: strength, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }

@@ -1,0 +1,10 @@
+id: corner_dealing
+name: Corner dealing
+blurb: Moving product street by street. Steady money, steady attention.
+kinds: [street_gang, motorcycle_club]
+effect: earn
+size: small
+danger: medium
+drug: true
+done: "{member} worked the corners all year and brought back {amount}."
+bust: "{member}'s corner went wrong this year. The take was {amount}, and the trouble was bigger than the take."

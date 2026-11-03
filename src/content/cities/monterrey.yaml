@@ -19,3 +19,11 @@ schools:
   elite: Universidad Regia
   trade: Instituto Técnico Fundidora
   grad: Escuela de Posgrado del Norte
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: colonia_cumbres_bajas, name: Colonia Cumbres Bajas, income: 2, attention: 30 }
+  - { id: calle_fundidora, name: Calle Fundidora, income: 5, attention: 44 }
+  - { id: el_rincon, name: El Rincon, income: 5, attention: 56 }
+  - { id: barrio_del_acero, name: Barrio del Acero, income: 3, attention: 71 }
+  - { id: parque_ladrillero, name: Parque Ladrillero, income: 4, attention: 43 }

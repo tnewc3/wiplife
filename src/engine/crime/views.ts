@@ -9,7 +9,7 @@ import type { Id, LifeState } from '../types';
 import { arrestChance } from '../legal';
 import { isLifeActionAvailable } from '../actions/life';
 import { frontsFor, launderBlock, launderRisk, spendBlock, type LaunderBlock, type SpendBlock } from './money';
-import { bandOf, crewDef, crewName, inCrew, isFormer, liveMembers, rankTitle } from './query';
+import { bandOf, crewDef, crewName, inCrew, isFormer, liveMembers, rankTitle, tierOf, topRank } from './query';
 
 export interface CrimeMemberView {
   id: Id;
@@ -53,7 +53,8 @@ export function getCrimeView(state: LifeState, content: ContentBundle): CrimeVie
   const b = content.balance.crime;
   const crew = k.crew;
   const last = k.past.at(-1);
-  const next = crew ? b.ranks[k.rank] : undefined;
+  const top = crew ? topRank(content, crew.defId) : b.ranks.length;
+  const next = crew && k.rank < top ? b.ranks[tierOf(content, crew.defId, k.rank + 1) - 1] : undefined;
   const person = (id: Id): CrimeMemberView => {
     const p = state.people[id]!;
     return { id, name: `${p.name.first} ${p.name.last}`, leads: crew?.leader === id };
@@ -65,7 +66,7 @@ export function getCrimeView(state: LifeState, content: ContentBundle): CrimeVie
     crew: crewName(content, crew?.defId ?? last?.crewId),
     blurb: crewDef(content, crew?.defId ?? last?.crewId)?.blurb ?? '',
     rank: k.rank,
-    ranks: b.ranks.length,
+    ranks: top,
     rankTitle: crew ? rankTitle(content, crew.defId, k.rank) : '',
     nextTitle: crew && next ? rankTitle(content, crew.defId, k.rank + 1) : null,
     readyForNext: crew !== null && next?.reach !== undefined && k.standing >= next.reach.standing && state.currentYear - k.rankSince >= next.reach.years,

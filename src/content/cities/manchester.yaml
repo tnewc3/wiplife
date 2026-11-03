@@ -29,3 +29,11 @@ heritageWeights:
   chinese: 2.5
   arab: 2.5
   west_african: 3
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: millstone_court, name: Millstone Court, income: 1, attention: 60 }
+  - { id: cotton_reach, name: Cotton Reach, income: 1, attention: 61 }
+  - { id: brickfield_estate, name: Brickfield Estate, income: 1, attention: 64 }
+  - { id: the_locks, name: The Locks, income: 2, attention: 56 }
+  - { id: ashgrove_parade, name: Ashgrove Parade, income: 5, attention: 52 }

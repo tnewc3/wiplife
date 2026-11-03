@@ -1,0 +1,45 @@
+id: offer_cartel_courier
+title: A job nobody advertises
+text: >-
+  {acquaintance.name} says there is steady work for someone who can keep
+  quiet and be where they say they will be. It is better work than anything you could find legitimately, and the people behind it do not take no as an
+  answer so much as a delay. You could say yes now.
+tone: dark
+category: crimeoffers
+rarity: rare
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { crime: { offered: [cartel] } }
+once: true
+weight:
+  base: 0.2
+  modifiers:
+    - { if: { finances: { debt: { gte: 8000 } } }, x: 2.5 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.7 }
+    - { if: { flag: turned_down_a_crew }, x: 0.6 }
+cast:
+  acquaintance: { kind: acquaintance, presence: city, age: { min: 22, max: 55 }, ageOffset: { min: -4, max: 15 } }
+choices:
+  - id: yes
+    label: Take the work
+    outcome:
+      text: >-
+        There is no ceremony. A phone is handed to you, an address is read
+        out, and you are a worker for {crew}. Nobody at the top will ever know
+        your name, and everybody at the bottom knows what getting it wrong means.
+      effects:
+        - { type: crime, action: join, kind: cartel, role: acquaintance }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: stress, delta: 5 }
+  - id: no
+    label: Say you will think about it, and then do not
+    outcome:
+      text: >-
+        {acquaintance.name} nods as if this were the usual answer. Nobody
+        follows you. For a while you check anyway.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: flag, key: turned_down_a_crew, value: true }

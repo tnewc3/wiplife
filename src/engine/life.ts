@@ -51,7 +51,7 @@ import { ensureStructure } from './web/structure';
 import { emptyWeb } from './web/ties';
 import { emptyPossessions } from './possessions/query';
 import { emptyTeen } from './teen/query';
-import { emptyCrime } from './crime/query';
+import { emptyCrime, emptyOrgs } from './crime/query';
 import { emptyFame } from './fame/query';
 import { emptySports } from './sports/query';
 import { emptyLeague } from './sports/league';
@@ -213,6 +213,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     possessions: emptyPossessions(),
     teen: emptyTeen(),
     crime: emptyCrime(),
+    orgs: emptyOrgs(),
     fame: emptyFame(),
     sports: emptySports(),
     league: { ...emptyLeague(), setup: options.teamSetup ?? emptySetup() },

@@ -459,3 +459,47 @@ describe('D1 saves', () => {
     expect(loadedLifeSchema(content).safeParse(produce(life, (d) => void (d.drugs.stock.nope = { units: 1, quality: 1, hidden: false }))).success).toBe(false);
   });
 });
+
+describe('O1 saves', () => {
+  it('upgrades a save from before organized crime: an empty world, and a street gang rank of five moves to the nearest of four; heir snapshots too', () => {
+    const life = produce(lifeAtAge('o1-migrate', 30), (d) => {
+      d.character.cityId = 'chicago';
+      d.crime.crew = { defId: 'cinder_row_outfit', cityId: 'chicago', since: d.currentYear - 4, members: [], rivalMembers: [] };
+      d.crime.rank = 5;
+      d.crime.peak = 5;
+      d.crime.standing = 70;
+      d.crime.past = [{ crewId: 'cinder_row_outfit', fromYear: d.currentYear - 9, toYear: d.currentYear - 6, topRank: 3, how: 'left' }];
+    });
+    const old = cloneJson(life) as unknown as Record<string, unknown>;
+    delete old.orgs;
+    const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 41 }).data as typeof life;
+    expect(after.orgs).toMatchObject({ cities: {}, hoods: {}, next: 1 });
+    // The Cinder Row Outfit is a street gang with four ranks: five (the leader) becomes four, three stays at three.
+    expect(after.crime.rank).toBe(4);
+    expect(after.crime.peak).toBe(4);
+    expect(after.crime.past[0]!.topRank).toBe(3);
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ orgs: { next: 1 } });
+    // A crew of five ranks keeps its rank.
+    const family = produce(life, (d) => void ((d.crime.crew!.defId = 'marrow_street_crew'), (d.crime.rank = 5), (d.crime.peak = 5)));
+    const kept = cloneJson(family) as unknown as Record<string, unknown>;
+    delete kept.orgs;
+    expect((migrateEnvelope({ ...makeEnvelope(kept, content.contentVersion), schemaVersion: 41 }).data as typeof life).crime.rank).toBe(5);
+  });
+
+  it('keeps a life with an organization through a save, and turns away damaged organization data', () => {
+    const life = produce(lifeAtAge('o1-save', 30), (d) => {
+      d.character.cityId = 'chicago';
+      d.orgs.cities.chicago = [
+        { id: 'marrow_street_crew', defId: 'marrow_street_crew', name: 'the Marrow Street Family', kind: 'mafia', cityId: 'chicago', strength: 50, attitude: -10, war: 0, status: 'neutral' },
+        { id: 'g1', name: 'the Ember Boys', kind: 'street_gang', cityId: 'chicago', strength: 40, attitude: -30, war: 12, status: 'war' },
+      ];
+      d.orgs.hoods.chicago = { the_foundry_flats: 'marrow_street_crew', larder_street: null };
+      d.orgs.next = 2;
+    });
+    expect(lifeStateSchema.parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.orgs.cities.chicago![0]!.strength = 101))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void ((d.orgs as unknown as Record<string, unknown>).extra = 1))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.orgs.cities.chicago![0]!.status = 'shouting' as never))).success).toBe(false);
+  });
+});

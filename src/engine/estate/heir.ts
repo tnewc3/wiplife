@@ -67,7 +67,7 @@ import { ensureStructure } from '../web/structure';
 import { emptyWeb } from '../web/ties';
 import { emptyPossessions } from '../possessions/query';
 import { startingTeen } from '../teen/query';
-import { emptyCrime } from '../crime/query';
+import { emptyCrime, emptyOrgs } from '../crime/query';
 import { emptyFame } from '../fame/query';
 import { emptySports } from '../sports/query';
 import { emptyLeague } from '../sports/league';
@@ -424,6 +424,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     possessions: emptyPossessions(),
     teen: startingTeen(age, year, content),
     crime: emptyCrime(),
+    orgs: emptyOrgs(),
     fame: emptyFame(),
     sports: emptySports(),
     // Batch 6: an heir plays in the world their parent's life did.

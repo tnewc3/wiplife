@@ -1,0 +1,56 @@
+id: discipline_skimming
+title: Short on the count
+text: >-
+  The numbers are off by exactly the amount {member.name} would take, if
+  {member.they} {member:were|were} the sort. {member.They} {member:has|have}
+  been loyal for a long time, and tired for longer. Now there is a decision about
+  what you do when someone you trust has been taking from you.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { leader: true } }
+    - { crime: { away: false } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: forgive
+    label: Make clear you know, and leave it there
+    outcome:
+      text: >-
+        {member.name} understands exactly how generous this is. The count is right
+        next time, and {member.they} {member:watches|watch} you more closely than before.
+      effects:
+        - { type: relationship, role: member, trust: 5 }
+        - { type: crime, action: loyalty, delta: 2 }
+        - { type: crime, action: standing, delta: -2 }
+  - id: make_an_example
+    label: Make an example of {member.them}
+    outcome:
+      text: >-
+        It is quick and quiet, and it does not feel the way you thought it would.
+        {crew} runs on a new kind of respect afterwards, and nobody skims.
+      effects:
+        - { type: crime, action: remove, role: member }
+        - { type: relationship, role: member, affection: -40, trust: -40 }
+        - { type: crime, action: loyalty, delta: -3 }
+        - { type: crime, action: standing, delta: 6 }
+        - { type: stat, key: kindness, delta: -3 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: let_go
+    label: Let {member.them} go quietly
+    outcome:
+      text: >-
+        {member.name} walks out with a handshake and a promise that does not
+        need to be spoken. It will be kept, or it will not.
+      effects:
+        - { type: crime, action: remove, role: member }
+        - { type: relationship, role: member, affection: -6 }
+        - { type: crime, action: heat, delta: 3 }

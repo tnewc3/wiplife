@@ -6,7 +6,7 @@
  * the content build requires it of every event that joins a crew. Numbers:
  * balance/crime.yaml (entry, ranks).
  */
-import type { CastSpec, ContentBundle, CrewDef } from '../../content/schemas';
+import type { CastSpec, ContentBundle, CrewDef, OrgKind } from '../../content/schemas';
 import { createPerson } from '../events/casting';
 import { isIncarcerated } from '../legal';
 import { clampInt, rollScore } from '../random';
@@ -14,23 +14,24 @@ import { nextInt, pick } from '../rng';
 import { writeFromGroup } from '../systems/history';
 import type { CrimePast, Id, LifeState, Person } from '../types';
 import { addTie, canTie } from '../web/ties';
-import { crewDef, crewName, inCrew, liveMembers, rankTitle } from './query';
+import { crewDef, crewName, initiationRank, inCrew, liveMembers, rankTitle, topRank } from './query';
+import { ensureCity, ensureHolding, ensureRoster } from './orgs';
 
-/** Crews that work in a city (active ones only). */
-export function crewsIn(content: ContentBundle, cityId: Id): CrewDef[] {
+/** Crews that work in a city (active ones only), of one kind when given (O1). */
+export function crewsIn(content: ContentBundle, cityId: Id, kind?: OrgKind): CrewDef[] {
   return Object.values(content.crews)
-    .filter((c) => !c.retired && c.cities.includes(cityId))
+    .filter((c) => !c.retired && c.cities.includes(cityId) && (kind === undefined || c.kind === kind))
     .sort((a, b) => (a.id < b.id ? -1 : 1));
 }
 
 /** Why you can't join a crew now, or null. */
 export type JoinBlock = 'age' | 'inCrew' | 'away' | 'none';
 
-export function joinBlock(state: LifeState, content: ContentBundle): JoinBlock | null {
+export function joinBlock(state: LifeState, content: ContentBundle, kind?: OrgKind): JoinBlock | null {
   if (state.character.age < content.balance.relationships.adultAge) return 'age';
   if (inCrew(state)) return 'inCrew';
   if (isIncarcerated(state)) return 'away';
-  if (crewsIn(content, state.character.cityId).length === 0) return 'none';
+  if (crewsIn(content, state.character.cityId, kind).length === 0) return 'none';
   return null;
 }
 
@@ -85,13 +86,15 @@ export function staffCrew(state: LifeState, content: ContentBundle): void {
     crew.members = [...crew.members, ...made];
     tieMembers(state, crew.members, content);
   }
+  const top = topRank(content, crew.defId);
   const leaderGone = crew.leader === undefined || !crew.members.includes(crew.leader);
-  if (state.crime.rank < content.balance.crime.ranks.length && leaderGone) {
+  if (state.crime.rank < top && leaderGone) {
     const next = oldestOf(state, crew.members);
     if (next !== undefined) crew.leader = next;
     else delete crew.leader;
-  } else if (state.crime.rank >= content.balance.crime.ranks.length) delete crew.leader;
+  } else if (state.crime.rank >= top) delete crew.leader;
   if (crew.informant !== undefined && !crew.members.includes(crew.informant)) delete crew.informant;
+  ensureRoster(state, content);
 }
 
 /** Where you start in a crew: a rank and a standing. */
@@ -108,14 +111,17 @@ export interface Start {
  * (and whoever brought you, if given), and a rival crew. Returns false when
  * you may not (see `joinBlock`).
  */
-export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id, start?: Start): boolean {
-  if (joinBlock(state, content) !== null) return false;
-  const crews = crewsIn(content, state.character.cityId);
+export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id, start?: Start, kind?: OrgKind): boolean {
+  if (joinBlock(state, content, kind) !== null) return false;
+  const crews = crewsIn(content, state.character.cityId, kind);
   // A crew you were in before takes you back first, if it works here.
   const before = [...state.crime.past].reverse().find((p) => crews.some((c) => c.id === p.crewId));
   const def = (before && crews.find((c) => c.id === before.crewId)) || pick(state.rng, crews);
   const entry = content.balance.crime.entry;
-  const rivals = def.rivals.filter((id) => content.crews[id] && !content.crews[id]!.retired && content.crews[id]!.cities.includes(state.character.cityId));
+  const named = def.rivals.filter((id) => content.crews[id] && !content.crews[id]!.retired && content.crews[id]!.cities.includes(state.character.cityId));
+  // (O1: a crew with none of its named rivals in the city is at odds with whoever else works there.)
+  const rivals = named.length > 0 ? named : crewsIn(content, state.character.cityId).filter((c) => c.id !== def.id).map((c) => c.id);
+  const top = topRank(content, def.id);
   const crime = state.crime;
   crime.crew = {
     defId: def.id,
@@ -126,8 +132,9 @@ export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id,
     ...(rivals.length > 0 ? { rival: pick(state.rng, rivals) } : {}),
   };
   const again = start ?? (before ? rejoinStart(before, content) : undefined);
-  crime.rank = again?.rank ?? 1;
+  crime.rank = clampInt(again?.rank ?? 1, 1, top - 1);
   crime.peak = crime.rank;
+  crime.crew.initiated = crime.rank >= initiationRank(content, def.id);
   crime.rankSince = state.currentYear;
   crime.standing = again?.standing ?? entry.standing;
   crime.lowYears = 0;
@@ -140,6 +147,8 @@ export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id,
     crime.crew.members.push(brought);
     shapePerson(state.people[brought]!, def, `crew:${def.id}`);
   }
+  ensureCity(state, content, crime.crew.cityId);
+  ensureHolding(state, content);
   staffCrew(state, content);
   writeFromGroup(state, content.text.crime.history.joined, ['crime', 'joined'], { values: { crew: def.name } }, content);
   return true;
@@ -203,9 +212,10 @@ export function leaveCrew(state: LifeState, how: CrimePast['how'], content: Cont
 export function promote(state: LifeState, content: ContentBundle): boolean {
   const crime = state.crime;
   const crew = crime.crew;
-  const top = content.balance.crime.ranks.length;
+  const top = topRank(content, crew?.defId);
   if (!crew || crime.rank >= top) return false;
   crime.rank += 1;
+  if (crime.rank >= initiationRank(content, crew.defId)) crew.initiated = true;
   crime.peak = Math.max(crime.peak, crime.rank);
   crime.rankSince = state.currentYear;
   crime.standing = Math.max(content.balance.crime.entry.standing, crime.standing - 25);
@@ -234,6 +244,7 @@ export function removeMember(state: LifeState, id: Id): void {
   const crew = state.crime.crew;
   if (!crew) return;
   crew.members = crew.members.filter((m) => m !== id);
+  if (crew.roster) delete crew.roster[id];
   crew.rivalMembers = crew.rivalMembers.filter((m) => m !== id);
   if (crew.leader === id) delete crew.leader;
   if (crew.informant === id) delete crew.informant;

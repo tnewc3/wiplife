@@ -1,0 +1,11 @@
+id: supply_the_gangs
+name: Supply the gangs
+blurb: Wholesale to the gangs and clubs who deal for you. Larger orders and larger consequences.
+kinds: [cartel]
+effect: supply
+size: big
+danger: high
+drug: true
+minRank: 2
+done: "{member} supplied the gangs this year and brought back {amount}."
+bust: "{member}'s deliveries to the gangs went wrong. {amount} was recovered."

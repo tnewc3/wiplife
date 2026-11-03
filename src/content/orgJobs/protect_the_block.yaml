@@ -1,0 +1,9 @@
+id: protect_the_block
+name: Protect the block
+blurb: Watching the streets you hold. No money in it, but it keeps what you have.
+kinds: [street_gang]
+effect: protect
+danger: medium
+needsHood: true
+done: "{member} spent the year watching the block, and no one took a thing."
+bust: "{member} was hurt or picked up holding the line on the block this year."

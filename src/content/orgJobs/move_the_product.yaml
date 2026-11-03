@@ -1,0 +1,10 @@
+id: move_the_product
+name: Move the product
+blurb: Carry the supply across the city, the country or the border. The biggest money there is, and the biggest danger.
+kinds: [cartel]
+effect: earn
+size: major
+danger: high
+drug: true
+done: "{member} moved the product all year without a stop, and {amount} came back."
+bust: "A shipment under {member} was caught or lost. What survived came to {amount}."

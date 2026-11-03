@@ -31,3 +31,11 @@ heritageWeights:
   west_african: 2
   korean: 0.7
   japanese: 0.3
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: bayou_gate, name: Bayou Gate, income: 5, attention: 52 }
+  - { id: cottonseed_row, name: Cottonseed Row, income: 1, attention: 61 }
+  - { id: ship_lane, name: Ship Lane, income: 1, attention: 39 }
+  - { id: pecan_hollow, name: Pecan Hollow, income: 5, attention: 28 }
+  - { id: the_terminal_strip, name: The Terminal Strip, income: 5, attention: 62 }

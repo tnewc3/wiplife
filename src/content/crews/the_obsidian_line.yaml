@@ -1,0 +1,8 @@
+id: the_obsidian_line
+name: the Obsidian Line
+kind: cartel
+blurb: A quiet supplier that works through ports and warehouses. They treat violence as a cost they would rather not pay.
+cities: [vancouver, toronto, los_angeles, houston, nyc, chicago, london, manchester, montreal, mexico_city, monterrey]
+ranks: [worker, runner, lieutenant, plaza boss, leader]
+rivals: [harrowgate_freight, sol_alba_combine]
+traits: { discipline: 10, ambition: 8, kindness: -6 }

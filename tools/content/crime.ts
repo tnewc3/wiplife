@@ -96,6 +96,69 @@ export function checkCrime(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
   const sizes = Object.values(b.jobs.sizes);
   if (sizes.some((s, i) => i > 0 && (s.payout < sizes[i - 1]!.payout || s.heat < sizes[i - 1]!.heat))) err(BALANCE, 'jobs.sizes must grow in payout and heat from petty to major');
 
+  // O1: kinds, member jobs, neighborhoods, generated names and numbers.
+  const o = bundle.balance.orgs;
+  const dirtyTexts = (file: string, label: string, ...texts: string[]) => {
+    for (const t of texts) {
+      if (INSTRUCTION_WORDS.test(t)) err(file, `${label}: crime stays at the level of story (found instruction wording: "${t.match(INSTRUCTION_WORDS)![0]}")`);
+    }
+  };
+  for (const kind of ['street_gang', 'mafia', 'cartel', 'motorcycle_club'] as const) {
+    const def = bundle.orgKinds[kind];
+    const file = fileOf('orgKinds', kind);
+    if (!def) {
+      err('orgKinds/', `no definition for the kind ${kind}`);
+      continue;
+    }
+    for (const id of def.jobs) {
+      const job = bundle.orgJobs[id];
+      if (!job) err(file, `${kind}: unknown job "${id}"`);
+      else if (!job.kinds.includes(kind)) err(file, `${kind}: job "${id}" is not for this kind`);
+    }
+    if (!def.jobs.some((id) => bundle.orgJobs[id]?.effect === 'earn' || bundle.orgJobs[id]?.effect === 'supply')) err(file, `${kind}: needs at least one job that earns`);
+    if (!def.jobs.includes('lie_low')) err(file, `${kind}: needs the lie_low job (the way to cool things)`);
+    if (def.supplies && def.buys) err(file, `${kind}: a kind supplies or buys its drugs, not both`);
+    if (def.codes.some((c) => c.check === 'heat' && c.over === undefined)) err(file, `${kind}: a heat code needs "over"`);
+    dirtyTexts(file, kind, def.blurb, def.initiation.blurb, def.initiation.name, ...def.codes.map((c) => c.text));
+    if (active(bundle.crews).filter((c) => c.kind === kind).length < 2) err('crews/', `at least two crews of kind ${kind}`);
+  }
+  if (!Object.values(bundle.orgKinds).some((k) => k.supplies)) err('orgKinds/', 'a cartel supplies drugs: some kind must supply');
+  for (const [id, job] of Object.entries(bundle.orgJobs)) {
+    const file = fileOf('orgJobs', id);
+    if ((job.effect === 'earn' || job.effect === 'supply' || job.effect === 'launder') && job.size === undefined) err(file, `${id}: a job that moves money needs a size`);
+    if (job.effect === 'supply' && !job.kinds.every((k) => bundle.orgKinds[k]?.supplies)) err(file, `${id}: only a kind that supplies has a supply job`);
+    if (job.minRank !== undefined && job.minRank >= 5) err(file, `${id}: minRank is for a member below the top`);
+    dirtyTexts(file, id, job.name, job.blurb, job.done, job.bust);
+    if (!/\{member\}/.test(job.done) || !/\{member\}/.test(job.bust)) err(file, `${id}: the recap lines name {member}`);
+    if (job.effect === 'earn' && !(/\{amount\}/.test(job.done) && /\{amount\}/.test(job.bust))) err(file, `${id}: an earning job's lines show {amount}`);
+    if (STEREOTYPE_WORDS.test(`${job.name} ${job.blurb}`.replace(/\b(?:mafia|cartel)\b/gi, ''))) err(file, `${id}: a job says nothing about race, religion, nationality or background`);
+  }
+  for (const [kind, parts] of Object.entries(bundle.registries.orgs.names)) {
+    for (const t of [...parts.patterns, ...parts.first, ...parts.second]) {
+      if (STEREOTYPE_WORDS.test(t.replace(/\b(?:mafia|cartel)\b/gi, '')) || INSTRUCTION_WORDS.test(t)) err('registries/orgs.yaml', `names.${kind}: "${t}" is not a made-up name that says nothing about background`);
+    }
+    if (!parts.patterns.every((p) => p.includes('{a}'))) err('registries/orgs.yaml', `names.${kind}: every pattern needs {a}`);
+  }
+  for (const city of active(bundle.cities)) {
+    const hoods = city.neighborhoods ?? [];
+    if (hoods.length < 4) err(fileOf('cities', city.id), `${city.id}: needs at least four neighborhoods for organizations to hold`);
+    if (new Set(hoods.map((h) => h.id)).size !== hoods.length) err(fileOf('cities', city.id), `${city.id}: duplicate neighborhood ids`);
+    if (new Set(hoods.map((h) => h.name)).size !== hoods.length) err(fileOf('cities', city.id), `${city.id}: duplicate neighborhood names`);
+    if (STEREOTYPE_WORDS.test(hoods.map((h) => h.name).join(' '))) err(fileOf('cities', city.id), `${city.id}: a neighborhood name says nothing about race, religion, nationality or background`);
+  }
+  if (o.territory.income.some((v, i) => i > 0 && v < o.territory.income[i - 1]!)) err('balance/orgs.yaml', 'territory.income must not fall from value 1 to 5');
+  if (!(o.cut.low.keep < o.cut.fair.keep && o.cut.fair.keep < o.cut.high.keep)) err('balance/orgs.yaml', 'cut: keep must rise from low to fair to high');
+  if (!(o.cut.low.loyalty >= o.cut.fair.loyalty && o.cut.fair.loyalty >= o.cut.high.loyalty)) err('balance/orgs.yaml', 'cut: loyalty must not rise as you keep more');
+  if (!(o.jobs.danger.low.arrest <= o.jobs.danger.medium.arrest && o.jobs.danger.medium.arrest <= o.jobs.danger.high.arrest)) err('balance/orgs.yaml', 'jobs.danger: arrest odds must rise from low to high');
+  if (!(o.jobs.danger.low.killed <= o.jobs.danger.medium.killed && o.jobs.danger.medium.killed <= o.jobs.danger.high.killed)) err('balance/orgs.yaml', 'jobs.danger: death odds must rise from low to high');
+  if (o.jobs.danger.low.killed !== 0) err('balance/orgs.yaml', 'jobs.danger.low.killed must be 0: a safe job never kills');
+  for (const [name, bands] of [['bands.strength', o.bands.strength], ['bands.attitude', o.bands.attitude], ['bands.member', o.bands.member]] as const) {
+    if (bands.some((v, i) => i > 0 && v <= bands[i - 1]!)) err('balance/orgs.yaml', `${name} must increase`);
+  }
+  for (const drug of o.supply.drugs) if (!bundle.drugs[drug]) err('balance/orgs.yaml', `supply.drugs: unknown drug "${drug}"`);
+  for (const [kind, n] of Object.entries(o.roster.cap)) if (n < b.entry.members.max) err('balance/orgs.yaml', `roster.cap.${kind}: below the members a crew starts with (${b.entry.members.max})`);
+  if (o.world.attitude.mean > 0) err('balance/orgs.yaml', 'world.attitude.mean: rivals start wary or hostile, not friendly');
+
   // Crews, rivals and businesses.
   for (const [id, def] of Object.entries(bundle.crews)) {
     const file = fileOf('crews', id);
@@ -159,6 +222,17 @@ export function checkCrime(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
           if (!requiresCrime(def, (c) => c.away === false)) e('answers cut, so it must require { crime: { away: false } } (nothing is shared while you are far away)');
         }
         if (name === 'pushedOut' && !requiresCrime(def, (c) => c.standing !== undefined)) e('answers pushedOut, so it must require a low standing');
+        // O1: the organization's own triggers.
+        if (name === 'initiation') {
+          if (!requiresCrime(def, (c) => c.initiating === true)) e('answers initiation, so it must require { crime: { initiating: true } }');
+          if (!requiresCrime(def, (c) => c.kind !== undefined && c.kind.length === 1)) e('answers initiation, so it must require exactly one kind (crime: kind)');
+          if (!outcomesOf(def).some((o) => (o.effects as Effect[]).some((x) => x.type === 'crime' && x.action === 'promote'))) e('answers initiation, so some outcome must promote you');
+        }
+        if (name === 'contest' && !requiresCrime(def, (c) => c.territory?.gte !== undefined && c.territory.gte >= 1)) e('answers contest, so it must require a held neighborhood (crime: territory gte 1)');
+        if ((name === 'war' || name === 'truce' || name === 'betrayal') && !requiresCrime(def, (c) => c.war === true || c.rival === true)) e(`answers ${name}, so it must require { crime: { war: true } } (or a rival)`);
+        if (name === 'truce' && !outcomesOf(def).some((o) => (o.effects as Effect[]).some((x) => x.type === 'crime' && x.action === 'truce'))) e('answers truce, so some outcome must make the truce');
+        if ((name === 'discipline' || name === 'supply') && !requiresCrime(def, (c) => c.leader === true)) e(`answers ${name}, so it must require { crime: { leader: true } }: they are a leader's decisions`);
+        if (name === 'supply' && !requiresCrime(def, (c) => c.kind?.includes('cartel') === true)) e('answers supply, so it must require a cartel (crime: kind: [cartel])');
       }
     }
   }

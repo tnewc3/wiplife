@@ -3,10 +3,11 @@
  * an open investigation, the rival crew and who is talking to the police.
  * Every field given must hold.
  */
-import type { Compare, ContentBundle, CrimeCondition } from '../../content/schemas';
+import type { Compare, ContentBundle, CrimeCondition, OrgKind } from '../../content/schemas';
 import type { LifeState } from '../types';
 import { crewsIn } from './crew';
-import { crimeYears, inCrew, isFormer, lastCrewId } from './query';
+import { crewKind, crimeYears, initiationRank, inCrew, isFormer, lastCrewId } from './query';
+import { holdings } from './orgs';
 
 function within(value: number, c: Compare): boolean {
   if (c.gt !== undefined && !(value > c.gt)) return false;
@@ -46,5 +47,19 @@ export function crimeHolds(c: CrimeCondition, state: LifeState, topRank: number,
   if (c.suspicion && !within(k.crew?.away?.suspicion ?? 0, c.suspicion)) return false;
   if (c.returned !== undefined && (k.crew?.returned === state.currentYear) !== c.returned) return false;
   if (c.local !== undefined && (content !== undefined && crewsIn(content, state.character.cityId).length > 0) !== c.local) return false;
+  if (c.kind !== undefined) {
+    const kind = content === undefined ? undefined : crewKind(content, lastCrewId(state));
+    if (kind === undefined || !c.kind.includes(kind)) return false;
+  }
+  if (c.offered !== undefined && content !== undefined && !c.offered.some((kind) => crewsIn(content, state.character.cityId, kind as OrgKind).length > 0)) return false;
+  if (c.war !== undefined && (k.crew?.war !== undefined) !== c.war) return false;
+  if (c.territory) {
+    const held = k.crew ? holdings(state, k.crew.cityId, k.crew.defId).length : 0;
+    if (!within(held, c.territory)) return false;
+  }
+  if (c.initiating !== undefined) {
+    const now = k.crew !== null && content !== undefined && k.rank + 1 === initiationRank(content, k.crew.defId) && k.crew.initiated !== true;
+    if (now !== c.initiating) return false;
+  }
   return true;
 }

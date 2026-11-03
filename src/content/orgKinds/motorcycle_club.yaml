@@ -1,0 +1,15 @@
+id: motorcycle_club
+name: Motorcycle club
+noun: club
+blurb: Brotherhood, rules and rivalries with other clubs. Runs, protection and side businesses under a patch you have to earn.
+ranks: [hang-around, prospect, patched member, officer, president]
+tiers: [1, 2, 3, 4, 5]
+initiation:
+  rank: 3
+  name: Earning the patch
+  blurb: A prospect does what the club asks, for as long as it asks. The patch is a vote, and it is not always yes.
+jobs: [club_run, protect_the_clubhouse, side_business_work, corner_dealing, recruit_hangarounds, lie_low]
+codes:
+  - { id: club_first, text: "The club comes before everything else you have. Years of absence get remembered.", check: idle, standing: 8 }
+  - { id: no_snitching, text: "Nobody talks to the police about the club or about a brother.", check: arrest, standing: 10 }
+buys: true

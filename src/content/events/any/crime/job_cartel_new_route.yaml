@@ -1,0 +1,53 @@
+id: job_cartel_new_route
+title: A route nobody has tried
+text: >-
+  {crew} wants something to move through a place it has not used before,
+  and a person who has not been noticed yet. {member.name} says you are that
+  person. A plan exists. Everyone who has seen it is glad it is not
+  their name on the first trip.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [cartel] } }
+    - { crime: { rank: { gte: 2 } } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: first_trip
+    label: Make the first trip
+    check:
+      base: 58
+      stats: [{ key: smarts, weight: 0.2 }, { key: luck, weight: 0.25 }, { crime: heat, weight: -0.25 }]
+      success:
+        text: >-
+          It works so well it feels like an accident. By the end of the season
+          {crew} has a new route and you have a new reputation, and a cut that
+          the old one never paid.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: strength, delta: 3 }
+      failure:
+        text: >-
+          It was a good plan and a bad day. You are caught in the middle of a
+          road that was meant to be empty, and you lose more than a load.
+        effects:
+          - { type: crime, action: job, size: small }
+          - { type: crime, action: heat, delta: 15 }
+          - { type: crime, action: standing, delta: -8 }
+  - id: send_someone_else
+    label: Suggest someone else make the first trip
+    outcome:
+      text: >-
+        {member.name} listens, nods, and changes the name on the plan. You
+        are not blamed, but you are not asked again for a while.
+      effects:
+        - { type: crime, action: standing, delta: -4 }

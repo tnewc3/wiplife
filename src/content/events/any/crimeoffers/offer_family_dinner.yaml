@@ -1,0 +1,47 @@
+id: offer_family_dinner
+title: Dinner with a family
+text: >-
+  {acquaintance.name} invites you to a dinner that is, it turns out, not
+  really about dinner. The table is long. The people at it are polite and
+  attentive and very good at remembering what you said. Somebody asks, as a
+  favor to {acquaintance.them}, whether you might be useful.
+tone: dark
+category: crimeoffers
+rarity: rare
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { crime: { offered: [mafia] } }
+once: true
+weight:
+  base: 0.25
+  modifiers:
+    - { if: { trait: ambition, gt: 60 }, x: 1.6 }
+    - { if: { trait: discipline, gt: 55 }, x: 1.3 }
+    - { if: { flag: turned_down_a_crew }, x: 0.6 }
+cast:
+  acquaintance: { kind: acquaintance, presence: city, age: { min: 28, max: 65 }, ageOffset: { min: -5, max: 25 } }
+choices:
+  - id: accept
+    label: Say you would be glad to help
+    outcome:
+      text: >-
+        Nothing is signed and nothing is promised, which is how it works. You
+        leave as an associate of {crew}, with a number to call and a clear
+        sense that the number will be answered.
+      effects:
+        - { type: crime, action: join, kind: mafia, role: acquaintance }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: stress, delta: 3 }
+  - id: decline
+    label: Thank them and decline, politely
+    outcome:
+      text: >-
+        You are thanked, warmly and at length. {acquaintance.name} walks you
+        to the door, and you feel, all the way home, that you have just been
+        remembered.
+      effects:
+        - { type: relationship, role: acquaintance, affection: -3 }
+        - { type: flag, key: turned_down_a_crew, value: true }

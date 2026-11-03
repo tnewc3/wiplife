@@ -32,3 +32,11 @@ heritageWeights:
   korean: 2
   west_african: 1
   french: 3
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: junction_yards, name: Junction Yards, income: 4, attention: 30 }
+  - { id: basin_street, name: Basin Street, income: 2, attention: 53 }
+  - { id: elm_terrace, name: Elm Terrace, income: 4, attention: 60 }
+  - { id: the_underpass, name: The Underpass, income: 3, attention: 33 }
+  - { id: harbourfront_flats, name: Harbourfront Flats, income: 4, attention: 60 }

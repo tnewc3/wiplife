@@ -1,0 +1,14 @@
+id: mafia
+name: Mafia family
+noun: family
+blurb: Slower, richer and strict. Rackets, fronts and favors, and a code about loyalty that is older than anyone in the room.
+ranks: [associate, soldier, capo, underboss, boss]
+tiers: [1, 2, 3, 4, 5]
+initiation:
+  rank: 2
+  name: Becoming made
+  blurb: A soldier is a person the family has decided to stand behind. First they decide whether you are worth it.
+jobs: [protection_collection, gambling_book, loan_collection, front_business_work, launder_the_take, lie_low]
+codes:
+  - { id: omerta, text: "You do not cooperate with the police. Ever. A family does not forgive it.", check: arrest, standing: 12 }
+  - { id: keep_it_cool, text: "Attention is a tax on everyone. Run hot and the family will notice.", check: heat, over: 70, standing: 8 }

@@ -1,0 +1,10 @@
+id: collect_on_the_block
+name: Collect tribute
+blurb: Local businesses pay to stay unbothered. Reliable, and it makes enemies.
+kinds: [street_gang]
+effect: earn
+size: small
+danger: medium
+needsHood: true
+done: "{member} collected tribute on the block, {amount} for the year."
+bust: "A shopkeeper pushed back on {member} this year. The collection came to {amount}."

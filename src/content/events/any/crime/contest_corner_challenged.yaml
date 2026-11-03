@@ -1,0 +1,64 @@
+id: contest_corner_challenged
+title: Somebody wants what you hold
+text: >-
+  People you do not know are doing business on a corner of your neighborhood,
+  and they are not asking. {member.name} says {crew} has to answer, that the
+  answer will be noticed by everyone in the area, and that it is better to
+  decide how than to be told.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { territory: { gte: 1 } } }
+    - { crime: { away: false } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: push_back
+    label: Push them off the corner
+    check:
+      base: 56
+      stats: [{ key: confidence, weight: 0.25 }, { key: fitness, weight: 0.15 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          They are gone before the sun is. The corner is yours, and the people on
+          it say so.
+        effects:
+          - { type: crime, action: standing, delta: 6 }
+          - { type: crime, action: strength, delta: 3 }
+          - { type: crime, action: heat, delta: 5 }
+      failure:
+        text: >-
+          They were more than you counted, and they were ready. The corner goes
+          to them, and the story goes around the neighborhood faster than you can
+          stop it.
+        effects:
+          - { type: crime, action: territory, delta: -1 }
+          - { type: crime, action: standing, delta: -6 }
+          - { type: crime, action: strength, delta: -3 }
+  - id: talk_first
+    label: Send word and talk first
+    outcome:
+      text: >-
+        There is a conversation, then a longer one, then an understanding that
+        nobody likes. The corner is shared for now, and everyone is watching how
+        long that lasts.
+      effects:
+        - { type: crime, action: standing, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: give_it_up
+    label: Let them have the corner
+    outcome:
+      text: >-
+        You will not lose anyone over a corner, you tell yourself, and tell
+        everyone else. The neighborhood hears it as a retreat anyway.
+      effects:
+        - { type: crime, action: territory, delta: -1 }
+        - { type: crime, action: standing, delta: -8 }

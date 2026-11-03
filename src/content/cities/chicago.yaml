@@ -19,3 +19,11 @@ schools:
   elite: Ashcombe University
   trade: Midway Trade Institute
   grad: Lakefront Graduate School
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: the_foundry_flats, name: The Foundry Flats, income: 3, attention: 34 }
+  - { id: larder_street, name: Larder Street, income: 4, attention: 66 }
+  - { id: canal_row, name: Canal Row, income: 1, attention: 29 }
+  - { id: kiln_park, name: Kiln Park, income: 5, attention: 31 }
+  - { id: meridian_heights, name: Meridian Heights, income: 3, attention: 62 }

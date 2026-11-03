@@ -10,6 +10,8 @@ import { clampInt } from '../random';
 import type { RngState } from '../rng';
 import type { Id, LifeState } from '../types';
 import { demote, joinCrew, leaveCrew, promote, removeMember, transferCrew } from './crew';
+import { changeTerritory, declareWar, endWar } from './wars';
+import { myOrg } from './orgs';
 import { addDirty, addHeat, closeInvestigation, crewCut, dirtyCost, jobPayout, loseDirty, openInvestigation, takeDirty } from './money';
 
 type CrimeEffect = Extract<Effect, { type: 'crime' }>;
@@ -21,7 +23,7 @@ export function applyCrimeEffect(state: LifeState, effect: CrimeEffect, cast: Re
   const role = effect.role === undefined ? undefined : cast[effect.role];
   switch (effect.action) {
     case 'join':
-      joinCrew(state, content, role);
+      joinCrew(state, content, role, undefined, effect.kind);
       return;
     case 'leave':
       leaveCrew(state, effect.how ?? 'left', content);
@@ -66,6 +68,30 @@ export function applyCrimeEffect(state: LifeState, effect: CrimeEffect, cast: Re
       return;
     case 'remove':
       if (role !== undefined) removeMember(state, role);
+      return;
+    case 'loyalty':
+      for (const m of Object.values(crime.crew?.roster ?? {})) m.loyalty = clampInt(m.loyalty + effect.delta!, 0, 100);
+      return;
+    case 'strength': {
+      const org = myOrg(state);
+      if (org) org.strength = clampInt(org.strength + effect.delta!, 0, 100);
+      return;
+    }
+    case 'territory':
+      changeTerritory(state, effect.delta!);
+      return;
+    case 'war':
+      declareWar(state, content);
+      return;
+    case 'truce':
+      endWar(state, content, 'truce');
+      return;
+    case 'ally':
+      endWar(state, content, 'allied');
+      return;
+    case 'informant':
+      if (role !== undefined && crime.crew && crime.crew.members.includes(role)) crime.crew.informant = role;
+      else if (role === undefined) delete crime.crew?.informant;
       return;
   }
 }

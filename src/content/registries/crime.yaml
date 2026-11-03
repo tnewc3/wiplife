@@ -30,6 +30,14 @@ jobs:
   - job_sit_down_with_the_rival
   - job_tribute_season
   - job_warned_off
+  - job_gang_turf_walk
+  - job_gang_stash_house
+  - job_mafia_sitdown
+  - job_mafia_the_wedding
+  - job_cartel_checkpoint
+  - job_cartel_new_route
+  - job_club_long_ride
+  - job_club_rally
 # deathCauses the causes of death a crew life can end in (src/content/causes)
 # cut         a rank 4-5 member's yearly share of the crew's business, as an event
 # away        the crew reaches out while you live far from it (favors, threats, suspicion)
@@ -38,6 +46,13 @@ jobs:
 # shark       a loan shark's collectors come for a missed payment (Batch 2b; queued by the economy step)
 deathCauses: [crime_job_gone_wrong, crew_war_killing, crew_reprisal, crew_fight]
 triggers:
+  initiation: { events: [initiation_jumped_in, initiation_made, initiation_first_run, initiation_the_patch] }
+  contest: { events: [contest_corner_challenged, contest_scouts_on_your_block] }
+  war: { events: [war_ambush_on_the_road, war_the_funeral] }
+  truce: { events: [truce_sitdown_offered, truce_price_of_peace] }
+  betrayal: { events: [betrayal_ally_turns, betrayal_deal_behind_your_back] }
+  discipline: { events: [discipline_skimming, discipline_wants_more, discipline_whispers] }
+  supply: { events: [supply_shipment_short, supply_gang_wants_credit] }
   promotion: { events: [promotion_offered] }
   pushedOut: { events: [pushed_out] }
   investigation: { events: [detective_visit, detective_reopens] }

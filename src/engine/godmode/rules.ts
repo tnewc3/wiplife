@@ -5,6 +5,7 @@
  */
 import { produce } from 'immer';
 import type { ContentBundle } from '../../content/schemas';
+import { topRank } from '../crime/query';
 import { activeJob, meetsJobRequirements, searchBlock } from '../career';
 import { sameCountry } from '../country';
 import { isIncarcerated, onProbation } from '../legal';
@@ -419,6 +420,21 @@ function careerRules(before: LifeState, payload: EditPayload, content: ContentBu
     else {
       if (e.agent !== undefined && e.agent !== null && !content.fameAgents[e.agent]) add(refusal('unknown_id', 'career', { field: 'agent', facts: { id: e.agent } }));
       if (e.contract !== undefined && f.contract === null) unavailable('contract');
+    }
+  }
+  if (career.crime) {
+    const k = career.crime;
+    const crew = before.crime.crew;
+    const adult = before.character.age >= content.balance.relationships.adultAge;
+    if (!adult) unavailable('crime');
+    else {
+      if ((k.rank !== undefined || k.standing !== undefined || k.cut !== undefined || k.members !== undefined || k.war !== undefined) && !crew) unavailable('crime');
+      if (crew) {
+        const top = topRank(content, crew.defId);
+        if (k.rank !== undefined && k.rank > top) add(refusal('invalid_value', 'career', { field: 'rank', facts: { max: top } }));
+        for (const m of k.members ?? []) if (!crew.roster?.[m.id]) add(refusal('unknown_id', 'career', { field: 'members', person: m.id, facts: { id: m.id } }));
+        if (k.war !== undefined && crew.war === undefined) unavailable('war');
+      }
     }
   }
 }

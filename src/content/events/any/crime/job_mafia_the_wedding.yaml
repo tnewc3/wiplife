@@ -1,0 +1,53 @@
+id: job_mafia_the_wedding
+title: A wedding with envelopes
+text: >-
+  A cousin of {crew} is getting married, and everyone who matters is invited.
+  {member.name} says there are more envelopes than guests, that someone is
+  to be watching the door, and that the real business will be done on the
+  steps outside while the music plays.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [mafia] } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: work_the_door
+    label: Work the door
+    check:
+      base: 70
+      stats: [{ key: confidence, weight: 0.25 }, { key: sociability, weight: 0.2 }, { key: luck, weight: 0.15 }]
+      success:
+        text: >-
+          You smile at the right people, say nothing to the wrong ones, and are
+          handed an envelope at the end of the night that is heavier than it looks.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: crime, action: job, size: small }
+          - { type: relationship, role: member, affection: 3 }
+      failure:
+        text: >-
+          A guest who was not on anyone's list gets past you and into a photograph
+          with the wrong people. It is nobody's fault, which is how you know it
+          is yours.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 5 }
+          - { type: crime, action: standing, delta: -4 }
+  - id: enjoy_the_party
+    label: Just go and enjoy the party
+    outcome:
+      text: >-
+        You eat, you dance and you shake the hands you are supposed to. It is
+        remembered that you came and that you did nothing else.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: crime, action: standing, delta: -2 }

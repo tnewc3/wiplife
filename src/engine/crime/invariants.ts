@@ -7,6 +7,7 @@
  */
 import type { ContentBundle } from '../../content/schemas';
 import type { LifeState } from '../types';
+import { topRank } from './query';
 
 export function crimeFailures(state: LifeState, content: ContentBundle): string[] {
   const failures: string[] = [];
@@ -29,7 +30,8 @@ export function crimeFailures(state: LifeState, content: ContentBundle): string[
   } else {
     const def = content.crews[k.crew.defId];
     if (!def) fail(`crime: unknown crew "${k.crew.defId}"`);
-    if (!Number.isInteger(k.rank) || k.rank < 1 || k.rank > b.ranks.length) fail(`crime: rank ${String(k.rank)} is outside 1 to ${b.ranks.length}`);
+    const top = topRank(content, k.crew.defId);
+    if (!Number.isInteger(k.rank) || k.rank < 1 || k.rank > top) fail(`crime: rank ${String(k.rank)} is outside 1 to ${top}`);
     if (k.peak < k.rank) fail('crime: the highest rank held is below the current rank');
     if (k.crew.since > state.currentYear || k.crew.since < state.birthYear + adultAge) fail('crime: the crew was joined outside the adult years');
     if (!content.cities[k.crew.cityId]) fail(`crime: the crew works in an unknown city "${k.crew.cityId}"`);
@@ -46,12 +48,41 @@ export function crimeFailures(state: LifeState, content: ContentBundle): string[
     for (const id of [...k.crew.members, ...k.crew.rivalMembers]) if (!state.people[id]) fail(`crime: crew person ${id} does not exist`);
     if (new Set(k.crew.members).size !== k.crew.members.length) fail('crime: a crew member appears twice');
     if (k.crew.leader !== undefined && !k.crew.members.includes(k.crew.leader)) fail('crime: the leader is not among the members');
-    if (k.rank >= b.ranks.length && k.crew.leader !== undefined) fail('crime: the crew has a leader above its top rank');
+    if (k.rank >= top && k.crew.leader !== undefined) fail('crime: the crew has a leader above its top rank');
     if (k.crew.informant !== undefined && !k.crew.members.includes(k.crew.informant)) fail('crime: the informant is not among the members');
     if (k.crew.informant !== undefined && !k.investigation) fail('crime: an informant without an investigation');
     for (const id of k.crew.members) {
       const p = state.people[id];
       if (p && state.currentYear - p.birthYear < adultAge) fail(`crime: crew member ${id} is under ${adultAge}`);
+    }
+    // O1: the roster, the world around the crew.
+    for (const [id, m] of Object.entries(k.crew.roster ?? {})) {
+      if (!k.crew.members.includes(id)) fail(`org: roster member ${id} is not in the crew`);
+      score(`org.roster.${id}.skill`, m.skill);
+      score(`org.roster.${id}.loyalty`, m.loyalty);
+      score(`org.roster.${id}.heat`, m.heat);
+      if (!Number.isInteger(m.rank) || m.rank < 1 || m.rank > Math.max(1, top - 1)) fail(`org: roster member ${id} has rank ${String(m.rank)}`);
+      if (m.job !== undefined && !content.orgJobs[m.job]) fail(`org: roster member ${id} has an unknown job "${m.job}"`);
+    }
+    const orgs = state.orgs.cities[k.crew.cityId];
+    if (!orgs?.some((o) => o.id === k.crew!.defId)) fail('org: the crew is not among its city\'s organizations');
+    if (k.crew.war !== undefined && orgs?.find((o) => o.id === k.crew!.war)?.status !== 'war') fail('org: at war with an organization that is not at war with you');
+    if (k.crew.supplier !== undefined && !orgs?.some((o) => o.id === k.crew!.supplier && content.orgKinds[o.kind]?.supplies)) fail('org: the supplier is not a cartel of the city');
+    if (k.crew.plan?.expand !== undefined && !(k.crew.plan.expand in (state.orgs.hoods[k.crew.cityId] ?? {}))) fail('org: an order to take a neighborhood that does not exist');
+  }
+  for (const [cityId, orgs] of Object.entries(state.orgs.cities)) {
+    if (!content.cities[cityId]) fail(`org: organizations in an unknown city "${cityId}"`);
+    const ids = new Set(orgs.map((o) => o.id));
+    if (ids.size !== orgs.length) fail(`org: duplicate organization ids in ${cityId}`);
+    for (const o of orgs) {
+      score(`org.${o.id}.strength`, o.strength);
+      score(`org.${o.id}.war`, o.war);
+      if (!Number.isInteger(o.attitude) || o.attitude < -100 || o.attitude > 100) fail(`org.${o.id}.attitude out of range`);
+      if (o.supplier !== undefined && !ids.has(o.supplier)) fail(`org.${o.id}: unknown supplier`);
+    }
+    for (const [hood, owner] of Object.entries(state.orgs.hoods[cityId] ?? {})) {
+      if (!content.cities[cityId]?.neighborhoods?.some((h) => h.id === hood)) fail(`org: unknown neighborhood ${hood} in ${cityId}`);
+      if (owner !== null && !ids.has(owner)) fail(`org: ${hood} is held by an unknown organization`);
     }
   }
   if (k.investigation && k.investigation.until < k.investigation.since) fail('crime: an investigation ends before it begins');

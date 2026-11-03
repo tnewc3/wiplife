@@ -1,0 +1,56 @@
+id: war_the_funeral
+title: A funeral for someone who was one of yours
+text: >-
+  {member.name} stands with you in a church hall full of people who are not
+  there for the music. Someone from {crew} has died, and everyone knows
+  who is responsible and what is expected. The family looks at you. You are one
+  of the people who decides what happens next.
+tone: serious
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { war: true } }
+    - { crime: { away: false } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: hold_the_line
+    label: Say that the dead will be honored by holding what is theirs
+    outcome:
+      text: >-
+        It is not the answer some of them wanted, and it is the one that
+        keeps the neighborhood from burning. {member.name} is quiet on the
+        walk back.
+      effects:
+        - { type: flag, key: held_the_line_in_a_war, value: true }
+        - { type: crime, action: standing, delta: 3 }
+        - { type: crime, action: loyalty, delta: 2 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: demand_an_answer
+    label: Promise that it will be answered
+    outcome:
+      text: >-
+        The hall goes silent and then it roars. You have said what they needed and
+        it will have to be answered by someone.
+      effects:
+        - { type: crime, action: rivalry, delta: 15 }
+        - { type: crime, action: loyalty, delta: 6 }
+        - { type: crime, action: standing, delta: 6 }
+        - { type: crime, action: heat, delta: 6 }
+  - id: send_a_wreath
+    label: Pay for the funeral and say nothing
+    outcome:
+      text: >-
+        You cover what the family cannot. Nobody thanks you out loud, and everyone
+        remembers.
+      effects:
+        - { type: dirtyMoney, pay: small }
+        - { type: crime, action: loyalty, delta: 4 }
+        - { type: crime, action: standing, delta: 2 }

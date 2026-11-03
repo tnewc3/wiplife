@@ -13,7 +13,7 @@ import { clampInt } from '../random';
 import { chance, nextFloat, nextInt, type RngState } from '../rng';
 import { writeFromGroup } from '../systems/history';
 import type { Id, LifeState } from '../types';
-import { inCrew } from './query';
+import { inCrew, tierOf } from './query';
 
 /** Your city's pay level (1 is the national average): payouts and costs follow it. */
 export function payLevel(state: LifeState, content: ContentBundle): number {
@@ -32,7 +32,7 @@ export function addHeat(state: LifeState, delta: number): number {
 /** What a job of this size pays you now: its base, your rank's multiplier, your city's pay level, and a little variation. Draws from `rng`. */
 export function jobPayout(state: LifeState, size: JobSize, content: ContentBundle, rng: RngState): number {
   const b = content.balance.crime;
-  const rank = b.ranks[Math.max(1, state.crime.rank) - 1]!;
+  const rank = b.ranks[tierOf(content, state.crime.crew?.defId, state.crime.rank) - 1]!;
   const swing = 1 + b.jobs.variation * (nextFloat(rng) * 2 - 1);
   return wholeDollars(b.jobs.sizes[size].payout * rank.payout * payLevel(state, content) * swing);
 }
@@ -40,7 +40,7 @@ export function jobPayout(state: LifeState, size: JobSize, content: ContentBundl
 /** The yearly cut a higher rank takes from the crew's business (dirty money; 0 below the ranks that have one). Draws from `rng`. */
 export function crewCut(state: LifeState, content: ContentBundle, rng: RngState): number {
   const b = content.balance.crime;
-  const cut = b.ranks[Math.max(1, state.crime.rank) - 1]!.cut;
+  const cut = b.ranks[tierOf(content, state.crime.crew?.defId, state.crime.rank) - 1]!.cut;
   if (!cut || !state.crime.crew) return 0;
   const swing = 1 + b.jobs.variation * (nextFloat(rng) * 2 - 1);
   addHeat(state, cut.heat);

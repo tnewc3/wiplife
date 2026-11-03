@@ -1,0 +1,9 @@
+id: protect_the_clubhouse
+name: Hold the clubhouse
+blurb: Watching the clubhouse and the club's turf against other clubs and the police.
+kinds: [motorcycle_club]
+effect: protect
+danger: medium
+needsHood: true
+done: "{member} held the clubhouse all year, and nobody got past the door."
+bust: "{member} was hurt or arrested holding the clubhouse this year."

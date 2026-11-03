@@ -98,6 +98,11 @@ flags:
   # E6a: crime careers.
   joined_a_crew: You were in a crew
   turned_down_a_crew: You said no to a crew that wanted you
+  has_an_inside_contact: You were given a name to ask for on the outside while you were in prison
+  passed_an_initiation: You passed an organization's initiation
+  failed_an_initiation: You failed an organization's initiation
+  held_the_line_in_a_war: You stood your ground when a war came to your door
+  made_peace_in_a_war: You helped end a war between organizations
   promised_to_leave_the_crew: You promised someone close to you that you would leave the crew
   testified_against_crew: You gave the police what you knew about your crew
   # E6b: fame in arts and media.

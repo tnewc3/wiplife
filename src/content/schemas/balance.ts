@@ -645,6 +645,22 @@ export const targetsBalanceSchema = z.strictObject({
    * it earns and what it costs, and on crime not paying better than a legal
    * career without matching risk.
    */
+  /**
+   * O1: organized crime (tools/simulate/orgs.ts). The law-abiding careful player never joins; the criminal player (which also leads)
+   * is judged on how many join each kind, how many lead, the neighborhoods held, deaths, arrests and the drugs cartels supply.
+   */
+  orgs: z.strictObject({
+    underAge: numberRangeSchema,
+    invariantFailures: numberRangeSchema,
+    eachKindJoined: numberRangeSchema,
+    leaders: numberRangeSchema,
+    hoodsHeld: numberRangeSchema,
+    memberDeathShare: numberRangeSchema,
+    leaderArrested: numberRangeSchema,
+    leaderDeaths: numberRangeSchema,
+    supplied: numberRangeSchema,
+    truce: numberRangeSchema,
+  }),
   crime: z.strictObject({
     /** Lives of the careful player that entered a crew: none. */
     carefulEntered: numberRangeSchema,

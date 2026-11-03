@@ -1,0 +1,10 @@
+id: club_run
+name: The run
+blurb: A long ride with something in the saddlebags. The club's business, quietly.
+kinds: [motorcycle_club]
+effect: earn
+size: big
+danger: medium
+drug: true
+done: "{member} rode the club's runs all year, and {amount} came back with them."
+bust: "A run under {member} was stopped by the police. The club saw {amount}."

@@ -1,0 +1,54 @@
+id: offer_supplier_above_you
+title: Whoever supplies you
+text: >-
+  The people who supply you know exactly how much you move, and they have been
+  keeping track. Somebody sits down across from you and says there is a larger
+  operation above you, that it is interested in having you inside it instead
+  of outside, and that it would prefer to be asked politely.
+tone: dark
+category: crimeoffers
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { crime: { offered: [street_gang, cartel] } }
+    - { drugs: { dealing: true } }
+once: true
+weight:
+  base: 0.5
+  modifiers:
+    - { if: { drugs: { customers: { gte: 30 } } }, x: 2 }
+    - { if: { flag: turned_down_a_crew }, x: 0.6 }
+choices:
+  - id: street
+    label: Work for the crew that holds your corner
+    outcome:
+      text: >-
+        You still stand where you stood. The difference is that now somebody
+        takes a share, and nobody else on the block will touch you. You are in
+        {crew}.
+      effects:
+        - { type: crime, action: join, kind: street_gang }
+        - { type: flag, key: joined_a_crew, value: true }
+  - id: supply
+    label: Work for the supplier
+    outcome:
+      text: >-
+        You are handed a phone and a number and a clear idea of what is expected of you now. Your corner belongs to somebody else now. You are in
+        {crew}.
+      effects:
+        - { type: crime, action: join, kind: cartel }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: stress, delta: 4 }
+  - id: stay_independent
+    label: Stay independent
+    outcome:
+      text: >-
+        The man across from you looks at you for a while, then at the table. He
+        says that is a decision and that he will remember it. You are not sure
+        whether it was a threat.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: flag, key: turned_down_a_crew, value: true }

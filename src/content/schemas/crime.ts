@@ -20,7 +20,13 @@ const range = z
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
 const spread = z.strictObject({ mean: z.number().min(0).max(100), sd: z.number().min(0).max(50) });
 
-/** A crew has this many ranks; the top one is the crew leader. */
+/** O1: the four kinds of criminal organization, and how many ranks each has (the top one runs it). */
+export const ORG_KINDS = ['street_gang', 'mafia', 'cartel', 'motorcycle_club'] as const;
+export type OrgKind = (typeof ORG_KINDS)[number];
+export const orgKindSchema = z.enum(ORG_KINDS);
+export const KIND_RANKS: Record<OrgKind, number> = { street_gang: 4, mafia: 5, cartel: 5, motorcycle_club: 5 };
+
+/** Balance/crime.yaml has five rank tiers (payout, stress, reach, cut). An organization's ranks map onto them (O1: a street gang has four ranks, the others five). */
 export const CREW_RANKS = 5;
 
 /** How big a job's take is (and, with it, its heat and what it does for your standing). */
@@ -36,18 +42,20 @@ const traitKey = z.enum(TRAIT_KEYS);
  * the crews it is at odds with.
  */
 export const crewSchema = baseDefSchema.extend({
+  /** O1: which kind of organization it is (src/content/orgKinds). A street gang has four ranks; the others have five. */
+  kind: orgKindSchema,
   /** As it reads in a sentence ("the Cinder Row Outfit"). */
   name: z.string().trim().min(2).max(40),
   blurb: z.string().trim().min(10).max(200),
   /** The cities it works in. */
   cities: z.array(idSchema).min(1),
   /** Rank titles, lowest first, as they read in a sentence without an article ("runner", "crew boss"). */
-  ranks: z.array(z.string().trim().min(2).max(30)).length(CREW_RANKS),
+  ranks: z.array(z.string().trim().min(2).max(30)).min(4).max(CREW_RANKS),
   /** The crews it is at odds with (each must work in a city this one does). */
   rivals: z.array(idSchema).min(1),
   /** The personality its members lean toward (added to each member's traits, from 50). */
   traits: z.partialRecord(traitKey, z.int().min(-30).max(30)),
-});
+}).refine((c) => c.ranks.length === KIND_RANKS[c.kind], 'ranks: a street gang has four ranks, every other kind five');
 export type CrewDef = z.infer<typeof crewSchema>;
 
 /**
@@ -239,7 +247,7 @@ export const crimeBalanceSchema = z.strictObject({
 export type CrimeBalance = z.infer<typeof crimeBalanceSchema>;
 
 /** The events the crime step queues (registries/crime.yaml). */
-export const CRIME_TRIGGERS = ['promotion', 'pushedOut', 'investigation', 'arrest', 'rival', 'informant', 'raid', 'theft', 'laundering', 'past', 'cut', 'away', 'awayCut', 'back', 'shark'] as const;
+export const CRIME_TRIGGERS = ['initiation', 'contest', 'war', 'truce', 'betrayal', 'discipline', 'supply', 'promotion', 'pushedOut', 'investigation', 'arrest', 'rival', 'informant', 'raid', 'theft', 'laundering', 'past', 'cut', 'away', 'awayCut', 'back', 'shark'] as const;
 export type CrimeTrigger = (typeof CRIME_TRIGGERS)[number];
 
 export const crimeRegistrySchema = z.strictObject({

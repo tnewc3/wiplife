@@ -1,0 +1,50 @@
+id: job_cartel_checkpoint
+title: A checkpoint that is not on the map
+text: >-
+  {member.name} has a job for you at the edge of {crew}'s territory: a road, a
+  hill, a long wait. Vehicles will come by, and the only thing you have to do is
+  wave through the right ones and be forgotten by the wrong ones.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [cartel] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: take_the_post
+    label: Take the post
+    check:
+      base: 64
+      stats: [{ key: discipline, weight: 0.3 }, { key: confidence, weight: 0.2 }, { crime: heat, weight: -0.25 }]
+      success:
+        text: >-
+          Nine nights of nothing, one of something, and a bonus delivered the
+          way everything is: with no signature and no explanation.
+        effects:
+          - { type: dirtyMoney, gain: solid }
+          - { type: crime, action: job, size: solid }
+      failure:
+        text: >-
+          A patrol arrives twenty minutes early. You walk away, which is what
+          you were told to do, and you leave a good deal behind that someone
+          will want an explanation for.
+        effects:
+          - { type: crime, action: job, size: small }
+          - { type: crime, action: heat, delta: 10 }
+          - { type: crime, action: standing, delta: -5 }
+  - id: refuse
+    label: Tell {member.them} you cannot do it
+    outcome:
+      text: >-
+        {member.name} says that is fine, and means that someone else will, and
+        that you will be remembered as the person who did not.
+      effects:
+        - { type: crime, action: standing, delta: -6 }

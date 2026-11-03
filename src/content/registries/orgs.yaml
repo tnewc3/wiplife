@@ -1,0 +1,18 @@
+# O1: the parts generated organizations are named from, by kind. {a} and {b} are the two parts. All names are made up.
+names:
+  street_gang:
+    patterns: ["the {a} {b}", "{a} {b} Set", "the {a} Street {b}"]
+    first: [Ember, Garnet, Lantern, Hollow, Copper, Dagger, Thistle, Salt, Harbor, Sparrow, Brickyard, Gutter]
+    second: [Boys, Runners, Dogs, Crew, Outfit, Blocks, Corner, Hands]
+  mafia:
+    patterns: ["the {a} Family", "the {a} {b}", "the {a} Combination"]
+    first: [Verrick, Castellow, Dunmore, Vasko, Brannock, Lorimer, Santoro, Halloran, Pellegrin, Ostrander]
+    second: [Combine, Interests, Partnership, Society, Brothers, Associates]
+  cartel:
+    patterns: ["the {a} {b}", "{a} {b}", "the {a} Line"]
+    first: [Amber, Cinder, Sable, Ridge, Coral, Marrow, Verde, Falcon, Salt, Iron]
+    second: [Combine, Network, Syndicate, Freight, Consortium, Pipeline]
+  motorcycle_club:
+    patterns: ["the {a} {b} Riders", "the {a} {b} MC", "{a} {b} Motorcycle Club"]
+    first: [Iron, Broken, Silver, Ashen, Hollow, Crimson, Grey, Rusted, Wild, Gilded]
+    second: [Wheel, Anchor, Saints, Hounds, Ravens, Spokes, Thorns, Wolves]

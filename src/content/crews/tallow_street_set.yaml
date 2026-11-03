@@ -1,0 +1,8 @@
+id: tallow_street_set
+name: the Tallow Street Set
+kind: street_gang
+blurb: Older than they look and better organised than the neighbours would like. They have a rota for everything.
+cities: [vancouver, toronto, montreal, london, manchester, small_town_uk, small_town_ca, small_town, small_town_mx, guadalajara, mexico_city, monterrey, chicago, houston]
+ranks: [associate, member, shot-caller, leader]
+rivals: [cinder_row_outfit, ash_lane_runners]
+traits: { discipline: 5, riskTaking: 10, ambition: 6 }

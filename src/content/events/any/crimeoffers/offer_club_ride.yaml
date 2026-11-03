@@ -1,0 +1,45 @@
+id: offer_club_ride
+title: Riding along
+text: >-
+  {friend.name} rides, and tonight {friend.they} {friend:brings|bring} you to a
+  clubhouse with forty bikes outside and a rule on the wall about respect. People
+  nod at you. Someone asks if you ride. Someone else asks if you would like to,
+  with the kind of smile that makes it sound like an invitation to more.
+tone: neutral
+category: crimeoffers
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { crime: { offered: [motorcycle_club] } }
+weight:
+  base: 0.3
+  modifiers:
+    - { if: { trait: sociability, gt: 55 }, x: 1.5 }
+    - { if: { trait: riskTaking, gt: 55 }, x: 1.4 }
+    - { if: { flag: turned_down_a_crew }, x: 0.6 }
+cast:
+  friend: { kind: friend, presence: city, age: { min: 22, max: 55 }, ageOffset: { min: -6, max: 12 } }
+choices:
+  - id: hang_around
+    label: Start hanging around the clubhouse
+    outcome:
+      text: >-
+        Nobody makes you a member. You are a hang-around: you fetch things,
+        you listen, and you are watched the whole time. It is the closest
+        thing to belonging you have found in a while, and it is in {crew}.
+      effects:
+        - { type: crime, action: join, kind: motorcycle_club, role: friend }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: relationship, role: friend, affection: 4 }
+  - id: just_ride
+    label: Enjoy the ride and go home
+    outcome:
+      text: >-
+        It was a good night. Nobody asks you to come back, which you decide is
+        a sign of respect rather than an absence of interest.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: flag, key: turned_down_a_crew, value: true }
