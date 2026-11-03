@@ -15,7 +15,10 @@ requires:
     - { crime: { member: true } }
     - { crime: { leader: true } }
     - { crime: { away: false } }
-weight: { base: 8 }
+weight:
+  base: 8
+  modifiers:
+    - { if: { flag: held_the_line_in_a_war }, x: 0.7 }
 followUpOnly: true
 cast:
   member: { kind: friend, crew: yours, presence: city }

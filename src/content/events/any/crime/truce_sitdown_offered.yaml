@@ -16,7 +16,10 @@ requires:
     - { crime: { member: true } }
     - { crime: { war: true } }
     - { crime: { away: false } }
-weight: { base: 8 }
+weight:
+  base: 8
+  modifiers:
+    - { if: { flag: made_peace_in_a_war }, x: 0.8 }
 followUpOnly: true
 cast:
   member: { kind: friend, crew: yours, presence: city }

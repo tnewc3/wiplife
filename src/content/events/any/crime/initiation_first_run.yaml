@@ -16,7 +16,10 @@ requires:
     - { crime: { member: true } }
     - { crime: { kind: [cartel] } }
     - { crime: { initiating: true } }
-weight: { base: 10 }
+weight:
+  base: 10
+  modifiers:
+    - { if: { flag: failed_an_initiation }, x: 1.3 }
 followUpOnly: true
 cast:
   member: { kind: friend, crew: yours, presence: city }
