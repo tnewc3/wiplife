@@ -99,6 +99,16 @@ describe('heat', () => {
     ok(busy);
   });
 
+  it('keeps a trace of heat while an investigation is open and there is no crime past (D1)', () => {
+    const life = apply(adult('trace', 30), (d) => {
+      d.crime.heat = 4;
+      d.crime.investigation = { since: d.currentYear, until: d.currentYear + 2 };
+      addHeat(d, -10);
+    });
+    expect(life.crime.heat).toBe(1);
+    ok(life);
+  });
+
   it('is clamped to 0–100 and never carried past the limit by someone who is out', () => {
     const life = apply(inCrewLife('clamp'), (d) => void addHeat(d, 500));
     expect(life.crime.heat).toBe(100);

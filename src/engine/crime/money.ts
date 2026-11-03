@@ -23,7 +23,9 @@ export function payLevel(state: LifeState, content: ContentBundle): number {
 /** Raises or lowers the heat on you (0–100). Returns the change made. */
 export function addHeat(state: LifeState, delta: number): number {
   const before = state.crime.heat;
-  state.crime.heat = clampInt(before + delta, 0, 100);
+  // (D1: an open investigation with no crime past keeps a trace of heat; the year step closes it once that has gone.)
+  const floor = state.crime.investigation && state.crime.past.length === 0 ? 1 : 0;
+  state.crime.heat = clampInt(before + delta, floor, 100);
   return state.crime.heat - before;
 }
 
