@@ -5,11 +5,16 @@ import { getBusinessScreen, type BusinessView } from '../../../engine/selectors'
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
+import { ActionTile, ActionTileRow } from '../../components/ActionTile';
+import { EmptyState } from '../../components/EmptyState';
+import { FactChip } from '../../components/FactChip';
+import { FeatureScreen } from '../../components/FeatureScreen';
+import { FilterChips } from '../../components/FilterChips';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { SegmentedTabs } from '../../components/SegmentedTabs';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
-import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
-import { BUSINESS_DECISION_HINTS, BUSINESS_DECISION_LABELS, BUSINESS_END_LABELS, BUSINESS_HOW_LABELS, BUSINESS_ROLE_BLURBS, BUSINESS_ROLE_LABELS, BUSINESS_TABS, BUSINESS_TITLES, ECONOMY_TONES, SUPPLIER_ARROWS, SUPPLIER_MOODS, TRAINING_HINTS, businessStakeLine, money, rateLabel } from '../../labels';
+import { BUSINESS_DECISION_HINTS, BUSINESS_DECISION_LABELS, BUSINESS_END_LABELS, BUSINESS_HOW_LABELS, BUSINESS_ROLE_LABELS, BUSINESS_TABS, BUSINESS_TITLES, ECONOMY_TONES, SUPPLIER_ARROWS, TRAINING_HINTS, businessStakeLine, money, rateLabel } from '../../labels';
 import { FranchiseTab } from './business/FranchiseTab';
 import { PlacesTab } from './business/PlacesTab';
 import { ProductsTab } from './business/ProductsTab';
@@ -52,7 +57,7 @@ function ReportTab({ b, life, disabled }: { b: BusinessView; life: LifeState; di
   const act = useAppStore((s) => s.takeLifeAction);
   const r = b.report;
   const n = r?.numbers;
-  const [confirm, setConfirm] = useState<'sell' | 'close' | { buyout: string; name: string; price: number } | null>(null);
+  const [confirm, setConfirm] = useState<{ buyout: string; name: string; price: number } | null>(null);
   return (
     <>
       <Section title={BUSINESS_TITLES.decisions} testId={`decisions-${b.id}`}>
@@ -60,7 +65,6 @@ function ReportTab({ b, life, disabled }: { b: BusinessView; life: LifeState; di
           {(Object.keys(LEVELS) as (keyof typeof LEVELS)[]).map((key) => (
             <div key={key}>
               <p className="text-sm font-semibold">{BUSINESS_DECISION_LABELS[key]}</p>
-              <p className="text-xs text-muted">{key === 'training' ? TRAINING_HINTS[b.depth.training.level] : BUSINESS_DECISION_HINTS[key]}</p>
               <div role="radiogroup" aria-label={BUSINESS_DECISION_LABELS[key]} className="mt-1 flex flex-wrap gap-2">
                 {(LEVELS[key].list as readonly string[]).map((level) => {
                   const current = key === 'training' ? b.depth.training.level : b.decisions[key];
@@ -83,7 +87,7 @@ function ReportTab({ b, life, disabled }: { b: BusinessView; life: LifeState; di
           {(['self', 'manager'] as const).map((role) => (
             <button key={role} type="button" role="radio" aria-checked={b.role === role} disabled={disabled || b.role === role} data-testid={`role-${b.id}-${role}`} onClick={() => void act('set_business_role', { biz: { businessId: b.id, role } })} className={`min-h-11 rounded-xl border px-3 py-2 text-left ${b.role === role ? 'border-accent bg-surface-2 font-semibold' : 'border-border'}`}>
               {BUSINESS_ROLE_LABELS[role]}
-              <span className="block text-sm font-normal text-muted">{role === 'manager' && !b.hasManager ? `${BUSINESS_ROLE_BLURBS[role]} Hiring one costs ${money(b.managerHireCost)}.` : BUSINESS_ROLE_BLURBS[role]}</span>
+              {role === 'manager' && !b.hasManager && <span className="block text-sm font-normal text-muted">Hiring one costs {money(b.managerHireCost)}</span>}
             </button>
           ))}
         </div>
@@ -184,73 +188,46 @@ function ReportTab({ b, life, disabled }: { b: BusinessView; life: LifeState; di
               </li>
             ))}
           </ul>
-          <p className="mt-1 text-xs text-muted">You are personally on the hook for these. They are paid from your own money each year.</p>
         </Section>
       )}
 
-      <div className="mt-4 flex flex-col gap-2">
-        <Button variant="secondary" block disabled={disabled} onClick={() => setConfirm('sell')} data-testid={`sell-${b.id}`}>
-          Sell it · about {money(b.salePrice)}
-        </Button>
-        <Button variant="ghost" block disabled={disabled} onClick={() => setConfirm('close')} data-testid={`close-${b.id}`}>
-          Close it
-        </Button>
-      </div>
       <ConfirmSheet
         open={confirm !== null}
-        title={confirm === 'sell' ? `Sell ${b.name}?` : confirm === 'close' ? `Close ${b.name}?` : confirm && 'buyout' in confirm ? `Buy ${confirm.name} out?` : ''}
-        confirmLabel={confirm === 'sell' ? 'Sell it' : confirm === 'close' ? 'Close it' : 'Buy out'}
+        title={confirm ? `Buy ${confirm.name} out?` : ''}
+        confirmLabel="Buy out"
         onCancel={() => setConfirm(null)}
         onConfirm={() => {
           const c = confirm;
           setConfirm(null);
-          if (c === 'sell') void act('sell_business', { biz: { businessId: b.id } });
-          else if (c === 'close') void act('close_business', { biz: { businessId: b.id } });
-          else if (c && 'buyout' in c) void act('buyout_owner', { biz: { businessId: b.id, ownerId: c.buyout } });
+          if (c) void act('buyout_owner', { biz: { businessId: b.id, ownerId: c.buyout } });
         }}
-        body={
-          confirm === 'sell'
-            ? `The loans on it are paid off from the price first, and what is left is shared by who owns it. You would get about ${money(b.salePrice)} before that.`
-            : confirm === 'close'
-              ? 'The equipment and stock are sold off cheaply, the loans come out of that first, and everyone who works there is let go. Anything still owed stays with you.'
-              : confirm && 'buyout' in confirm
-                ? `It costs ${money(confirm.price)} from your savings. The share becomes yours.`
-                : ''
-        }
+        body={confirm ? `It costs ${money(confirm.price)} from your savings. The share becomes yours.` : ''}
       />
     </>
   );
 }
 
+/** One business (U3): the tabs of its report, products, team, places and franchises. */
 function BusinessPanel({ b, life }: { b: BusinessView; life: LifeState }) {
   const busy = useAppStore((s) => s.aging);
   const [tab, setTab] = useState<Tab>('report');
   const between = life.phase === 'yearStart';
   const disabled = busy || !between;
   const showFranchise = b.depth.franchise.eligible || b.depth.franchise.count > 0;
-  const tabs = (Object.keys(BUSINESS_TABS) as Tab[]).filter((t) => t !== 'franchise' || showFranchise);
+  const ids = (Object.keys(BUSINESS_TABS) as Tab[]).filter((t) => t !== 'franchise' || showFranchise);
+  const tabs = ids.map((t) => ({ id: t, label: BUSINESS_TABS[t], testId: `tab-${b.id}-${t}` }));
   return (
-    <Card data-testid={`business-${b.id}`} className="mt-3">
-      <h3 className="text-lg font-bold break-words [overflow-wrap:anywhere]">{b.name}</h3>
-      <p className="text-sm text-muted">
-        {b.styleLabel} · {b.kind} · {b.city}
-        {b.chain ? ` · ${b.chain}` : ''} · {BUSINESS_HOW_LABELS[b.how]} {b.founded}
-      </p>
-      <p className="mt-1 text-sm" data-testid={`worth-${b.id}`}>
-        Worth about {money(b.value)}. Your share ({b.yourShare}%): {money(b.yourEquity)}.
-      </p>
+    <div data-testid={`business-${b.id}`} className="flex flex-col gap-3">
+      <HeroCard title={b.name} status={`${b.styleLabel} · ${b.kind} · ${b.city}${b.chain ? ` · ${b.chain}` : ''} · ${BUSINESS_HOW_LABELS[b.how]} ${b.founded}`}>
+        <StatCell label="Worth" value={money(b.value)} testId={`worth-${b.id}`} />
+        <StatCell label={`Your share ${b.yourShare}%`} value={money(b.yourEquity)} />
+      </HeroCard>
       {b.needsLicense && (
-        <p className={`mt-1 text-sm ${b.licensed ? 'text-muted' : 'font-semibold text-danger'}`} data-testid={`license-${b.id}`}>
+        <p className={`px-1 text-sm ${b.licensed ? 'text-muted' : 'font-semibold text-danger'}`} data-testid={`license-${b.id}`}>
           {b.licensed ? `Someone here holds the ${b.needsLicense}’s licence.` : `Nobody here holds the ${b.needsLicense}’s licence, so no jobs can be taken.`}
         </p>
       )}
-      <div role="tablist" aria-label={`${b.name} sections`} className="mt-3 flex flex-wrap gap-2">
-        {tabs.map((t) => (
-          <button key={t} type="button" role="tab" aria-selected={tab === t} data-testid={`tab-${b.id}-${t}`} onClick={() => setTab(t)} className={`min-h-11 rounded-xl border px-3 text-sm ${tab === t ? 'border-accent bg-surface-2 font-semibold' : 'border-border'}`}>
-            {BUSINESS_TABS[t]}
-          </button>
-        ))}
-      </div>
+      <SegmentedTabs sticky tabs={tabs} value={tab} onChange={setTab} label={`${b.name} sections`} />
       <div role="tabpanel" aria-label={BUSINESS_TABS[tab]}>
         {tab === 'report' && <ReportTab b={b} life={life} disabled={disabled} />}
         {tab === 'products' && <ProductsTab b={b} disabled={disabled} />}
@@ -258,11 +235,11 @@ function BusinessPanel({ b, life }: { b: BusinessView; life: LifeState }) {
         {tab === 'places' && <PlacesTab b={b} life={life} disabled={disabled} />}
         {tab === 'franchise' && <FranchiseTab b={b} life={life} disabled={disabled} />}
       </div>
-    </Card>
+    </div>
   );
 }
 
-/** The economy as one word with a line of explanation, and the suppliers' mood. */
+/** The economy as one word, and the suppliers' mood. */
 function WorldStrip({ owned }: { owned: BusinessView[] }) {
   const first = owned[0];
   if (!first) return null;
@@ -271,15 +248,16 @@ function WorldStrip({ owned }: { owned: BusinessView[] }) {
   for (const b of owned) for (const l of b.depth.lines) if (l.on && l.supplier.category && !moods.has(l.supplier.category)) moods.set(l.supplier.category, { label: l.supplier.label, mood: l.supplier.mood });
   for (const b of owned) for (const p of b.depth.pools) if (!moods.has(p.supplier.category)) moods.set(p.supplier.category, { label: p.supplier.label, mood: p.supplier.mood });
   return (
-    <div className="mt-2 rounded-xl border border-border p-3" data-testid="economy-strip" aria-label="The economy and your suppliers">
-      <p className={`font-semibold ${ECONOMY_TONES[phase]}`} data-testid="economy-phase">
+    <div className="flex flex-wrap items-center gap-1.5 px-1" data-testid="economy-strip" aria-label="The economy and your suppliers">
+      <span className={`text-sm font-bold ${ECONOMY_TONES[phase]}`} data-testid="economy-phase">
         Economy: {first.depth.economy.label}
-      </p>
-      <p className="text-sm text-muted">{content.text.business.report.economy[phase]}</p>
-      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm" data-testid="supplier-moods">
+      </span>
+      <ul className="flex flex-wrap gap-1" data-testid="supplier-moods">
         {[...moods.entries()].slice(0, 6).map(([id, m]) => (
           <li key={id}>
-            {SUPPLIER_ARROWS[m.mood]} {m.label} {SUPPLIER_MOODS[m.mood]}
+            <FactChip>
+              {SUPPLIER_ARROWS[m.mood]} {m.label}
+            </FactChip>
           </li>
         ))}
       </ul>
@@ -288,39 +266,74 @@ function WorldStrip({ owned }: { owned: BusinessView[] }) {
 }
 
 /**
- * W3: the Business screen from the Work tab: each business's yearly report (in words and numbers), the
- * decisions for the year (prices, marketing, quality, pay, staffing), who runs it, its staff, locations,
- * owners and loans; and the ways in: start one, or buy one that is for sale.
+ * W3, rebuilt in U3 on the feature screen template: your businesses (pick one with the chips when you own several), the
+ * hero with its worth and your share, tiles to start one or see what is for sale, and the tabs of the one you picked. Sell it
+ * and Close it are in the ⋯ menu and ask first.
  */
 export function BusinessScreen({ life, open, onClose }: { life: LifeState; open: boolean; onClose: () => void }) {
   const view = getBusinessScreen(life, content);
+  const act = useAppStore((s) => s.takeLifeAction);
   const [start, setStart] = useState(false);
   const [market, setMarket] = useState(false);
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<'sell' | 'close' | null>(null);
   const busy = useAppStore((s) => s.aging);
   const between = life.phase === 'yearStart';
+  const picked = view.owned.find((b) => b.id === pickedId) ?? view.owned[0];
+  const disabled = busy || !between;
+  const economy = view.owned[0]?.depth.economy.phase;
   return (
     <>
-      <Sheet open={open && !start && !market} title={BUSINESS_TITLES.screen} onClose={onClose}>
-        <div data-testid="business-screen">
-          {!between && <p className="mt-1 text-sm text-muted">Choices wait until the year is over.</p>}
-          {view.blocked === 'age' && <p className="mt-1">You can run a business from {content.balance.business.limits.minAge}.</p>}
-          {view.blocked === 'away' && <p className="mt-1">You can’t run a business from where you are.</p>}
-          {view.owned.length === 0 && view.blocked === null && <p className="mt-1 text-muted">{BUSINESS_TITLES.none}</p>}
-          <WorldStrip owned={view.owned} />
-          {view.owned.map((b) => (
-            <BusinessPanel key={b.id} b={b} life={life} />
-          ))}
+      <FeatureScreen
+        open={open}
+        title={BUSINESS_TITLES.screen}
+        onBack={onClose}
+        testId="business-screen"
+        info={
+          <>
+            <p>{BUSINESS_TITLES.none}</p>
+            {economy && <p>{content.text.business.report.economy[economy]}</p>}
+            {picked && picked.loans.length > 0 && <p>You are personally on the hook for the loans on a business. They are paid from your own money each year.</p>}
+            {(Object.keys(LEVELS) as (keyof typeof LEVELS)[]).map((key) => (
+              <p key={key}>
+                <strong>{BUSINESS_DECISION_LABELS[key]}.</strong> {key === 'training' ? TRAINING_HINTS[picked?.depth.training.level ?? 'none'] : BUSINESS_DECISION_HINTS[key]}
+              </p>
+            ))}
+          </>
+        }
+        actions={picked ? [{ id: 'sell', label: `Sell it · about ${money(picked.salePrice)}`, disabled, testId: `sell-${picked.id}`, onSelect: () => setConfirm('sell') }, { id: 'close', label: 'Close it', danger: true, disabled, testId: `close-${picked.id}`, onSelect: () => setConfirm('close') }] : []}
+        overlays={
+          <ConfirmSheet
+            open={confirm !== null && picked !== undefined}
+            title={confirm === 'sell' ? `Sell ${picked?.name}?` : `Close ${picked?.name}?`}
+            confirmLabel={confirm === 'sell' ? 'Sell it' : 'Close it'}
+            busy={busy}
+            onCancel={() => setConfirm(null)}
+            onConfirm={() => {
+              const c = confirm;
+              setConfirm(null);
+              if (!picked) return;
+              if (c === 'sell') void act('sell_business', { biz: { businessId: picked.id } });
+              else if (c === 'close') void act('close_business', { biz: { businessId: picked.id } });
+            }}
+            body={confirm === 'sell' && picked ? `The loans on it are paid off from the price first, and what is left is shared by who owns it. You would get about ${money(picked.salePrice)} before that.` : 'The equipment and stock are sold off cheaply, the loans come out of that first, and everyone who works there is let go. Anything still owed stays with you.'}
+          />
+        }
+      >
+        <div data-testid="business-screen-body" className="flex flex-col gap-3">
+          {!between && <p className="px-1 text-sm text-muted">Choices wait until the year is over.</p>}
+          {view.blocked === 'age' && <EmptyState text={`You can run a business from ${content.balance.business.limits.minAge}.`} />}
+          {view.blocked === 'away' && <EmptyState text="You can’t run a business from where you are." />}
+          {view.owned.length === 0 && view.blocked === null && <EmptyState text="You don’t own a business yet." />}
           {view.canOwn && (
-            <div className="mt-4 flex flex-col gap-2">
-              <Button block disabled={busy || !between || view.full} onClick={() => setStart(true)} data-testid="start-open">
-                Start a business
-              </Button>
-              <Button block variant="secondary" disabled={busy || !between || view.full} onClick={() => setMarket(true)} data-testid="market-open">
-                See what’s for sale
-              </Button>
-              {view.full && <p className="text-sm text-muted">You own as many as you can manage.</p>}
-            </div>
+            <ActionTileRow>
+              <ActionTile label="Start one" icon="shopping_bags" tone="money" status={view.full ? 'Full' : `${view.owned.length} owned`} disabled={disabled || view.full} onClick={() => setStart(true)} testId="start-open" />
+              <ActionTile label="For sale" icon="money_bag" tone="money" status="Buy one" disabled={disabled || view.full} onClick={() => setMarket(true)} testId="market-open" />
+            </ActionTileRow>
           )}
+          <WorldStrip owned={view.owned} />
+          {view.owned.length > 1 && <FilterChips label="Your businesses" chips={view.owned.map((b) => ({ id: b.id, label: b.name }))} value={picked?.id ?? ''} onChange={setPickedId} />}
+          {picked && <BusinessPanel key={picked.id} b={picked} life={life} />}
           {view.past.length > 0 && (
             <Section title={BUSINESS_TITLES.past} testId="business-past">
               <ul className="mt-1 flex flex-col gap-1 text-sm">
@@ -333,7 +346,7 @@ export function BusinessScreen({ life, open, onClose }: { life: LifeState; open:
             </Section>
           )}
         </div>
-      </Sheet>
+      </FeatureScreen>
       <StartBusinessSheet life={life} open={open && start} onClose={() => setStart(false)} />
       <MarketSheet life={life} open={open && market} onClose={() => setMarket(false)} />
     </>

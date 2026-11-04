@@ -11,7 +11,7 @@ export function SectionLabel({ children, id, trailing }: { children: ReactNode; 
 }
 
 /** A compact row: a label and its value on one line (a stat, a total), or a tappable line that opens something. */
-export function CompactRow({ label, value, onClick, testId, muted = false }: { label: ReactNode; value?: ReactNode; onClick?: () => void; testId?: string; muted?: boolean }) {
+export function CompactRow({ label, value, onClick, testId, muted = false }: { label: ReactNode; value?: ReactNode; onClick?: (() => void) | undefined; testId?: string; muted?: boolean }) {
   const body = (
     <>
       <span className={`min-w-0 flex-1 text-left text-[15px] [overflow-wrap:anywhere] ${muted ? 'text-muted' : ''}`}>{label}</span>

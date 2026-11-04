@@ -6,10 +6,9 @@ import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Sheet } from '../../components/Sheet';
-import { TextField } from '../../components/TextField';
+import { FilterChips } from '../../components/FilterChips';
+import { RenameDialog } from '../../components/RenameDialog';
 import { RISK_BLURBS, RISK_LABELS, STYLE_BLURBS, STYLE_LABELS, TITLE_ERROR } from '../../labels';
-
-const SELECT = 'min-h-11 w-full min-w-0 rounded-xl border border-border bg-surface px-3 text-base text-text';
 
 function Choice({ checked, label, blurb, onPick, testId, disabled = false }: { checked: boolean; label: string; blurb: string; onPick: () => void; testId: string; disabled?: boolean }) {
   return (
@@ -50,6 +49,7 @@ export function ProjectSheet({ life, paths, open, onClose }: { life: LifeState; 
   const [n, setN] = useState(0);
   const [title, setTitle] = useState<string | null>(null);
   const [tracks, setTracks] = useState('');
+  const [dialog, setDialog] = useState<'title' | 'tracks' | null>(null);
   if (!path) return null;
   const kinds = path.kinds.filter((k) => !k.locked);
   const kind = kinds.find((k) => k.id === kindId) ?? kinds[0];
@@ -86,9 +86,12 @@ export function ProjectSheet({ life, paths, open, onClose }: { life: LifeState; 
         </Button>
       }
     >
-      <p className="text-muted">It comes out as the year begins. How good it is depends on your talent, your craft and skills, your band and team, and what you choose here.</p>
       <div className="mt-3 flex flex-col gap-2">
-        <TextField label="Title" value={typed} onChange={setTitle} maxLength={60} error={titleOk ? undefined : TITLE_ERROR} hint="Type your own, or take a suggestion." data-testid="project-title" />
+        <button type="button" onClick={() => setDialog('title')} data-testid="project-title" className="wl-press flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-3 text-left">
+          <span className="text-sm font-semibold text-muted">Title</span>
+          <span className={`min-w-0 font-semibold [overflow-wrap:anywhere] ${titleOk ? '' : 'text-danger'}`}>{typed}</span>
+        </button>
+        {!titleOk && <span className="text-sm text-danger">{TITLE_ERROR}</span>}
         <Button
           variant="ghost"
           onClick={() => {
@@ -119,29 +122,22 @@ export function ProjectSheet({ life, paths, open, onClose }: { life: LifeState; 
         </div>
       </fieldset>
       {maxTracks > 0 && (
-        <label className="mt-3 flex flex-col gap-1 text-sm font-semibold">
-          Track titles (optional, one a line, up to {maxTracks})
-          <textarea className={`${SELECT} min-h-24 py-2`} value={tracks} onChange={(e) => setTracks(e.target.value)} data-testid="project-tracks" />
-          {block === 'tracks' && <span className="text-sm font-normal text-danger">{trackList.length > maxTracks ? `At most ${maxTracks} tracks.` : TITLE_ERROR}</span>}
-        </label>
+        <button type="button" onClick={() => setDialog('tracks')} data-testid="project-tracks" className="wl-press mt-3 flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-3 text-left">
+          <span className="text-sm font-semibold text-muted">Track titles</span>
+          <span className="min-w-0 font-semibold">{trackList.length > 0 ? `${trackList.length} of ${maxTracks}` : 'Optional'}</span>
+        </button>
       )}
+      {block === 'tracks' && <span className="text-sm text-danger">{trackList.length > maxTracks ? `At most ${maxTracks} tracks.` : TITLE_ERROR}</span>}
       {path.genres.length > 0 && (
-        <label className="mt-3 flex flex-col gap-1 text-sm font-semibold">
-          Genre
-          <select className={SELECT} value={pickedGenre} onChange={(e) => setGenre(e.target.value)} data-testid="project-genre">
-            {path.genres.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-                {path.genre?.id === g.id ? ' (your sound)' : ''}
-              </option>
-            ))}
-          </select>
+        <div className="mt-3 flex flex-col gap-1">
+          <span className="text-sm font-semibold">Genre</span>
+          <FilterChips label="Genre" value={pickedGenre} onChange={setGenre} chips={path.genres.map((g) => ({ id: g.id, label: `${g.name}${path.genre?.id === g.id ? ' (your sound)' : ''}`, testId: `project-genre-${g.id}` }))} />
           {path.genre && pickedGenre !== path.genre.id && (
-            <span className="text-sm font-normal text-muted" data-testid="project-off-genre">
-              Outside your sound. Critics will judge it on its own; {far >= 0.5 ? 'many fans will not follow you there, though new ones may come.' : 'most fans will come along.'}
+            <span className="text-sm text-muted" data-testid="project-off-genre">
+              Outside your sound: {far >= 0.5 ? 'many fans will not follow you there.' : 'most fans will come along.'}
             </span>
           )}
-        </label>
+        </div>
       )}
       <fieldset className="mt-3 flex flex-col gap-2">
         <legend className="font-semibold">Aim</legend>
@@ -161,14 +157,20 @@ export function ProjectSheet({ life, paths, open, onClose }: { life: LifeState; 
       </fieldset>
       <fieldset className="mt-3 flex flex-col gap-2">
         <legend className="font-semibold">Beyond the work</legend>
-        <label className="flex min-h-11 items-center gap-3">
-          <input type="checkbox" className="size-6" checked={press && path.press.allowed} disabled={!path.press.allowed} onChange={(e) => setPress(e.target.checked)} data-testid="project-press" />
-          <span className="min-w-0 break-words">
-            {path.press.label}
-            <span className="block text-sm text-muted">{path.press.allowed ? 'Fame travels further. So does anything you say.' : `Opens at ${path.ladder[path.press.minRung - 1]?.title ?? 'a higher rung'}.`}</span>
-          </span>
-        </label>
+        <button
+          type="button"
+          aria-pressed={press && path.press.allowed}
+          disabled={!path.press.allowed}
+          onClick={() => setPress((x) => !x)}
+          data-testid="project-press"
+          className={`wl-press flex min-h-11 w-full min-w-0 flex-col rounded-xl border px-3 py-2 text-left disabled:opacity-50 ${press && path.press.allowed ? 'border-accent bg-surface-2' : 'border-border bg-surface'}`}
+        >
+          <span className="font-semibold [overflow-wrap:anywhere]">{path.press.label}</span>
+          {!path.press.allowed && <span className="text-sm text-muted">{`Opens at ${path.ladder[path.press.minRung - 1]?.title ?? 'a higher rung'}.`}</span>}
+        </button>
       </fieldset>
+      <RenameDialog open={dialog === 'title'} title="Title" label="Title" initial={typed} allowSame error={(t) => (parseTitle(t) === null ? TITLE_ERROR : undefined)} testId="project-title-input" onCancel={() => setDialog(null)} onSave={(t) => { setTitle(t); setDialog(null); }} />
+      <RenameDialog open={dialog === 'tracks'} title="Track titles" label={`One a line, up to ${maxTracks}`} initial={tracks} multiline allowSame maxLength={2000} testId="project-tracks-input" onCancel={() => setDialog(null)} onSave={(t) => { setTracks(t); setDialog(null); }} />
     </Sheet>
   );
 }
