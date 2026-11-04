@@ -5,6 +5,8 @@ import type { BusinessView } from '../../../../engine/selectors';
 import type { LifeState } from '../../../../engine/types';
 import { useAppStore } from '../../../../store/appStore';
 import { Button } from '../../../components/Button';
+import { ChipSelect } from '../../../components/FilterChips';
+import { cityOptions } from '../../../cityOptions';
 import { Sheet } from '../../../components/Sheet';
 import { money } from '../../../labels';
 
@@ -19,18 +21,7 @@ export function ExpandSheet({ b, life, open, onClose }: { b: BusinessView; life:
   return (
     <Sheet open={open} title="Open a new location" onClose={onClose}>
       <div className="flex flex-col gap-3" data-testid="expand-sheet">
-        <label htmlFor="expand-city" className="font-bold">
-          City
-        </label>
-        <select id="expand-city" data-testid="expand-city" value={cityId} onChange={(e) => setCityId(e.target.value)} className="min-h-11 w-full rounded-xl border border-border bg-surface px-3">
-          {Object.keys(content.cities)
-            .sort()
-            .map((id) => (
-              <option key={id} value={id}>
-                {content.cities[id]!.name}
-              </option>
-            ))}
-        </select>
+        <ChipSelect label="City" testId="expand-city" value={cityId} onChange={setCityId} options={cityOptions()} />
         <div role="radiogroup" aria-label="Style" className="flex flex-col gap-2">
           {BUSINESS_STYLES.map((s) => (
             <button key={s} type="button" role="radio" aria-checked={style === s} onClick={() => setStyle(s)} data-testid={`expand-style-${s}`} className={`min-h-11 rounded-xl border px-3 py-2 text-left ${style === s ? 'border-accent bg-surface-2 font-semibold' : 'border-border'}`}>

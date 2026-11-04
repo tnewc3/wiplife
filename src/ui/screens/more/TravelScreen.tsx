@@ -1,3 +1,4 @@
+import { ChipSelect } from '../../components/FilterChips';
 import { useState } from 'react';
 import { content } from '../../../content';
 import type { Souvenir, TripActivity, TripStyle } from '../../../content/schemas';
@@ -28,30 +29,14 @@ export function TravelScreen({ life }: { life: LifeState }) {
   return <div className="flex flex-col gap-4">
     {residence && <Card><p data-testid="residence">{residence.name} · Return in {residence.endYear}</p></Card>}
     <Card>
-      <label className="block font-medium" htmlFor="trip-style">Kind of trip</label>
-      <select id="trip-style" className="mt-2 min-h-11 w-full rounded border border-border bg-surface px-2" value={style} onChange={(e) => { setStyle(e.target.value as TripStyle); setCompanions([]); setDestination(''); }}>
-        {view.styles.map((s) => <option key={s.id} value={s.id}>{TRIP_STYLE_LABELS[s.id]}{s.reason ? ' (not available)' : ''}</option>)}
-      </select>
+      <ChipSelect label="Kind of trip" testId="trip-style" value={style} onChange={(v) => { setStyle(v); setCompanions([]); setDestination(''); }} options={view.styles.map((s) => ({ id: s.id, label: `${TRIP_STYLE_LABELS[s.id]}${s.reason ? ' (not available)' : ''}` }))} />
       <p className="mt-1 text-sm text-muted">{TRIP_STYLE_BLURBS[style]}</p>
-      <label className="mt-4 block font-medium" htmlFor="trip-destination">Destination</label>
-      <select id="trip-destination" className="mt-2 min-h-11 w-full rounded border border-border bg-surface px-2" value={trip.destinationId} onChange={(e) => setDestination(e.target.value)}>
-        {view.options.map((d) => <option key={d.id} value={d.id}>{d.name} · {d.country}</option>)}
-      </select>
+      <ChipSelect label="Destination" testId="trip-destination" value={trip.destinationId} onChange={setDestination} options={view.options.map((d) => ({ id: d.id, label: `${d.name} · ${d.country}` }))} />
       {!business && <>
-        <label className="mt-4 block font-medium" htmlFor="trip-budget">Budget</label>
-        <select id="trip-budget" className="mt-2 min-h-11 w-full rounded border border-border bg-surface px-2" value={budget} onChange={(e) => setBudget(e.target.value as TripBudget)}>
-          {Object.entries(TRIP_BUDGET_LABELS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
-        </select>
+        <ChipSelect label="Budget" testId="trip-budget" value={budget} onChange={setBudget} options={Object.entries(TRIP_BUDGET_LABELS).map(([id, label]) => ({ id: id as TripBudget, label }))} />
       </>}
-      <label className="mt-4 block font-medium" htmlFor="trip-activity">What you’ll do</label>
-      <select id="trip-activity" className="mt-2 min-h-11 w-full rounded border border-border bg-surface px-2" value={activity} onChange={(e) => setActivity(e.target.value as TripActivity | '')}>
-        <option value="">No plan</option>
-        {view.activities.filter((a) => a.available).map((a) => <option key={a.id} value={a.id}>{TRIP_ACTIVITY_LABELS[a.id]} · {money(a.extra)}</option>)}
-      </select>
-      <label className="mt-4 block font-medium" htmlFor="trip-souvenir">Bring something back</label>
-      <select id="trip-souvenir" className="mt-2 min-h-11 w-full rounded border border-border bg-surface px-2" value={souvenir} onChange={(e) => setSouvenir(e.target.value as Souvenir)}>
-        {view.souvenirs.map((s) => <option key={s.id} value={s.id}>{SOUVENIR_LABELS[s.id]}{s.cost ? ` · ${money(s.cost)}` : ''}</option>)}
-      </select>
+      <ChipSelect<TripActivity | ''> label="What you’ll do" testId="trip-activity" value={activity} onChange={setActivity} options={[{ id: '', label: 'No plan' }, ...view.activities.filter((a) => a.available).map((a) => ({ id: a.id, label: `${TRIP_ACTIVITY_LABELS[a.id]} · ${money(a.extra)}` }))]} />
+      <ChipSelect label="Bring something back" testId="trip-souvenir" value={souvenir} onChange={setSouvenir} options={view.souvenirs.map((s) => ({ id: s.id, label: `${SOUVENIR_LABELS[s.id]}${s.cost ? ` · ${money(s.cost)}` : ''}` }))} />
       {!fixedCompany && <fieldset className="mt-4"><legend className="font-medium">{style === 'group' ? 'Friends' : 'Companions'}</legend>
         <p className="text-sm text-muted">{style === 'group' ? `Choose ${view.minFriends} or ${view.maxCompanions} friends. You cover part of each friend’s costs.` : `Choose up to ${view.maxCompanions} companions, or leave everyone unchecked to travel solo. You cover part of each companion’s costs.`}</p>
         {view.companions.map(({ id, name }) => <label key={id} className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={trip.companions.includes(id)} disabled={!trip.companions.includes(id) && trip.companions.length >= view.maxCompanions} onChange={(e) => setCompanions(e.target.checked ? [...trip.companions, id] : trip.companions.filter((p) => p !== id))} />{name}</label>)}
