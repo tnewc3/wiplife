@@ -1232,7 +1232,7 @@ describe('the social web (E4)', () => {
     expect(web.length).toBeGreaterThanOrEqual(35);
     expect(web.length).toBeLessThanOrEqual(50);
     const kinds = Object.entries(result.bundle.registries.web.kinds);
-    expect(kinds).toHaveLength(17);
+    expect(kinds).toHaveLength(13);
     for (const [kind, def] of kinds) {
       expect(Object.keys(def.versions).length, kind).toBeGreaterThanOrEqual(3);
       expect(Object.values(def.versions).some((v) => v.twists.length > 0), kind).toBe(true);
@@ -1462,10 +1462,10 @@ describe('the teen years (T1)', () => {
 describe('crime careers (E6a)', () => {
   const read = (file: string) => readFile(path.join(dir, file), 'utf8');
 
-  it('accepts the real content: thirteen crews, six businesses, the crime events, and no warnings', { timeout: 90_000 }, async () => {
+  it('accepts the real content: seventeen crews (four of them youth crews), six businesses, the crime events, and no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
-    expect(Object.keys(result.bundle.crews)).toHaveLength(13);
+    expect(Object.keys(result.bundle.crews)).toHaveLength(17);
     expect(Object.keys(result.bundle.fronts)).toHaveLength(6);
     const categories = ['crimeoffers', 'crime', 'crimeaway', 'crimehome', 'crimelaw', 'crimepast'];
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && categories.includes(e.category));
