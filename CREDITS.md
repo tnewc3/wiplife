@@ -84,6 +84,16 @@ The icons on event cards, stat bars and in the People list (`public/icons`) are 
 | `public/icons/syringe.svg` | Syringe |
 | `public/icons/microphone.svg` | Microphone |
 | `public/icons/drum.svg` | Drum |
+| `public/icons/soccer_ball.svg` | Soccer ball |
+| `public/icons/baseball.svg` | Baseball |
+| `public/icons/key.svg` | Key |
+| `public/icons/person_running.svg` | Person running |
+| `public/icons/slot_machine.svg` | Slot machine |
+| `public/icons/cherries.svg` | Cherries |
+| `public/icons/bell.svg` | Bell |
+| `public/icons/lemon.svg` | Lemon |
+| `public/icons/spade_suit.svg` | Spade suit |
+| `public/icons/goal_net.svg` | Goal net |
 
 ## Interface icons
 

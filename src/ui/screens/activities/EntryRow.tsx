@@ -17,6 +17,7 @@ import {
   loanOfferWords,
   LAWYER_QUALITY_NOTES,
   LOAN_BLOCK_LABELS,
+  MINIGAME_LABELS,
   money,
   moneyChange,
   OUTCOME_TIER_LABELS,
@@ -64,6 +65,11 @@ export function EntryRow({
     <li className="flex min-w-0 flex-col gap-2 py-3" data-testid={`activity-${entry.id}`}>
       <span className="font-semibold break-words [overflow-wrap:anywhere]">{entry.label}</span>
       <span className="text-sm text-muted">{entry.blurb}</span>
+      {entry.minigame && (
+        <span className="text-[13px] font-semibold text-muted" data-testid="entry-minigame">
+          {MINIGAME_LABELS.playOrAuto}
+        </span>
+      )}
       {entry.count > 0 && (
         <span className="text-sm text-muted">
           Done {entry.count} of {entry.limit} times this year.

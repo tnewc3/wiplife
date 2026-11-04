@@ -18,6 +18,10 @@ pin: true
 choices:
   - id: lead
     label: Ask for the ball when it matters
+    minigame:
+      - { game: last_shot, when: { sports: { sport: [basketball] } } }
+      - { game: penalty_kick, when: { sports: { sport: [soccer] } } }
+      - { game: swing, when: { sports: { sport: [baseball] } } }
     check:
       base: 37
       stats: [{ sports: rating, weight: 0.22 }, { sports: team, weight: 0.15 }, { key: confidence, weight: 0.1 }, { sports: form, weight: 0.1 }]

@@ -20,6 +20,10 @@ export const dollarsSchema = z.int().nonnegative();
 /** A 0–100 score. */
 export const scoreSchema = z.int().min(0).max(100);
 
+/** G1: the mini-games (balance/minigames.yaml gives each its numbers). */
+export const MINIGAME_IDS = ['last_shot', 'penalty_kick', 'swing', 'lockpick', 'getaway', 'blackjack', 'slots'] as const;
+export type MiniGameId = (typeof MINIGAME_IDS)[number];
+
 export const STAT_KEYS = ['health', 'happiness', 'smarts', 'looks', 'fitness', 'stress'] as const;
 export const TRAIT_KEYS = ['ambition', 'confidence', 'kindness', 'riskTaking', 'discipline', 'sociability'] as const;
 /** Hidden values events may read or change (genetic risk and inner conflict belong to later systems). */

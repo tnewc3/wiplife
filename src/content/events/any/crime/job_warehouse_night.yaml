@@ -21,6 +21,8 @@ cast:
 choices:
   - id: go_in
     label: Do your part
+    minigame:
+      - { game: lockpick }
     check:
       base: 58
       stats: [{ key: discipline, weight: 0.25 }, { key: fitness, weight: 0.15 }, { crime: heat, weight: -0.25 }, { key: luck, weight: 0.2 }]

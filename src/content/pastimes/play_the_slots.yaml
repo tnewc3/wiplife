@@ -11,6 +11,7 @@ companion: none
 cost: casino_slots
 yearlyLimit: 6
 hub: casino
+minigame: slots
 tiers:
   great:
     text:

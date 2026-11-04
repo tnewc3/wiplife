@@ -45,6 +45,9 @@ import { evaluate } from '../conditions';
 import { clampInt } from '../random';
 import { weightedPick } from '../random';
 import { chance, nextInt } from '../rng';
+import { tiltWeights, type PlayRecord } from '../minigames/odds';
+import { activityPerformance, blackjackVisit } from '../minigames/pastime';
+import { settlePlay } from '../minigames/play';
 import { renderText } from '../text';
 import { hasLicense } from '../teen/query';
 import { vehiclesOf } from '../possessions/query';
@@ -202,16 +205,42 @@ export function performPastime(state: LifeState, def: PastimeDef, input: Pastime
   // 2. The tier. A game is its payout table; everything else is an odds profile.
   let multiple = 0;
   let tier: OutcomeTier;
+  // G1: a mini-game's result (a played one, or Auto's draw) moves these odds a little, less with every repeat this year.
+  const factor = returnsFactor(repeats, content);
+  let played: PlayRecord | undefined;
   if (def.mechanic === 'gamble') {
     const game = content.balance.risk.games[def.game!]!;
-    const result = weightedPick(state.rng, game.outcomes.map((o) => [o, o.chance] as [(typeof game.outcomes)[number], number]));
-    tier = result.tier;
-    multiple = result.multiple;
+    if (def.minigame === 'blackjack') {
+      // Blackjack is the hands themselves: the stake comes back by how the visit went.
+      const visit = blackjackVisit(state, input.play, content);
+      tier = visit.tier;
+      multiple = visit.session.returned;
+      played = visit.record;
+    } else {
+      let weights = game.outcomes.map((o) => [o, o.chance] as [(typeof game.outcomes)[number], number]);
+      if (def.minigame === 'slots') {
+        const settled = settlePlay(state, 'slots', input.play, content);
+        played = settled.record;
+        const scale = (content.balance.minigames.games.slots.params.tiltScale! / 100) * factor;
+        weights = tiltWeights(weights, (o) => (o.multiple > 1 ? 1 : o.multiple < 1 ? -1 : 0), settled.performance, scale, content);
+      }
+      const result = weightedPick(state.rng, weights);
+      tier = result.tier;
+      multiple = result.multiple;
+    }
   } else {
-    tier = weightedPick(state.rng, tierWeights(state, def, input, repeats, content));
+    let weights = tierWeights(state, def, input, repeats, content);
+    const performed = activityPerformance(state, def, input.play, content);
+    if (performed) {
+      played = performed.record;
+      weights = tiltWeights(weights, (w) => (w === 'great' || w === 'good' ? 1 : w === 'bad' || w === 'backfire' ? -1 : 0), performed.performance, factor, content);
+    }
+    tier = weightedPick(state.rng, weights);
   }
+  // The log keeps what was played (Auto's draw too), so a replay uses the stored result.
+  const logged = state.inputLog.at(-1);
+  if (played && logged?.kind === 'action' && typeof logged.payload.params === 'object' && logged.payload.params !== null) (logged.payload.params as Record<string, unknown>).play = played;
   const outcome = def.tiers[tier]!;
-  const factor = returnsFactor(repeats, content);
   const companionId = input.companionId;
   const cast: Record<string, Id> = companionId !== undefined ? { [COMPANION_ROLE]: companionId } : {};
 

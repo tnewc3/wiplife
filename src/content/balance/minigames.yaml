@@ -1,0 +1,68 @@
+# G1 mini-games (docs/careers-crime-and-ui.md, G1). Every number a mini-game or its odds use.
+# One odds model serves Auto and a played game: a play is an accuracy from 0 to 100; Auto draws one from your skill, a
+# played game measures one. The accuracy is a performance tier, and the tier moves the odds the event or activity
+# already had. Skill can push the odds, never replace them.
+
+# The accuracy a performance needs, best first. Below `fair` is a miss.
+tiers: { perfect: 85, good: 60, fair: 35 }
+
+# What a performance does: percentage points on a chance check (events, an activity's good and bad outcomes, a casino
+# game after `tiltScale`). The most a play can move any chance is the largest of these.
+shift: { perfect: 12, good: 5, fair: 0, miss: -10 }
+
+# What Auto plays like: the accuracy it draws is centered between these by your skill (0 to 100), with this spread. The
+# same skill sizes the window and speed when you play, so a typical play at a given skill lands where Auto does.
+auto: { meanWeak: 34, meanStrong: 72, spread: 22 }
+
+# Reduced motion (and anyone who asks): the game runs this much slower, and Auto is offered first.
+slowFactor: 0.5
+
+# After this long without a tap (milliseconds), a game says Auto can play it.
+idleMs: 20000
+
+games:
+  last_shot:
+    # Skill is the weighted sum of these (each 0 to 100; the weights add to 1). Your sport rating counts as 50 without one.
+    skill: [{ sports: rating, weight: 0.5 }, { key: fitness, weight: 0.2 }, { key: confidence, weight: 0.2 }, { key: discipline, weight: 0.1 }]
+    # The zone you must stop the marker in, as a share of the bar (weak skill to strong skill), and how fast the marker sweeps (bar widths per second).
+    window: { weak: 0.12, strong: 0.3 }
+    speed: { weak: 1.5, strong: 0.85 }
+    params: {}
+  penalty_kick:
+    skill: [{ sports: rating, weight: 0.5 }, { key: fitness, weight: 0.15 }, { key: confidence, weight: 0.25 }, { key: discipline, weight: 0.1 }]
+    window: { weak: 0.14, strong: 0.3 }
+    speed: { weak: 1.4, strong: 0.8 }
+    # keeperReads: the chance the keeper guesses your corner (weak skill to strong skill is set by readsWeak and readsStrong, in percent). saved: how much of the power accuracy a read keeper leaves (percent).
+    params: { readsWeak: 55, readsStrong: 30, saved: 40 }
+  swing:
+    skill: [{ sports: rating, weight: 0.5 }, { key: fitness, weight: 0.2 }, { key: confidence, weight: 0.2 }, { key: discipline, weight: 0.1 }]
+    window: { weak: 0.12, strong: 0.28 }
+    speed: { weak: 1.5, strong: 0.85 }
+    params: {}
+  lockpick:
+    skill: [{ key: smarts, weight: 0.4 }, { key: discipline, weight: 0.3 }, { key: confidence, weight: 0.1 }, { key: riskTaking, weight: 0.2 }]
+    # window: the width of a pin's sweet spot, as a share of a full turn; speed: turns per second of the needle.
+    window: { weak: 0.07, strong: 0.16 }
+    speed: { weak: 0.9, strong: 0.55 }
+    # pins: how many to set; seconds: the time you have; slip: accuracy points lost for each pin you try and miss.
+    params: { pins: 4, seconds: 14, slip: 8 }
+  getaway:
+    skill: [{ key: fitness, weight: 0.5 }, { key: luck, weight: 0.15 }, { key: riskTaking, weight: 0.15 }, { key: confidence, weight: 0.2 }]
+    # window: how open the course is (a wider one blocks one lane in more rows, not two); speed: rows that pass you each second.
+    window: { weak: 0.22, strong: 0.34 }
+    speed: { weak: 1.5, strong: 1 }
+    # rows: how many rows of obstacles; lanes: how many lanes.
+    params: { rows: 8, lanes: 3 }
+  blackjack:
+    skill: [{ key: smarts, weight: 0.6 }, { key: discipline, weight: 0.4 }]
+    window: { weak: 0, strong: 0 }
+    speed: { weak: 0, strong: 0 }
+    # hands: how many hands a visit plays, each for an equal share of the stake. mistakeWeak and mistakeStrong: the chance (percent) Auto goes against the book on a decision. great, good: the share of the stake a visit returns for each outcome (total return, in percent of the stake); neutral covers the band around 100.
+    params: { hands: 3, mistakeWeak: 6, mistakeStrong: 0, great: 170, good: 105, bad: 95 }
+  slots:
+    skill: [{ key: luck, weight: 0.3 }, { key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }, { key: confidence, weight: 0.2 }]
+    window: { weak: 0.14, strong: 0.28 }
+    speed: { weak: 1.3, strong: 0.9 }
+    # tiltScale: a performance moves a slot machine's payout table this much as it moves a check (in percent of the shift), so the house keeps an edge at the best play.
+    params: { tiltScale: 25, reels: 3 }
+

@@ -2151,6 +2151,9 @@ describe('risk and legal activities (Batch 2b)', { timeout: 90_000 }, () => {
     expect(await expectErrors()).toContain('gambling follows the legal gambling age');
     await write('pastimes/play_the_slots.yaml', slots.replace('game: slots', 'game: nonesuch'));
     expect(await expectErrors()).toContain('unknown game "nonesuch"');
+    // G1: a casino mini-game must be the game the activity plays.
+    await write('pastimes/play_the_slots.yaml', slots.replace('minigame: slots', 'minigame: blackjack'));
+    expect(await expectErrors()).toContain('the blackjack mini-game goes with game: blackjack');
   });
 
   it('refuses a teenager who can do a serious crime, dirty money or a drug problem', async () => {

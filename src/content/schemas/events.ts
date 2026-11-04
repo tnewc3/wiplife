@@ -12,6 +12,7 @@ import {
   type MentalCareId,
   idSchema,
   LATENT_KINDS,
+  MINIGAME_IDS,
   scoreKeySchema,
   STAT_KEYS,
   TRAIT_KEYS,
@@ -2457,6 +2458,13 @@ export const checkSchema = z.strictObject({
 });
 export type Check = z.infer<typeof checkSchema>;
 
+/**
+ * G1: a mini-game that can be played for a check (a big moment, a heist, a run): the first option whose `when` holds is
+ * the game, and Auto resolves it from your stats. A check without a game that holds is resolved as before.
+ */
+export const choiceMiniGameSchema = z.strictObject({ game: z.enum(MINIGAME_IDS), when: conditionSchema.optional() });
+export type ChoiceMiniGame = z.infer<typeof choiceMiniGameSchema>;
+
 export const choiceSchema = z
   .strictObject({
     id: idSchema,
@@ -2464,8 +2472,10 @@ export const choiceSchema = z
     visibleIf: conditionSchema.optional(),
     outcome: outcomeSchema.optional(),
     check: checkSchema.optional(),
+    minigame: z.array(choiceMiniGameSchema).min(1).max(5).optional(),
   })
-  .refine((c) => (c.outcome === undefined) !== (c.check === undefined), 'a choice needs exactly one of outcome or check');
+  .refine((c) => (c.outcome === undefined) !== (c.check === undefined), 'a choice needs exactly one of outcome or check')
+  .refine((c) => c.minigame === undefined || c.check !== undefined, 'a mini-game needs a check to move');
 export type ChoiceDef = z.infer<typeof choiceSchema>;
 
 /**

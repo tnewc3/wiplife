@@ -35,6 +35,7 @@ import { PersonScreen } from '../people/PersonScreen';
 import { PetScreen } from '../people/PetScreen';
 import { CareerTab } from '../work/CareerTab';
 import { TrainingPopup } from '../../components/TrainingPopup';
+import { MiniGameHost } from '../../minigames/MiniGameHost';
 
 /** The pages that open over a tab (Assets → Properties, Profile → Health, Activities → Trips...), by the store's moreView. */
 const PAGE_TITLES = {
@@ -137,6 +138,7 @@ export function GameScreen({ life }: { life: LifeState }) {
           <InteractionCard life={life} />
           <ActivitySheet life={life} />
           <TrainingPopup />
+          <MiniGameHost />
         </main>
         <div className="shrink-0">
           <GameNav />

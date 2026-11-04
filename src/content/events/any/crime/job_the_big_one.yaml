@@ -21,6 +21,8 @@ cast:
 choices:
   - id: go_in
     label: Go in
+    minigame:
+      - { game: lockpick }
     check:
       base: 45
       stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.2 }, { key: luck, weight: 0.3 }, { crime: heat, weight: -0.3 }]

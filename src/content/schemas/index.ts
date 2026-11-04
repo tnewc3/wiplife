@@ -21,6 +21,7 @@ import { educationBalanceSchema, gradProgramSchema, majorSchema, tradeSchema } f
 import { bannerRegistrySchema, categoryRegistrySchema, eventSchema, flagRegistrySchema, iconRegistrySchema, memoryRegistrySchema } from './events';
 import { causeSchema, historyTextSchema, legalTextSchema, obituaryTextSchema, relationWordsSchema, timeTextSchema } from './text';
 import { godmodeBalanceSchema } from './godmodeBalance';
+import { minigamesBalanceSchema } from './minigamesBalance';
 import { conditionDefSchema, healthBalanceSchema, healthRegistrySchema } from './health';
 import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal';
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
@@ -62,6 +63,7 @@ export * from './school';
 export * from './events';
 export * from './relationships';
 export * from './godmodeBalance';
+export * from './minigamesBalance';
 export * from './text';
 export * from './health';
 export * from './legal';
@@ -177,6 +179,7 @@ export const singletonTypes = {
   'balance/activities': activitiesBalanceSchema,
   'balance/risk': riskBalanceSchema,
   'balance/godmode': godmodeBalanceSchema,
+  'balance/minigames': minigamesBalanceSchema,
   'balance/teen': teenBalanceSchema,
   'balance/school': schoolBalanceSchema,
   'balance/crime': crimeBalanceSchema,
@@ -329,6 +332,7 @@ export const contentBundleSchema = z.strictObject({
     activities: activitiesBalanceSchema,
     risk: riskBalanceSchema,
     godmode: godmodeBalanceSchema,
+    minigames: minigamesBalanceSchema,
     teen: teenBalanceSchema,
     school: schoolBalanceSchema,
     crime: crimeBalanceSchema,
