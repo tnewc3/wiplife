@@ -28,8 +28,8 @@ test('form a band from an open-mic start, rename it and replace a member', async
   await band.getByTestId('band-start').click();
   const parts = page.getByTestId('band-part-sheet');
   if (await parts.isVisible()) await parts.locator('[data-testid^="band-part-"]').first().click();
-  await band.getByTestId('band-name-input').fill('  The Night   Shift  ');
-  await band.getByTestId('band-form').click();
+  await page.getByTestId('band-name-input').fill('  The Night   Shift  ');
+  await page.getByTestId('band-form').click();
   await expect(page.getByTestId('band-screen').filter({ hasText: 'The Night Shift' })).toBeVisible();
   await band.getByTestId('screen-info').click();
   await expect(page.getByRole('dialog')).toContainText('You lead it.');
@@ -39,10 +39,10 @@ test('form a band from an open-mic start, rename it and replace a member', async
   // A name that can't be a title is refused before it is sent (the rename is a dialog in the ⋯ menu).
   await band.getByTestId('screen-overflow').click();
   await page.getByTestId('band-rename-open').click();
-  await band.getByTestId('band-rename-input').fill('<b>loud</b>');
-  await expect(band.getByTestId('band-rename')).toBeDisabled();
-  await band.getByTestId('band-rename-input').fill('Static Bloom');
-  await band.getByTestId('band-rename').click();
+  await page.getByTestId('band-rename-input').fill('<b>loud</b>');
+  await expect(page.getByTestId('band-rename')).toBeDisabled();
+  await page.getByTestId('band-rename-input').fill('Static Bloom');
+  await page.getByTestId('band-rename').click();
   await expect(page.getByTestId('band-screen').filter({ hasText: 'Static Bloom' })).toBeVisible();
 
   // Replace someone: they go, and auditions for their part open.

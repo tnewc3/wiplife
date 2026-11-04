@@ -40,7 +40,8 @@ test('Sports, the band, an organization and the overflow menu', async ({ page })
   await page.getByTestId('screen-overflow').click();
   await shoot(page, 'overflow-menu');
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Back' }).first().click();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
   await page.getByTestId('role-band').click();
   await shoot(page, 'band');
 });
