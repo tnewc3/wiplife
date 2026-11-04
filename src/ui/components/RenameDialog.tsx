@@ -6,21 +6,38 @@ import { TextField } from './TextField';
  * A small dialog with one text field (U3): rename a band. Feature screens and sheets hold no text inputs; this is where
  * one lives. It opens from an overflow menu and closes on Save, Cancel or Escape.
  */
-export function RenameDialog({ open, title, label, initial, error, maxLength = 60, multiline = false, allowSame = false, hint, testId = 'rename-input', saveTestId = 'rename-save', saveLabel = 'Save', onSave, onCancel, busy = false }: { open: boolean; title: string; label: string; initial: string; /** The reason the text can't be saved, or undefined. */ error?: (text: string) => string | undefined; maxLength?: number; /** Several lines (track titles). */ multiline?: boolean; /** Saving the text as it is counts (a title that is only a suggestion). */ allowSame?: boolean; hint?: string; testId?: string; saveTestId?: string; saveLabel?: string; onSave: (text: string) => void; onCancel: () => void; busy?: boolean }) {
+export function RenameDialog(props: RenameDialogProps) {
+  return props.open ? <Dialog {...props} /> : null;
+}
+
+interface RenameDialogProps {
+  open: boolean;
+  title: string;
+  label: string;
+  initial: string;
+  error?: ((text: string) => string | undefined) | undefined;
+  maxLength?: number;
+  multiline?: boolean;
+  allowSame?: boolean;
+  hint?: string;
+  testId?: string;
+  saveTestId?: string;
+  saveLabel?: string;
+  onSave: (text: string) => void;
+  onCancel: () => void;
+  busy?: boolean;
+}
+
+function Dialog({ title, label, initial, error, maxLength = 60, multiline = false, allowSame = false, hint, testId = 'rename-input', saveTestId = 'rename-save', saveLabel = 'Save', onSave, onCancel, busy = false }: RenameDialogProps) {
   const titleId = useId();
   const [text, setText] = useState(initial);
   useEffect(() => {
-    if (open) setText(initial);
-  }, [open, initial]);
-  useEffect(() => {
-    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, onCancel]);
-  if (!open) return null;
+  }, [onCancel]);
   const problem = error?.(text);
   const unchanged = !allowSame && text.trim() === initial.trim();
   return (

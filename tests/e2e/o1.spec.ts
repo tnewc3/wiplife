@@ -58,10 +58,9 @@ test('a leader gives a member a job from the row’s action sheet, and the year 
   await ageUp(page);
   await settle(page);
   await openOrg(page);
-  await page.getByTestId('org-tab-overview').click();
+  await page.getByTestId('org-tab-members').click();
   await expect(page.getByTestId('org-recap')).toBeVisible();
-  await page.getByTestId('org-recap').getByRole('button').click();
-  await expect(page.getByTestId('org-recap-list')).toContainText(/paid you|supplied|Did well|Went badly|Arrested|Hurt|Out of action|Killed/);
+  await expect(page.getByTestId('org-recap')).toContainText(/paid you|supplied|Did well|Went badly|Arrested|Hurt|Out of action|Killed/);
 });
 
 test('your cut changes from a sheet, and an attack on a neighborhood is ordered at a cost', async ({ page }) => {
@@ -74,7 +73,7 @@ test('your cut changes from a sheet, and an attack on a neighborhood is ordered 
   const take = page.locator('[data-testid^="org-hood-more-"]').first();
   await take.click();
   await page.getByTestId('org-act-take').click();
-  await page.getByTestId('org-tab-overview').click();
+  await page.getByTestId('org-tab-members').click();
   await expect(page.getByTestId('org-row-dirty')).toBeVisible();
 });
 

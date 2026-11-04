@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { content } from '../../../content';
 import type { LifeActionParams } from '../../../engine/actions';
 import { scaledAmount } from '../../../engine/country';
-import { getActivitiesView, getActivityTabView, type ActivityEntryView, type ActivityHubView } from '../../../engine/selectors';
+import { getActivitiesView, getActivityTabView, type ActivityEntryView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import type { TileTone } from '../../components/ActionTile';
@@ -11,12 +11,7 @@ import { FilterChips } from '../../components/FilterChips';
 import { ItemCard, ItemDetailSheet, StoreScreen } from '../../components/StoreScreen';
 import { LOOK_KIND_LABELS, lookWords, money, SHOP_TONES } from '../../labels';
 import { ReceiptCard } from './EntryCards';
-import { reasonOf } from './EntryCards';
-
-/** Which activities of the hub are shops: the Shopping section of a category (stores, fine goods, outdoor gear, the luxury shops) and the black market. */
-export function isShop(hub: Pick<ActivityHubView, 'id' | 'section' | 'kind'>): boolean {
-  return hub.kind === 'options' && (hub.section === 'shopping' || hub.id === 'black_market');
-}
+import { reasonOf } from './reasons';
 
 type Filter = 'all' | 'afford' | 'owned' | string;
 

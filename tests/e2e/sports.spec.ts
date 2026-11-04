@@ -8,7 +8,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, expandGroups, goTab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, goTab } from './helpers';
 import { sportsLife, type SportsLife } from './sportsFixtures';
 
 
@@ -23,8 +23,6 @@ const openScreen = async (page: Page) => {
   await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('sports-screen')).toBeVisible();
-  // C2: the Overview keeps its details in groups that start closed.
-  await expandGroups(page);
 };
 
 test('the Career tab shows your sport and team with a Greatness bar, and fits a phone', async ({ page }) => {
@@ -39,7 +37,7 @@ test('the Career tab shows your sport and team with a Greatness bar, and fits a 
   await expectTouchTargets(page);
 });
 
-test('the Sports screen shows the ladder, team, position, season report and fame bars', async ({ page }) => {
+test('the Sports screen shows the ladder, team, position, season report and, with fame, the fame bars', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-2' });
   await openScreen(page);
   const ladder = page.getByRole('list', { name: 'Basketball ladder' });
@@ -47,15 +45,9 @@ test('the Sports screen shows the ladder, team, position, season report and fame
   await expect(ladder.locator('[aria-current="step"]')).toContainText('School team player');
   await expect(page.getByTestId('team-line')).toContainText('school team');
   await expect(page.getByTestId('position-line')).toContainText(/fit/);
-  await expect(page.getByTestId('contract-line')).toContainText('Amateur play pays nothing');
-  await page.getByTestId('sports-tab-season').click();
-  await expect(page.getByTestId('season-report')).toBeVisible();
   await expect(page.getByTestId('season-record')).toContainText('12-6');
-  await expect(page.getByTestId('season-stats').getByRole('listitem').first()).toBeVisible();
-  await expect(page.getByRole('meter', { name: 'Fame' })).toBeVisible();
-  await expect(page.getByRole('meter', { name: 'Public image' })).toBeVisible();
-  await expect(page.getByRole('meter', { name: 'Fan mood' })).toBeVisible();
   await expect(page.getByTestId('sports-screen')).not.toContainText(/\b\d{2,3}\/100\b/);
+  await expect(page.getByTestId('contract-line')).toHaveCount(0);
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 });
@@ -64,29 +56,29 @@ test('a pro has a deal with a salary, an agent, a team in the league, and can as
   await open(page, { seed: 'e2e-sports-3', pro: true });
   await openScreen(page);
   await expect(page.getByTestId('contract-line')).toContainText(/a rookie deal|a standard deal/i);
-  await expect(page.getByTestId('contract-line')).toContainText(/\$[\d,]+ a year/);
-  await expect(page.getByTestId('sports-contract-row')).toContainText(/\$[\d,]+/);
-  await expect(page.getByTestId('team-line')).toContainText('Continental Hoops League');
+  await expect(page.getByTestId('contract-line')).toContainText(/\$[\d,]+/);
+  await expect(page.getByTestId('tile-deal')).toContainText(/\$[\d,]+/);
   await expect(page.getByTestId('agent-line')).toContainText('Quill & Marlow');
+  await page.getByTestId('screen-overflow').click();
   await page.getByTestId('ask-trade').click();
   await expect(page.getByTestId('ask-line')).toContainText('trade');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 });
 
-test('position, training focus and commitment change with one tap', async ({ page }) => {
+test('position and training focus change with one tap on a card', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-4' });
   await openScreen(page);
-  await expect(page.getByTestId('focus-skills')).toHaveAttribute('aria-checked', 'true');
+  await page.getByTestId('tile-practice').click();
   await page.getByTestId('focus-conditioning').click();
-  await expect(page.getByTestId('focus-conditioning')).toHaveAttribute('aria-checked', 'true');
-  await expect(page.getByTestId('commitment-steady')).toHaveAttribute('aria-checked', 'true');
-  await page.getByTestId('commitment-back').click();
-  await expect(page.getByTestId('commitment-back')).toHaveAttribute('aria-checked', 'true');
-  const positions = page.getByRole('radiogroup', { name: 'Position' }).getByRole('radio');
+  await page.getByTestId('tile-practice').click();
+  await expect(page.getByTestId('focus-conditioning')).toContainText('Now');
+  await page.keyboard.press('Escape');
+  await page.getByTestId('position-line').click();
+  const positions = page.getByTestId('position-picker').locator('[data-testid^="position-"]');
   await expect(positions).toHaveCount(5);
-  const other = positions.and(page.locator('[aria-checked="false"]')).first();
-  const label = (await other.innerText()).split('\n')[0]!.split('·')[0]!.trim();
+  const other = positions.and(page.locator(':not([aria-disabled])')).first();
+  const label = (await other.innerText()).split('\n')[0]!.trim();
   await other.click();
   await expect(page.getByTestId('position-line')).toContainText(label);
 });
@@ -96,12 +88,11 @@ test('with no career the Sports screen shows the teams you can try out for, and 
   await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('entry')).toBeVisible();
-  await expect(page.getByRole('list', { name: 'Youth team options' }).first().getByRole('listitem')).toHaveCount(3);
+  await expect(page.locator('[data-testid^="tryout-hockey-youth"]')).toHaveCount(3);
   // The rec league takes everyone who shows up.
   await page.getByTestId('tryout-hockey-youth:rec').click();
   await page.getByRole('button', { name: 'Play your game' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expandGroups(page);
   await expect(page.getByRole('list', { name: 'Hockey ladder' }).locator('[aria-current="step"]')).toContainText('Youth league player');
   await expectNoHorizontalScroll(page);
 });
@@ -131,6 +122,7 @@ test('after leaving the game, the Sports screen looks back on the seasons', asyn
 test('leaving the game asks first and keeps your seasons', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-8', pro: true });
   await openScreen(page);
+  await page.getByTestId('screen-overflow').click();
   await page.getByTestId('exit-normal').click();
   await expect(page.getByRole('dialog', { name: 'Start a normal life?' })).toBeVisible();
   await page.getByRole('button', { name: 'Start a normal life' }).last().click();

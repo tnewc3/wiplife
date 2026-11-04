@@ -38,7 +38,7 @@ export function StatBar({ label, value, kind = 'stat', icon, layout = 'stacked' 
       <div className="flex items-center gap-2">
         <span className="flex w-28 shrink-0 items-center gap-1.5 text-sm font-bold">
           {icon && <Icon id={icon} size={18} />}
-          <span className="truncate">{label}</span>
+          <span className="[overflow-wrap:anywhere]">{label}</span>
         </span>
         {bar}
         {percent}

@@ -36,7 +36,7 @@ test('the Career tab lists every role with one bar and a Schedule, and fits the 
 test('the Sports screen has Overview, Season, League and History tabs', async ({ page }) => {
   await openCareer(page);
   await page.getByTestId('role-sports').click();
-  await expect(page.getByTestId('sports-overview')).toBeVisible();
+  await expect(page.getByTestId('sports-season')).toBeVisible();
   await expect(page.getByTestId('sports-role-row').getByRole('meter')).toHaveCount(1);
   await page.getByTestId('sports-tab-season').click();
   await expect(page.getByTestId('sports-season')).toBeVisible();
@@ -51,7 +51,7 @@ test('the Sports screen has Overview, Season, League and History tabs', async ({
 test('the band screen: rehearse, hold auditions and hire, with a training card that can be skipped', async ({ page }) => {
   await openCareer(page);
   await page.getByTestId('role-band').click();
-  await expect(page.getByTestId('band-overview')).toBeVisible();
+  await expect(page.getByTestId('band-members')).toBeVisible();
   await page.getByTestId('rehearse').click();
   await expect(page.getByTestId('training-popup')).toBeVisible();
   await expect(page.getByTestId('training-result')).toContainText(/tighter|groove|nailed/i, { timeout: 4000 });

@@ -10,6 +10,7 @@ import { OptionCard } from '../../components/OptionPickerSheet';
 import { RenameDialog } from '../../components/RenameDialog';
 import type { Picks } from './picks';
 import { effectChips } from './effectChips';
+import { reasonOf } from './reasons';
 import {
   ACTIVITY_TAB_LABELS,
   CHASE_LABEL,
@@ -43,20 +44,11 @@ function chipsOf(entry: ActivityEntryView) {
         </EffectChip>
       ))}
       {entry.minigame && <FactChip>{MINIGAME_LABELS.playOrAuto}</FactChip>}
-      {entry.hobby && <FactChip>{ACTIVITY_TAB_LABELS.hobbySkill(HOBBY_LEVEL_LABELS[Math.min(entry.hobby.level, HOBBY_LEVEL_LABELS.length - 1)]!, entry.hobby.skill)}</FactChip>}
+      {entry.hobby && <FactChip testId={`hobby-${entry.id}`}>{ACTIVITY_TAB_LABELS.hobbySkill(HOBBY_LEVEL_LABELS[Math.min(entry.hobby.level, HOBBY_LEVEL_LABELS.length - 1)]!, entry.hobby.skill)}</FactChip>}
       {entry.buys && <FactChip>A belonging: {entry.buys}</FactChip>}
       {entry.evidence !== null && <FactChip>{evidenceWords(entry.evidence)}</FactChip>}
     </>
   );
-}
-
-/** Why an option can't be chosen now, as the short chip that greys its card ("Needs $40 more", "Done this year"). */
-export function reasonOf(entry: ActivityEntryView, price: number, savings: number, blockedByPhase: boolean): string | undefined {
-  if (blockedByPhase) return 'Not now';
-  if (entry.block === 'limit') return 'Done this year';
-  if (entry.block === 'afford') return `Needs ${money(Math.max(0, price - savings))} more`;
-  if (entry.block !== null && !['companion', 'name', 'consent', 'stake', 'route', 'quality', 'look'].includes(entry.block)) return PASTIME_BLOCK_LABELS[entry.block]?.replace(/\.$/, '') ?? 'Not now';
-  return undefined;
 }
 
 const priceWord = (n: number) => (n === 0 ? 'Free' : money(n));
@@ -128,7 +120,7 @@ export function EntryCards({
 
   if (entry.stakes) {
     return (
-      <div className="flex flex-col gap-2" data-testid={`activity-${entry.id}`}>
+      <div className="flex flex-col gap-2" >
         {extras}
         {entry.chase?.available && (
           <button type="button" aria-pressed={chasing} disabled={disabled} data-testid={`chase-${entry.id}`} onClick={() => onPick({ chase: !chasing })} className={`wl-press min-h-11 rounded-xl border px-4 py-2 text-left text-sm font-medium disabled:opacity-50 ${chasing ? 'border-danger bg-surface-2' : 'border-border bg-surface'}`}>
@@ -155,7 +147,7 @@ export function EntryCards({
   }
   if (entry.qualities) {
     return (
-      <div className="flex flex-col gap-2" data-testid={`activity-${entry.id}`}>
+      <div className="flex flex-col gap-2" >
         {extras}
         {PASTIME_QUALITIES.map((q) => {
           const row = entry.qualities!.find((x) => x.quality === q)!;

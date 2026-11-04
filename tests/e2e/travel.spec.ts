@@ -12,8 +12,8 @@ test('More trip planner has a destination, budget and companions; costs and skil
   });
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await openPage(page, 'trip');
-  await page.getByLabel('Destination', { exact: true }).selectOption('kyoto');
-  await page.getByLabel('Budget', { exact: true }).selectOption('budget');
+  await page.getByTestId('trip-destination-kyoto').click();
+  await page.getByTestId('trip-budget-budget').click();
   await expect(page.getByText('Total: $1,040', { exact: true })).toBeVisible();
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Take this trip' }).click(); await settle(page);
@@ -42,8 +42,8 @@ test('Work/School exchange moves temporarily, preserves enrollment and automatic
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await goTab(page, 'Job');
   await openRow(page, 'find-abroad');
-  await page.getByLabel('Partner school city').selectOption('montreal');
-  await page.getByLabel('Length or route').selectOption('semester');
+  await page.getByTestId('abroad-destination-montreal').click();
+  await page.getByTestId('abroad-route-semester').click();
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Start exchange' }).click(); await playThroughEvents(page);
   await goTab(page, 'Job');
@@ -72,8 +72,8 @@ test('temporary work uses a dated residence, charges a receipt, and returns afte
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await goTab(page, 'Job');
   await openRow(page, 'find-abroad');
-  await page.getByLabel('Work destination').selectOption('london');
-  await page.getByLabel('Length or route').selectOption('working_holiday');
+  await page.getByTestId('abroad-destination-london').click();
+  await page.getByTestId('abroad-route-working_holiday').click();
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Start temporary work' }).click(); await settle(page);
   await eventSheet(page).getByRole('button', { name: 'Continue' }).click(); await settle(page);

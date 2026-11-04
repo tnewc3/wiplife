@@ -1,4 +1,3 @@
-import { ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 import type { LifeState } from '../../../engine/types';
 import { getCharacterSummary } from '../../../engine/selectors';
@@ -8,6 +7,7 @@ import { EventSheet } from '../../components/EventSheet';
 import { GameNav } from '../../components/GameNav';
 import { InteractionCard } from '../../components/InteractionCard';
 import { LegalBanner } from '../../components/LegalBanner';
+import { ScreenHeader } from '../../components/ScreenHeader';
 import { ACTIVITY_TAB_LABELS, GROUPS_FOCUS_TITLES, TAB_LABELS } from '../../labels';
 import { ActivitiesTab } from '../activities/ActivitiesTab';
 import { ActivitySheet } from '../activities/ActivitySheet';
@@ -54,14 +54,7 @@ const PAGE_TITLES = {
 } as const;
 
 function PageHeader({ title, onBack, backLabel }: { title: string; onBack: () => void; backLabel: string }) {
-  return (
-    <header className="pt-safe px-safe flex min-h-14 shrink-0 items-center gap-2 border-b border-border bg-surface-2">
-      <button type="button" onClick={onBack} aria-label={backLabel} className="-ml-2 flex size-11 items-center justify-center rounded-full text-link active:bg-surface">
-        <ChevronLeft aria-hidden="true" size={28} />
-      </button>
-      <h1 className="font-display truncate py-3 text-xl font-semibold">{title}</h1>
-    </header>
-  );
+  return <ScreenHeader title={title} onBack={onBack} backLabel={backLabel} tone="raised" />;
 }
 
 /** The in-game layout (U1): a header, the page, and at the bottom the tabs around the Age button (and on Home the stat panel). */

@@ -78,11 +78,14 @@ test('the Career tab: dealing needs stock or a way to get it, shows customers an
   await page.getByTestId('special-drugs').click();
   await expect(page.getByTestId('dealing-sheet')).toBeVisible();
   await page.getByTestId('deal-start').click();
+  await page.locator('[data-testid^="deal-pick-"]:not([aria-disabled])').first().click();
   await expect(page.getByTestId('deal-customers')).toBeVisible();
+  await page.getByTestId('deal-price-open').click();
   await page.getByTestId('deal-price-high').click();
-  await expect(page.getByTestId('deal-price-high')).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByTestId('deal-price-open')).toContainText('High');
   await expect(page.getByTestId('deal-dirty')).toBeVisible();
   await page.getByTestId('dealing-tab-production').click();
+  await page.getByTestId('deal-setup-open').click();
   await expect(page.getByTestId('op-start-backroom_grow-cannabis')).toBeVisible();
   await expectNoHorizontalScroll(page);
 });

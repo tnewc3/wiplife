@@ -2,20 +2,12 @@ import type { ReactNode } from 'react';
 import { lightHaptic } from '../haptics';
 import { Icon } from './Icon';
 import { FactChip } from './FactChip';
+import { content } from '../../content';
+import { freshnessOf } from './freshness';
 import { Sheet } from './Sheet';
 
-/**
- * How fresh an activity still is this year, as pips. The diminishing-returns counters are the engine's (times done, and the
- * most): all pips lit while it is fresh, fewer with each repeat, none at the limit.
- */
-export function freshnessOf(done: number, limit: number, pips = 4): { lit: number; pips: number; word: string } {
-  const left = Math.max(0, limit - done);
-  const lit = limit <= 0 ? 0 : done <= 0 ? pips : Math.max(left > 0 ? 1 : 0, Math.round((left / limit) * pips));
-  return { lit, pips, word: done <= 0 ? 'Fresh' : left === 0 ? 'Worn out' : lit >= pips - 1 ? 'Fresh' : lit >= 2 ? 'Fine' : 'Stale' };
-}
-
 export function FreshnessPips({ done, limit }: { done: number; limit: number }) {
-  const f = freshnessOf(done, limit);
+  const f = freshnessOf(done, limit, content.balance.activities.returns.repeat);
   return (
     <span className="inline-flex items-center gap-1 text-xs font-bold text-muted" data-testid="freshness" role="img" aria-label={`${f.word}: ${f.lit} of ${f.pips}`}>
       <span aria-hidden="true">{f.word}</span>

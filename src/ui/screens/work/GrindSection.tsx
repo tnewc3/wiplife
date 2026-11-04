@@ -63,7 +63,10 @@ export function GrindSection({ view, disabled }: { view: FameView; disabled: boo
       )}
 
       {main.skills.length > 0 && (
-        <>
+        <div className="flex flex-col gap-3" data-testid="practice">
+          <span className="sr-only" data-testid="practice-count">
+            {view.practice.used} of {view.practice.budget} practice sessions this year
+          </span>
           <SectionLabel trailing={`${view.practice.used} of ${view.practice.budget}`}>Practice</SectionLabel>
           {view.instruments.length > 0 && (
             <CompactList label="Instrument">
@@ -84,7 +87,7 @@ export function GrindSection({ view, disabled }: { view: FameView; disabled: boo
               />
             ))}
           </RowList>
-        </>
+        </div>
       )}
       {main.skills.length === 0 && !shows.venue && !main.tourQuote && <EmptyState text="Nothing to practise here yet." />}
 

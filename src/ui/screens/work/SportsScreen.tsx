@@ -53,6 +53,7 @@ import {
 import { renameDeep, useTeamText } from '../../useTeamNames';
 import { LeaguesSection, WorldSection } from './SportsWorld';
 import { DraftSection } from './SportsGrind';
+import { Ladder } from './FameScreen';
 
 const cap = (text: string) => text[0]!.toUpperCase() + text.slice(1);
 
@@ -353,6 +354,8 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
               ) : (
                 <EmptyState text={SPORTS_HUB_LABELS.seasonEmpty} />
               )}
+              <SectionLabel>Your ladder</SectionLabel>
+              <Ladder path={view.path} />
               <SectionLabel>Your role</SectionLabel>
               <CompactList label="Your role">
                 <CompactRow label={`${view.position?.label ?? 'Position'}${view.position ? ` · ${FIT_WORDS[view.position.fitBand]!.toLowerCase()}` : ''}`} value="Change" onClick={disabled ? undefined : () => setPicker('position')} testId="position-line" />
@@ -441,7 +444,7 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
 
       {!view.active && view.retired && (
         <div className="flex flex-col gap-3" data-testid="after">
-          <HeroCard lead={<Icon id="trophy" size={44} />} title="After the game" status={view.retired.route ? SPORT_RETIRED_LABELS[view.retired.route] : 'Your playing days are over.'}>
+          <HeroCard lead={<Icon id="trophy" size={44} />} title="After the game" status={view.retired.route ? SPORT_RETIRED_LABELS[view.retired.route] : 'Your playing days are over.'} testId="after-line">
             <StatCell label="Seasons" value={view.totals.seasons} />
             <StatCell label="Titles" value={view.totals.titles} />
             <StatCell label="Earned" value={money(view.totals.earned)} />

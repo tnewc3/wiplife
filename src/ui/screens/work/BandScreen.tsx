@@ -44,13 +44,17 @@ export function BandScreen({ life, open, onClose }: { life: LifeState; open: boo
   const [dialog, setDialog] = useState<'rename' | 'form' | null>(null);
   const [project, setProject] = useState(false);
   const [more, setMore] = useState<string | null>(null);
-  const [auditions, setAuditions] = useState(false);
+  const [dismissed, setDismissed] = useState<string | null>(null);
   const [partPicker, setPartPicker] = useState(false);
   const [part, setPart] = useState('');
   const [suggest, setSuggest] = useState(0);
   const [confirm, setConfirm] = useState<{ kind: 'replace'; id: string; who: string } | { kind: 'leave'; solo: boolean } | null>(null);
   const disabled = busy || !hub.between;
   const band = fame.band;
+  // The candidates of an audition open on their own when there are some; closing the sheet puts them away until you ask again.
+  const poolKey = hub.pool ? `${hub.pool.partId}:${hub.pool.candidates.length}` : null;
+  const auditions = hub.pool !== null && dismissed !== poolKey;
+  const setAuditions = (on: boolean) => setDismissed(on ? null : poolKey);
   const moreMember = hub.members.find((m) => m.id === more);
   const genre = fame.paths[0]?.genre?.name;
   const nameCheck = (t: string) => (parseTitle(t) === null ? TITLE_ERROR : undefined);

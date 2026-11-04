@@ -13,7 +13,8 @@ import { ACTIVITY_TAB_LABELS, HUB_BLOCK_WORDS, money, PASTIME_CATEGORY_NOTES } f
 import { DoctorPanel } from './DoctorPanel';
 import { EntryCards, ReceiptCard } from './EntryCards';
 import { nameParams, type Picks } from './picks';
-import { isShop, ShopScreen } from './ShopScreen';
+import { ShopScreen } from './ShopScreen';
+import { isShop } from './shops';
 
 /**
  * The sheet of one activity of the Activities tab (U3): the option picker. A header with the icon, the title, one line, your
@@ -125,8 +126,8 @@ function Options({ life, hubId, gold }: { life: LifeState; hubId: string; gold: 
       )}
       <div className="flex flex-col gap-2" aria-label={hub.label} role="group">
         {hub.options.map((entry) => (
+          <div key={entry.id} data-testid={`activity-${entry.id}`}>
           <EntryCards
-            key={entry.id}
             life={life}
             entry={entry}
             disabled={disabled}
@@ -141,6 +142,7 @@ function Options({ life, hubId, gold }: { life: LifeState; hubId: string; gold: 
               else run();
             }}
           />
+          </div>
         ))}
       </div>
       {note && (

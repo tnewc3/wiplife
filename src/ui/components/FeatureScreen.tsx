@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode, type TouchEvent } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react';
 import type { SheetAction } from './ActionSheet';
 import { InfoSheet } from './InfoSheet';
 import { OverflowMenu } from './OverflowMenu';
@@ -32,6 +32,17 @@ export function FeatureScreen({ open, title, onBack, backLabel = 'Back', info, a
   const [infoOpen, setInfoOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
+  const root = useRef<HTMLDivElement>(null);
+  // Escape goes back, unless a sheet or dialog is on top (it closes first).
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      const screens = document.querySelectorAll('[data-feature-screen]');
+      if (e.key === 'Escape' && document.querySelector('[role="dialog"]') === null && screens[screens.length - 1] === root.current) onBack();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onBack]);
   if (!open) return null;
   const onTouchStart = (e: TouchEvent) => {
     const t = e.touches[0];
@@ -45,7 +56,7 @@ export function FeatureScreen({ open, title, onBack, backLabel = 'Back', info, a
     if (t && s && t.clientX - s.x >= DISTANCE && Math.abs(t.clientY - s.y) < DISTANCE) onBack();
   };
   return (
-    <div role="region" aria-label={title} data-testid={testId} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="fixed inset-0 z-40 flex justify-center bg-bg animate-[wl-slide-in_220ms_ease-out]">
+    <div ref={root} data-feature-screen="" role="region" aria-label={title} data-testid={testId} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="fixed inset-0 z-30 flex justify-center bg-bg animate-[wl-slide-in_220ms_ease-out]">
       <div className="flex h-full w-full max-w-lg flex-col md:border-x md:border-border">
         <ScreenHeader title={title} onBack={onBack} backLabel={backLabel} onInfo={info ? () => setInfoOpen(true) : undefined} onOverflow={actions && actions.length > 0 ? () => setMenuOpen(true) : undefined} />
         <main data-testid="feature-main" className="px-safe flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3 pb-[max(env(safe-area-inset-bottom),1rem)]">

@@ -34,7 +34,7 @@ export function Screen({ title, onBack, backLabel = 'Back', children, footer, ce
                 <ChevronLeft aria-hidden="true" size={28} />
               </button>
             )}
-            {title && <h1 className="font-display truncate py-3 text-xl font-semibold">{title}</h1>}
+            {title && <h1 className="font-display min-w-0 py-3 text-xl leading-tight font-semibold [overflow-wrap:anywhere]">{title}</h1>}
           </header>
         )}
         <main

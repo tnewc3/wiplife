@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 
 /** A small fact on a card: "3 h a week", "$40 a year", "Members only". 12px, on the second surface. */
-export function FactChip({ children, icon, gold = false }: { children: ReactNode; icon?: ReactNode; gold?: boolean }) {
+export function FactChip({ children, icon, gold = false, testId }: { children: ReactNode; icon?: ReactNode; gold?: boolean; testId?: string }) {
   return (
-    <span className={`inline-flex min-w-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${gold ? 'bg-gold-surface text-gold' : 'bg-surface-2 text-text'}`}>
+    <span data-testid={testId} className={`inline-flex min-w-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${gold ? 'bg-gold-surface text-gold' : 'bg-surface-2 text-text'}`}>
       {icon}
       <span className="[overflow-wrap:anywhere]">{children}</span>
     </span>

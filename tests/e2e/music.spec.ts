@@ -70,10 +70,12 @@ test('release an off-genre single with a typed title', async ({ page }) => {
   await page.getByTestId('plan-open').click();
   const sheet = page.getByRole('dialog', { name: 'Line up a project' });
   await sheet.getByTestId('project-kind-single').click();
-  await sheet.getByTestId('project-title').fill('{bad}');
-  await expect(sheet.getByTestId('project-save')).toBeDisabled();
-  await sheet.getByTestId('project-title').fill('  Night Bus   Hymn ');
-  await sheet.getByTestId('project-genre').selectOption('metal');
+  await sheet.getByTestId('project-title').click();
+  await page.getByTestId('project-title-input').fill('{bad}');
+  await expect(page.getByTestId('rename-save')).toBeDisabled();
+  await page.getByTestId('project-title-input').fill('  Night Bus   Hymn ');
+  await page.getByTestId('rename-save').click();
+  await sheet.getByTestId('project-genre-metal').click();
   await expect(sheet.getByTestId('project-off-genre')).toContainText('Outside your sound');
   await expectTouchTargets(page);
   await sheet.getByTestId('project-save').click();
@@ -96,8 +98,8 @@ test('practice: take up an instrument and practise, a session at a time', async 
   const practice = page.getByTestId('practice');
   await expect(practice.getByTestId('practice-count')).toContainText('0 of 8 practice sessions this year');
   await expect(practice.getByTestId('practise-instrument')).toBeDisabled();
-  await practice.getByTestId('instrument-select').selectOption('drums');
-  await practice.getByTestId('instrument-set').click();
+  await practice.getByTestId('instrument-line').click();
+  await page.getByTestId('instrument-drums').click();
   await expect(practice.getByTestId('practise-instrument')).toBeEnabled();
   await practice.getByTestId('practise-vocals').click();
   await expect(practice.getByTestId('practice-count')).toContainText('1 of 8 practice sessions this year');
