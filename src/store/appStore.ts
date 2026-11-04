@@ -8,6 +8,8 @@ import { finishAction, performAction, type LifeActionId, type LifeActionParams }
 import type { IdentityEditInput } from '../engine/discovery';
 import { ageBounds, checkEdit, EditRefusedError, performEdit, refusal, type AgeBounds, type EditResult } from '../engine/godmode';
 import { archiveEntry } from '../engine/archive';
+import type { PlayRecord } from '../engine/minigames/odds';
+import type { MiniGameId } from '../content/schemas';
 import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
 import { getDeathView, type DeathView } from '../engine/estate/views';
 import { spendTimeWithEveryone, type GroupTimeRow } from '../engine/interactions/group';
@@ -67,6 +69,12 @@ export type TabId = 'home' | 'work' | 'assets' | 'people' | 'activities';
  * with events) the recap as the last card. UI state only; the events
  * themselves are in the saved life.
  */
+/** G1: what a mini-game is being played for. */
+export interface MiniGameRequest {
+  game: MiniGameId;
+  source: { kind: 'event'; instanceId: string; choiceId: string } | { kind: 'activity'; params: LifeActionParams & { pastimeId: string } };
+}
+
 export interface EventSheetState {
   index: number;
   /** Set once the year has ended: the sheet shows the recap. */
@@ -93,6 +101,8 @@ export interface AppState {
   aging: boolean;
   /** Open while the year's events (and then its recap) are showing. */
   eventSheet: EventSheetState | null;
+  /** G1: a mini-game waiting to be played (or handed to Auto) for an event choice or an activity. */
+  miniGame: MiniGameRequest | null;
   /** C2: the short card after a practice, training session, rehearsal, study session or gym visit (null when none is showing). */
   training: { kind: 'practice' | 'rehearsal' | 'training' | 'study' | 'gym'; lines: TrainingLine[] } | null;
   /** The archive entry of the life that just ended, for the Death screen. */
@@ -163,7 +173,8 @@ export interface AppState {
    * Resolves one pending event with the player's choice and autosaves. The
    * card then shows the outcome. Ignored while the engine is working.
    */
-  chooseEvent: (instanceId: string, choiceId: string) => Promise<void>;
+  /** G1: `play` is a mini-game's result; without it Auto plays. */
+  chooseEvent: (instanceId: string, choiceId: string, play?: PlayRecord) => Promise<void>;
   /**
    * Moves the event sheet on: to the next event, then (once every event is
    * resolved) ends the year and shows the recap, then closes the sheet. A
@@ -256,6 +267,10 @@ export interface AppState {
   closeActivity: () => void;
   /** C2: dismisses the training card (a tap skips it). */
   closeTraining: () => void;
+  /** G1: open a mini-game; `finishMiniGame` hands its result (none: Auto plays) to the event or activity it was for. */
+  openMiniGame: (request: MiniGameRequest) => void;
+  closeMiniGame: () => void;
+  finishMiniGame: (play?: PlayRecord) => Promise<void>;
   /** E5: opens the Interact sheet for a pet. */
   openPetInteractions: (petId: string) => void;
   /** E5: spends time with a pet (between years) and autosaves; the outcome card opens like any interaction's. */
@@ -534,6 +549,7 @@ export function createAppStore({
         aging: false,
         eventSheet: null,
         training: null,
+        miniGame: null,
         lastDeath: null,
         deadLife: null,
         deathView: null,
@@ -786,11 +802,11 @@ export function createAppStore({
           });
         },
 
-        chooseEvent: (instanceId, choiceId) =>
+        chooseEvent: (instanceId, choiceId, play) =>
           busy(async () => {
             const life = get().life;
             if (!life || (life.phase !== 'events' && life.phase !== 'action')) return;
-            const next = resolveChoice(life, instanceId, choiceId, bundle);
+            const next = resolveChoice(life, instanceId, choiceId, bundle, play);
             await commit(next);
             // An event without choices and nothing more to say moves straight on.
             const resolved = next.pending.find((p) => p.instanceId === instanceId);
@@ -899,6 +915,15 @@ export function createAppStore({
             if (s.life && s.life.phase === 'yearStart' && s.life.housing.kind !== 'incarcerated' || activityId === 'doctor') s.activitySheet = activityId;
           }),
 
+        openMiniGame: (request) => set((s) => void (s.miniGame = request)),
+        closeMiniGame: () => set((s) => void (s.miniGame = null)),
+        finishMiniGame: async (play) => {
+          const request = get().miniGame;
+          if (!request) return;
+          set((s) => void (s.miniGame = null));
+          if (request.source.kind === 'event') await get().chooseEvent(request.source.instanceId, request.source.choiceId, play);
+          else await get().takeLifeAction('do_activity', { ...request.source.params, ...(play ? { play } : {}) });
+        },
         closeTraining: () =>
           set((s) => {
             s.training = null;

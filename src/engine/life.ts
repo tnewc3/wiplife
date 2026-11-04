@@ -46,7 +46,9 @@ import { chance, cloneRng, createRng, pick } from './rng';
 import { addHistory, writeFromGroup } from './systems/history';
 import { characterDeathChance, pickCause } from './systems/mortality';
 import { deadlyConditions } from './health';
-import type { Character, Id, LifePhase, LifeState, Look } from './types';
+import type { Character, Id, InputRecord, LifePhase, LifeState, Look } from './types';
+import { chanceAfter, parsePlay, type PlayRecord } from './minigames/odds';
+import { choiceGame, settlePlay } from './minigames/play';
 import { ensureStructure } from './web/structure';
 import { emptyWeb } from './web/ties';
 import { emptyPossessions } from './possessions/query';
@@ -410,7 +412,7 @@ export const SURPRISE_CHOICE = 'surprise';
  * the phase stays until finishAction. Throws PhaseError outside 'events' and
  * 'action', and InvalidInputError for an unknown, resolved or hidden choice.
  */
-export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, content: ContentBundle): LifeState {
+export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, content: ContentBundle, playInput?: unknown): LifeState {
   if (state.phase !== 'events' && state.phase !== 'action') {
     throw new PhaseError(`Can't choose in the "${state.phase}" phase (expected "events" or "action").`);
   }
@@ -431,9 +433,21 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
     throw new InvalidInputError([{ path: 'choice', message: `Event "${instance.eventId}" has no choices; use "${CONTINUE_CHOICE}".` }]);
   }
 
+  // G1: a mini-game's result comes with the choice (a played game, as the log kept it); with none, Auto plays it.
+  let play: PlayRecord | undefined;
+  if (playInput !== undefined) {
+    const parsed = parsePlay(playInput);
+    if (!parsed) throw new InvalidInputError([{ path: 'play', message: 'The mini-game result is not valid.' }]);
+    if (choiceId !== SURPRISE_CHOICE && choiceGame(state, choice, instance.cast, content) !== parsed.game) {
+      throw new InvalidInputError([{ path: 'play', message: `"${choiceId}" is not played as ${parsed.game}.` }]);
+    }
+    play = parsed;
+  }
+
   return produce(state, (draft) => {
     useFastRng(draft, state);
-    draft.inputLog.push({ year: draft.currentYear, kind: 'choice', payload: { instanceId, choiceId } });
+    const logged: InputRecord = { year: draft.currentYear, kind: 'choice', payload: { instanceId, choiceId } };
+    draft.inputLog.push(logged);
     const target = draft.pending.find((p) => p.instanceId === instanceId)!;
     if (choiceId === SURPRISE_CHOICE) {
       const visible = def!.choices!.filter((c) => evaluate(c.visibleIf, draft as LifeState, { cast: instance.cast, roles: 'strict', content }));
@@ -446,7 +460,18 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
       let outcome: Outcome | undefined = def.autoOutcome;
       if (choice?.outcome) outcome = choice.outcome;
       else if (choice?.check) {
-        outcome = chance(draft.rng, successChance(draft, choice.check, content, instance.cast)) ? choice.check.success : choice.check.failure;
+        let odds = successChance(draft, choice.check, content, instance.cast);
+        // G1: a choice played as a mini-game: how well you played (or Auto's draw from your stats) moves the same odds.
+        const game = choiceGame(draft as LifeState, choice, instance.cast, content);
+        if (game) {
+          if (play !== undefined && play.game !== game) throw new InvalidInputError([{ path: 'play', message: `"${choice.id}" is not played as ${play.game}.` }]);
+          const settled = settlePlay(draft as LifeState, game, play, content);
+          odds = chanceAfter(odds, settled.performance, content);
+          logged.payload.play = settled.record;
+        } else if (play !== undefined) {
+          throw new InvalidInputError([{ path: 'play', message: `"${choice.id}" has no mini-game.` }]);
+        }
+        outcome = chance(draft.rng, odds) ? choice.check.success : choice.check.failure;
       }
       if (outcome) {
         const savings = draft.finances.savings;

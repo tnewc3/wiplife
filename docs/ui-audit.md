@@ -110,3 +110,11 @@ Actions that are not leisure activities (jobs, school, money, housing, family, t
 | Territory | n/a | One row per neighborhood (holder, income word, attention word, attention bar); three dots on a neighborhood you do not hold order an attack. |
 | Rivals | n/a | One row per organization (kind, status, attitude word, strength bar); three dots offer a truce or an alliance, or make a cartel your supplier. |
 | God mode → Career | Sports, music, fame | Adds **Crime** (rank, standing, heat, dirty money, your cut, each member's skill and loyalty, end a war). |
+
+## G1: mini-games
+
+| Screen | Before | Now |
+|---|---|---|
+| Event card | A choice with a chance check resolved at once | A choice that carries a mini-game (a sports big moment, a heist, a run) shows a second line, "A quick game. Play it, or let Auto play.", and opens the mini-game sheet. Choices without a game are unchanged. |
+| Activities → Casino (blackjack, slots), Crime (burglary) | One button per stake or option that resolved at once | The same buttons, with the same line under the blurb; they open the mini-game sheet, and the result comes back with the same stake, quality and companion choices. The receipt is unchanged. |
+| Mini-game sheet (new) | n/a | A bottom sheet over the screen (one level, not a menu): title, one line of how to play, your skill as a bar with its percentage, the game, then how you did (a word, the accuracy and what it does to the odds) and **Continue**. **Auto** and **Not now** sit at the bottom from the first moment (44px or taller). With reduced motion the game is slower and Auto is the primary button. |

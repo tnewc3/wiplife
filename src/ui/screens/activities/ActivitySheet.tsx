@@ -4,6 +4,7 @@ import { content } from '../../../content';
 import type { ActivityKind, PastimeQuality, PastimeStake } from '../../../content/schemas';
 import { getActivitiesView, getActivityTabView, type ActivityEntryView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
+import type { LifeActionParams } from '../../../engine/actions';
 import { useAppStore } from '../../../store/appStore';
 import { Sheet } from '../../components/Sheet';
 import { ACTIVITY_TAB_LABELS, HUB_BLOCK_WORDS, money, PASTIME_CATEGORY_NOTES } from '../../labels';
@@ -62,6 +63,7 @@ function Options({ life, hubId }: { life: LifeState; hubId: string }) {
   const all = getActivitiesView(life, content);
   const busy = useAppStore((s) => s.aging);
   const act = useAppStore((s) => s.takeLifeAction);
+  const openMiniGame = useAppStore((s) => s.openMiniGame);
   const [who, setWho] = useState<Record<string, string | null>>({});
   const [picks, setPicks] = useState<Record<string, Picks>>({});
   const latestRef = useRef<HTMLDivElement | null>(null);
@@ -80,16 +82,19 @@ function Options({ life, hubId }: { life: LifeState; hubId: string }) {
   const choose = (entry: ActivityEntryView, extra: { quality?: PastimeQuality; stake?: PastimeStake } = {}) => {
     const companionId = who[entry.id] ?? (entry.companion === 'required' ? entry.companions[0]?.id : undefined);
     const p = picks[entry.id] ?? {};
-    void act('do_activity', {
+    const params: LifeActionParams & { pastimeId: string } = {
       pastimeId: entry.id,
       ...(companionId ? { companionId } : {}),
       ...(extra.quality ? { quality: extra.quality } : {}),
       ...(extra.stake ? { stake: extra.stake } : {}),
-      ...(entry.mechanic === 'gamble' && p.chase ? { chase: true } : {}),
+      ...(entry.mechanic === 'gamble' && p.chase ? { chase: true as const } : {}),
       ...(entry.routes ? { route: p.route ?? 'settle' } : {}),
       ...(entry.look ? { look: p.look ?? entry.look.options[0] } : {}),
       ...(entry.name ? nameParams(entry, p) : {}),
-    });
+    };
+    // G1: an activity with a mini-game opens it first; its result (or Auto) comes back with the same choices.
+    if (entry.minigame) openMiniGame({ game: entry.minigame, source: { kind: 'activity', params } });
+    else void act('do_activity', params);
   };
 
   return (

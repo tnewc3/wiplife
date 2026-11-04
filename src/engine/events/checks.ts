@@ -20,7 +20,7 @@ export function scoreOf(state: LifeState, key: EffectStatKey): number {
 }
 
 /** A check stat's value: your own, how a cast person feels about you (50 when nobody is cast), or your job performance (50 without a job). */
-function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>, content: ContentBundle): number {
+export function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>, content: ContentBundle): number {
   if ('family' in stat) {
     const id = cast[stat.role] ?? '';
     return stat.family === 'custody' ? custodyCase(state, id, content) : Math.round(100 * tryChance(state, id, stat.family === 'fertilityPlanned', content));

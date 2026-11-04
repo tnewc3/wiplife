@@ -76,3 +76,13 @@ icons:
   syringe: { fluent: Syringe }
   microphone: { fluent: Microphone }
   drum: { fluent: Drum }
+  soccer_ball: { fluent: Soccer ball }
+  baseball: { fluent: Baseball }
+  key: { fluent: Key }
+  person_running: { fluent: Person running, variant: Default }
+  slot_machine: { fluent: Slot machine }
+  cherries: { fluent: Cherries }
+  bell: { fluent: Bell }
+  lemon: { fluent: Lemon }
+  spade_suit: { fluent: Spade suit }
+  goal_net: { fluent: Goal net }

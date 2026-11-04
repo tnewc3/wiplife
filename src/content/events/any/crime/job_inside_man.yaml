@@ -21,6 +21,8 @@ cast:
 choices:
   - id: lead_it
     label: Run the plan yourself
+    minigame:
+      - { game: lockpick }
     check:
       base: 48
       stats: [{ key: smarts, weight: 0.35 }, { key: confidence, weight: 0.2 }, { crime: standing, weight: 0.2 }, { crime: heat, weight: -0.25 }]

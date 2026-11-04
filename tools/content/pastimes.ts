@@ -101,6 +101,8 @@ export function checkPastimes(bundle: ContentBundle, fileOf: (typeKey: Collectio
       const game = def.game !== undefined ? risk.games[def.game] : undefined;
       if (!game) err(`unknown game "${def.game}" (balance/risk.yaml games)`);
       else {
+        // G1: a casino mini-game plays the game it is named for.
+        if ((def.minigame === 'blackjack' || def.minigame === 'slots') && def.game !== def.minigame) err(`the ${def.minigame} mini-game goes with game: ${def.minigame}`);
         if (houseEdge(game) < game.minEdge) errors.push({ file: RISK_BALANCE, message: `games.${def.game}: the house keeps ${(houseEdge(game) * 100).toFixed(1)}% on average; it must keep at least ${(game.minEdge * 100).toFixed(1)}%` });
         for (const o of game.outcomes) if (def.tiers[o.tier] === undefined) err(`tiers.${o.tier} is needed: the game ${def.game} pays out as ${o.tier}`);
         for (const t of OUTCOME_TIERS) if (def.tiers[t] !== undefined && !game.outcomes.some((o) => o.tier === t)) err(`tiers.${t} is never reached: the game ${def.game} does not pay out as ${t}`);

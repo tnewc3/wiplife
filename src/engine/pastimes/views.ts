@@ -26,6 +26,8 @@ import {
   type PastimeRoute,
   type PastimeStake,
 } from '../../content/schemas';
+import { type MiniGameId } from '../../content/schemas';
+
 import { scaledAmount } from '../country';
 import { netWorth } from '../finance';
 import type { MoneyChange, LifeState, PastimeReceipt } from '../types';
@@ -61,6 +63,8 @@ export interface ActivityEntryView {
   hobby: { skill: number; level: number } | null;
   /** Batch 2b: how it is worked out, and what the screen needs for it. */
   mechanic: PastimeMechanic;
+  /** G1: the mini-game you can play for it. */
+  minigame: MiniGameId | null;
   /** Gambling: the stakes with their prices; and chasing a loss (the loss, and what betting it back costs). */
   stakes: { stake: PastimeStake; price: number; block: PastimeBlock | null; chasePrice: number; chaseBlock: PastimeBlock | null }[] | null;
   chase: { available: boolean; loss: number } | null;
@@ -138,6 +142,7 @@ function entryView(state: LifeState, defId: string, content: ContentBundle): Act
     hobby: def.hobby ? { skill: hobbySkill(state, def.id, content), level: hobbyLevel(hobbySkill(state, def.id, content), content) } : null,
     buys: def.buys !== undefined ? (content.valuables[def.buys]?.name ?? null) : null,
     mechanic: def.mechanic,
+    minigame: def.minigame ?? null,
     stakes: def.mechanic === 'gamble' ? PASTIME_STAKES.map((stake) => ({ stake, price: pastimePrice(state, def, { stake }, content), block: pastimeBlock(state, def, { stake }, content), chasePrice: pastimePrice(state, def, { stake, chase: true }, content), chaseBlock: pastimeBlock(state, def, { stake, chase: true }, content) })) : null,
     chase: def.mechanic === 'gamble' ? chaseView(state, content) : null,
     routes: def.mechanic === 'lawsuit' ? PASTIME_ROUTES.map((route) => ({ route, block: pastimeBlock(state, def, { ...sampled, route }, content) })) : null,

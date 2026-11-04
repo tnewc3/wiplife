@@ -75,3 +75,5 @@ ones, so the sports tests can play a short run through the event sheet.
 Sports (Batch 5): four tryout scrimmages (`tryout_youth_trials`, `tryout_school_gym`, `tryout_college_walk_on` and `tryout_pro_camp`, copies of the real ones) so the sports tests can try out for a chosen team and for a pro camp through the event sheet. The other events the sports step queues are not in this pack.
 
 Social media (Batch 8): balance/social.yaml here makes every post one somebody might see and every such post found (by the boss, a partner, an ex or family), and events/any/socialfound/social_boss_saw_post.yaml is the one card a post that reaches the boss answers with. The platforms, niches and brands are the real ones.
+
+G1 (mini-games): `sports/big_game_basketball|soccer|baseball` and `crimelaw/arrest_caught_in_the_act` are copies of the real events (their `take_it` and `run` choices carry a `minigame`), and `playoffs_opening_series` offers the game of the sport. The mini-game tests (`tests/e2e/g1.spec.ts`) put them in the event sheet.

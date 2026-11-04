@@ -11,6 +11,7 @@ companion: none
 cost: casino_blackjack
 yearlyLimit: 6
 hub: casino
+minigame: blackjack
 tiers:
   great:
     text:
