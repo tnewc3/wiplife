@@ -216,7 +216,7 @@ export const pastimeSchema = baseDefSchema
       for (const t of OUTCOME_TIERS) if (def.tiers[t]?.settle !== undefined) issue(`tiers.${t}.settle is for lawsuits`);
     }
     if (def.minigame === 'blackjack' || def.minigame === 'slots') {
-      if (m !== 'gamble' || def.game !== def.minigame) issue(`a ${def.minigame} mini-game goes with mechanic: gamble and game: ${def.minigame}`);
+      if (m !== 'gamble') issue(`a ${def.minigame} mini-game goes with mechanic: gamble (and game: ${def.minigame}, checked by the content build)`);
     } else if (def.minigame !== undefined && (m !== 'roll' || def.category !== 'crime')) issue('this mini-game goes with a crime activity (mechanic: roll)');
     if (m === 'gamble' && def.legalAge !== 'gambling') issue('gambling follows the legal gambling age: legalAge: gambling');
     if (def.companion !== 'none' && !def.inPerson && def.mechanic !== 'lawsuit') issue('a companion needs inPerson: true (a lawsuit may be against someone far away)');
