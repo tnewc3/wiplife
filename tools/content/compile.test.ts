@@ -1462,10 +1462,10 @@ describe('the teen years (T1)', () => {
 describe('crime careers (E6a)', () => {
   const read = (file: string) => readFile(path.join(dir, file), 'utf8');
 
-  it('accepts the real content: thirteen crews, six businesses, the crime events, and no warnings', { timeout: 90_000 }, async () => {
+  it('accepts the real content: seventeen crews (four of them youth crews), six businesses, the crime events, and no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
-    expect(Object.keys(result.bundle.crews)).toHaveLength(13);
+    expect(Object.keys(result.bundle.crews)).toHaveLength(17);
     expect(Object.keys(result.bundle.fronts)).toHaveLength(6);
     const categories = ['crimeoffers', 'crime', 'crimeaway', 'crimehome', 'crimelaw', 'crimepast'];
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && categories.includes(e.category));

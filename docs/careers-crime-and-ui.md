@@ -41,7 +41,7 @@ A standalone plan for five stages, kept separate from the other plan docs. Same 
 
 - **Story and consequences only, never real-world instructions.** No recipes, methods, dosages, sourcing techniques or ways to avoid police. Growing and making drugs are business abstractions (capacity, quality, risk, raids), not processes.
 - **Real drug names are fine,** and effects are described at the level of how they feel and what they cost the character, not how to use them.
-- **Organization membership, dealing and making drugs are adults-only (18+),** matching the existing crime-career rule. Teens can still get into trouble through existing events, and can be approached by gangs in events, but can't join.
+- **Dealing, making drugs and the adult organizations (mafia families, cartels, motorcycle clubs, adult street gangs) are adults-only (18+),** matching the existing crime-career rule. **Decision changed after O1 shipped (the project owner's call):** teens from 14 can join a street gang's kids' set (a *youth crew*) or found one of their own, like real life. Youth crews have no dirty money, no yearly jobs or income, no killing, and no adult drug trade; the juvenile legal system, parents and school answer. At 18 the player is asked, in an event, whether to move up to an adult crew or walk away, and it never goes on silently. Nobody under 14 can join.
 - **Overdose and violent death are possible, rare, and never come out of nowhere.** They follow the C1 consistency rules and the crew-death rule: danger must be readable first.
 - **Addiction is written with weight,** with recovery as possible as decline.
 - **All organization, gang, cartel, club and business names are fictional.**

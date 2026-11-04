@@ -18,9 +18,11 @@ import { crewDef, crewName, initiationRank, inCrew, liveMembers, rankTitle, topR
 import { ensureCity, ensureHolding, ensureRoster } from './orgs';
 
 /** Crews that work in a city (active ones only), of one kind when given (O1). */
-export function crewsIn(content: ContentBundle, cityId: Id, kind?: OrgKind): CrewDef[] {
+export function crewsIn(content: ContentBundle, cityId: Id, kind?: OrgKind, age?: number): CrewDef[] {
   return Object.values(content.crews)
     .filter((c) => !c.retired && c.cities.includes(cityId) && (kind === undefined || c.kind === kind))
+    // (O1 follow-up: a teen can only be in a youth crew, and an adult only in an adult one.)
+    .filter((c) => age === undefined || (age >= content.balance.relationships.adultAge ? c.youth !== true : c.youth === true))
     .sort((a, b) => (a.id < b.id ? -1 : 1));
 }
 
@@ -28,10 +30,10 @@ export function crewsIn(content: ContentBundle, cityId: Id, kind?: OrgKind): Cre
 export type JoinBlock = 'age' | 'inCrew' | 'away' | 'none';
 
 export function joinBlock(state: LifeState, content: ContentBundle, kind?: OrgKind): JoinBlock | null {
-  if (state.character.age < content.balance.relationships.adultAge) return 'age';
+  if (state.character.age < content.balance.orgs.youth.minAge) return 'age';
   if (inCrew(state)) return 'inCrew';
   if (isIncarcerated(state)) return 'away';
-  if (crewsIn(content, state.character.cityId, kind).length === 0) return 'none';
+  if (crewsIn(content, state.character.cityId, kind, state.character.age).length === 0) return 'none';
   return null;
 }
 
@@ -47,7 +49,8 @@ export function shapePerson(person: Person, def: CrewDef, tag: string): void {
 /** Makes new friends who are in the crew, tied to one another (E4) and to the rest. Returns their ids. */
 function makeMembers(state: LifeState, def: CrewDef, count: number, content: ContentBundle): Id[] {
   const entry = content.balance.crime.entry;
-  const spec: CastSpec = { kind: 'friend', presence: 'city', createIfMissing: true, age: { min: entry.memberAge.min, max: entry.memberAge.max } };
+  const ages = def.youth ? content.balance.orgs.youth.memberAge : entry.memberAge;
+  const spec: CastSpec = { kind: 'friend', presence: 'city', createIfMissing: true, age: { min: ages.min, max: ages.max } };
   const made: Id[] = [];
   for (let i = 0; i < count; i++) {
     const id = createPerson(state, spec, state.rng, content);
@@ -111,9 +114,9 @@ export interface Start {
  * (and whoever brought you, if given), and a rival crew. Returns false when
  * you may not (see `joinBlock`).
  */
-export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id, start?: Start, kind?: OrgKind): boolean {
+export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id, start?: Start, kind?: OrgKind, lead = false): boolean {
   if (joinBlock(state, content, kind) !== null) return false;
-  const crews = crewsIn(content, state.character.cityId, kind);
+  const crews = crewsIn(content, state.character.cityId, kind, state.character.age);
   // A crew you were in before takes you back first, if it works here.
   const before = [...state.crime.past].reverse().find((p) => crews.some((c) => c.id === p.crewId));
   const def = (before && crews.find((c) => c.id === before.crewId)) || pick(state.rng, crews);
@@ -132,7 +135,8 @@ export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id,
     ...(rivals.length > 0 ? { rival: pick(state.rng, rivals) } : {}),
   };
   const again = start ?? (before ? rejoinStart(before, content) : undefined);
-  crime.rank = clampInt(again?.rank ?? 1, 1, top - 1);
+  // (Founding a crew makes you its leader; anyone else starts below the top.)
+  crime.rank = lead ? top : clampInt(again?.rank ?? 1, 1, top - 1);
   crime.peak = crime.rank;
   crime.crew.initiated = crime.rank >= initiationRank(content, def.id);
   crime.rankSince = state.currentYear;
@@ -141,9 +145,9 @@ export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id,
   crime.awayYears = 0;
   crime.rivalry = entry.rivalry;
   crime.heat = Math.max(crime.heat, entry.heat);
-  const adultAge = content.balance.relationships.adultAge;
+  const bringerAge = def.youth ? content.balance.orgs.youth.memberAge.min : content.balance.relationships.adultAge;
   const bringer = brought === undefined ? undefined : state.people[brought];
-  if (brought !== undefined && state.relationships[brought] && bringer?.alive && state.currentYear - bringer.birthYear >= adultAge) {
+  if (brought !== undefined && state.relationships[brought] && bringer?.alive && state.currentYear - bringer.birthYear >= bringerAge) {
     crime.crew.members.push(brought);
     shapePerson(state.people[brought]!, def, `crew:${def.id}`);
   }
@@ -181,7 +185,7 @@ export function transferStart(state: LifeState, content: ContentBundle): Start {
  */
 export function transferCrew(state: LifeState, content: ContentBundle): boolean {
   const crew = state.crime.crew;
-  if (!crew?.away || crewsIn(content, state.character.cityId).length === 0) return false;
+  if (!crew?.away || crewsIn(content, state.character.cityId, undefined, state.character.age).length === 0) return false;
   const start = transferStart(state, content);
   leaveCrew(state, 'moved', content);
   return joinCrew(state, content, undefined, start);

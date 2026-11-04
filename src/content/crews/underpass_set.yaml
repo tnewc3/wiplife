@@ -1,0 +1,9 @@
+id: underpass_set
+name: the Underpass Set
+kind: street_gang
+youth: true
+blurb: A set that meets under the bridge after school. The older kids call them small. They are working on that.
+cities: [chicago, guadalajara, houston, london, los_angeles, manchester, mexico_city, monterrey, montreal, nyc, small_town, small_town_ca, small_town_mx, small_town_uk, toronto, vancouver]
+ranks: [lookout, runner, shot-caller, leader]
+rivals: [back_lot_kids, bus_loop_crew, stairwell_boys]
+traits: { riskTaking: 10, sociability: 8, discipline: -6 }

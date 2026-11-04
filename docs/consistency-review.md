@@ -385,3 +385,27 @@ The 32 O1 events (`events/any/crimeoffers` 6, `events/any/prison` 1, `events/any
 | `supply_shipment_short`, `supply_gang_wants_credit` | crime | A cartel leader's supply events (D1): the shipment, the credit; each pays or loses dirty money. |
 
 Changes to existing content for O1: `promotion_offered` now requires `crime: initiating: false` (a step up to an initiation rank is an initiation event), the five E6a crews have a `kind` (Cinder Row Outfit is a street gang with four ranks; Marrow Street, Velvet Hand and Larkspur are mafia families; Harrowgate Freight is a cartel), the Marrow Street Crew is now "the Marrow Street Family", and `crew_cut_*` events are queued only for the second-highest rank (the leader's money comes from the organization's year).
+
+## O1 follow-up — youth crews
+
+The 11 youth events (`events/teen/youthoffers` 3, `events/teen/youthcrime` 6, `events/any/crime` 2 for the day a member turns 18) were written against AGENTS.md and the O1 writing guidance, after the project owner changed the adults-only rule for gangs to allow teens from 14 in youth crews. They were reviewed by hand and by the content build (`tools/content/crime.ts`, the category contracts `youthoffers` and `youthcrime`, and the C1 warnings). The build printed no warnings.
+
+| Rule | How the youth events meet it |
+|---|---|
+| Story and consequences only | No event says how to do anything. The jobs are a lookout, marking a wall and a fight after school, told as what happened and what it cost; no method, tool or way to avoid being caught appears. The build's instruction-word list is applied to every youth event. |
+| Consequences | Every youth job has a way to say no that costs standing, a failure branch with heat, stress or an injury, and answers from the people around you: a parent who finds out (`youth_parent_finds_out`), the school (`youth_school_calls`), and a way out (`youth_walk_away`). Nothing glamorises it. |
+| No sexual or romantic content | None. The audience is teens; nobody in these events is romantic or sexual in any way. |
+| Violence | A fight after school is the worst thing in these events: bruises, a split lip, a call to the front office. Nothing is graphic, and the build rejects a `death` effect or `dirtyMoney` in any youth event. The yearly step never kills anyone in a youth crew, and the leader of a youth crew has no jobs, income or decisions. |
+| Age | Offers never come before 14 (the `youthoffers` contract is age 14 to 17, and the engine refuses a join below 14). The youth crews' members are 14 to 19. A teen can only join a youth crew; every adult crew, dirty money, dealing and laundering stay for 18 and over (invariants and tests). At 18 `youth_grown_up` and `youth_grown_up_moved_on` ask what they will be: moving to an adult street gang at the bottom, or leaving; it never goes on silently (if no event fits, the crew drifts away). |
+| Evidence | `{crew}` needs `crime: member`; the parent, the school and the walk-away events need `crime: youth`; the walk-away event needs a year in the crew; the school call needs heat. |
+| Time | No fixed gaps in follow-ups. |
+| Money | No youth event moves money. A kid in a youth crew gets no pay; its rewards are respect and trouble. |
+| Household | `youth_parent_finds_out` casts a parent who lives with you (`presence: household`). |
+| Presence | Offers cast a classmate, an acquaintance or a friend in your city; the crew's people are in your city. |
+
+| Event | Checked for |
+|---|---|
+| `youth_offer_after_school`, `youth_offer_older_kids`, `youth_start_a_crew` | Teens 14 to 17 (the older-kids offer and the founding from 15), not in a crew, a crew works here; a clear way to say no; founding makes you the leader of a kids' crew, with everything that comes with it. |
+| `youth_job_lookout`, `youth_job_tag_the_wall`, `youth_job_after_school_fight` | Jobs for youth crews only (`crime: youth`), petty size, a way to decline that costs standing, a failure with a consequence. |
+| `youth_parent_finds_out`, `youth_school_calls`, `youth_walk_away` | Honest, lying or storming out; hearing the school out or saying nothing; leaving (a check you can fail) or staying. |
+| `youth_grown_up`, `youth_grown_up_moved_on` | At 18; move on to an adult street gang at the bottom, or leave. |

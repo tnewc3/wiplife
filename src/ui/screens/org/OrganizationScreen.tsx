@@ -62,6 +62,7 @@ export function OrganizationScreen({ life, open, onClose }: { life: LifeState; o
       <Sheet open={open} title={`${ORG_LABELS.title} · ${cap(view.name)}`} onClose={onClose}>
         <div data-testid="org-screen">
           {!between && <p className="mt-1 text-sm text-muted">{ORG_LABELS.waits}</p>}
+          {between && view.block === 'age' && <p className="mt-1 text-sm text-muted">{ORG_LABELS.blocks.age}</p>}
           {between && !view.leader && <p className="mt-1 text-sm text-muted">{ORG_LABELS.notLeader}</p>}
           <SegmentedTabs tabs={TABS} value={tab} onChange={setTab} label={ORG_LABELS.title} />
           {tab === 'overview' && <Overview life={life} view={view} setPanel={setPanel} />}

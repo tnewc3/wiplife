@@ -1,0 +1,9 @@
+id: back_lot_kids
+name: the Back Lot Kids
+kind: street_gang
+youth: true
+blurb: Kids from three streets who found out that being together is safer than being alone. Mostly they hang around, and mostly it is a game, until it isn't.
+cities: [chicago, guadalajara, houston, london, los_angeles, manchester, mexico_city, monterrey, montreal, nyc, small_town, small_town_ca, small_town_mx, small_town_uk, toronto, vancouver]
+ranks: [lookout, runner, shot-caller, leader]
+rivals: [underpass_set, bus_loop_crew, stairwell_boys]
+traits: { riskTaking: 10, sociability: 8, discipline: -6 }

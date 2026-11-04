@@ -1,0 +1,53 @@
+id: youth_job_lookout
+title: Watching the street
+text: >-
+  {member.name} wants you at the end of the block this evening, doing nothing
+  and watching everything. If someone you do not know turns the corner, you
+  are to whistle once. It is the easiest job {crew} has. It is also the one
+  nobody else wants.
+tone: dark
+category: youthcrime
+rarity: common
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: true } }
+    - { crime: { youth: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: watch
+    label: Take the corner
+    check:
+      base: 70
+      stats: [{ key: discipline, weight: 0.25 }, { key: luck, weight: 0.2 }, { crime: heat, weight: -0.25 }]
+      success:
+        text: >-
+          Nothing happens, which is the point. {member.name} claps you on the
+          back, and the others start to learn your name.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: relationship, role: member, trust: 3 }
+      failure:
+        text: >-
+          A patrol car idles at the corner, and your whistle comes late. Nobody
+          is caught, but everybody has an opinion about it, and you spend the
+          night sure someone saw your face.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 5 }
+          - { type: crime, action: standing, delta: -3 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: bail
+    label: Say you have homework
+    outcome:
+      text: >-
+        {member.name} says that is fine in a voice that says it is not. Someone
+        else takes the corner.
+      effects:
+        - { type: crime, action: standing, delta: -4 }

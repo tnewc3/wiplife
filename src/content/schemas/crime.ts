@@ -44,6 +44,8 @@ const traitKey = z.enum(TRAIT_KEYS);
 export const crewSchema = baseDefSchema.extend({
   /** O1: which kind of organization it is (src/content/orgKinds). A street gang has four ranks; the others have five. */
   kind: orgKindSchema,
+  /** O1 follow-up: a youth crew (a street gang's kids' set): teens from the youth age can join one, adults cannot; it has no dirty money and no killing. Always a street gang. */
+  youth: z.boolean().optional(),
   /** As it reads in a sentence ("the Cinder Row Outfit"). */
   name: z.string().trim().min(2).max(40),
   blurb: z.string().trim().min(10).max(200),
@@ -55,7 +57,7 @@ export const crewSchema = baseDefSchema.extend({
   rivals: z.array(idSchema).min(1),
   /** The personality its members lean toward (added to each member's traits, from 50). */
   traits: z.partialRecord(traitKey, z.int().min(-30).max(30)),
-}).refine((c) => c.ranks.length === KIND_RANKS[c.kind], 'ranks: a street gang has four ranks, every other kind five');
+}).refine((c) => c.ranks.length === KIND_RANKS[c.kind], 'ranks: a street gang has four ranks, every other kind five').refine((c) => c.youth !== true || c.kind === 'street_gang', 'a youth crew is a street gang');
 export type CrewDef = z.infer<typeof crewSchema>;
 
 /**
@@ -247,7 +249,7 @@ export const crimeBalanceSchema = z.strictObject({
 export type CrimeBalance = z.infer<typeof crimeBalanceSchema>;
 
 /** The events the crime step queues (registries/crime.yaml). */
-export const CRIME_TRIGGERS = ['initiation', 'contest', 'war', 'truce', 'betrayal', 'discipline', 'supply', 'promotion', 'pushedOut', 'investigation', 'arrest', 'rival', 'informant', 'raid', 'theft', 'laundering', 'past', 'cut', 'away', 'awayCut', 'back', 'shark'] as const;
+export const CRIME_TRIGGERS = ['grown', 'initiation', 'contest', 'war', 'truce', 'betrayal', 'discipline', 'supply', 'promotion', 'pushedOut', 'investigation', 'arrest', 'rival', 'informant', 'raid', 'theft', 'laundering', 'past', 'cut', 'away', 'awayCut', 'back', 'shark'] as const;
 export type CrimeTrigger = (typeof CRIME_TRIGGERS)[number];
 
 export const crimeRegistrySchema = z.strictObject({

@@ -1,0 +1,62 @@
+id: youth_parent_finds_out
+title: The kitchen light is on
+text: >-
+  It is late, and {parent.name} is sitting at the kitchen table with the light on.
+  Somebody has said something, or something has been seen, and the look on
+  {parent.their} face is one you have not seen before. {parent.They}
+  {parent:wants|want} to know where you have been spending your time and who
+  with.
+tone: serious
+category: youthcrime
+rarity: common
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: true } }
+    - { crime: { youth: true } }
+weight: { base: 6 }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: tell_the_truth
+    label: Tell {parent.them} the truth
+    outcome:
+      text: >-
+        It is the hardest conversation you have had, and {parent.name} listens
+        through it with a face that gives nothing away. Nothing is solved, but
+        something between you is honest for the first time in a while.
+      effects:
+        - { type: relationship, role: parent, trust: 6, affection: 2 }
+        - { type: crime, action: standing, delta: -3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: lie
+    label: Tell {parent.them} it is nothing
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: >-
+          {parent.name} wants to believe you, and does. It is a small win that
+          does not feel like one.
+        effects:
+          - { type: relationship, role: parent, trust: -2 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          {parent.name} is not fooled, and what hurts is that {parent.they}
+          {parent:doesn't|don't} say so. The silence at dinner lasts days.
+        effects:
+          - { type: relationship, role: parent, trust: -8, affection: -4 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: storm_out
+    label: Walk out
+    outcome:
+      text: >-
+        You slam the door, and in the quiet after you realise you have nowhere
+        to go but the stairwell. {parent.name} does not follow.
+      effects:
+        - { type: relationship, role: parent, trust: -5, affection: -5 }
+        - { type: stat, key: stress, delta: 4 }

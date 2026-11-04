@@ -1,0 +1,51 @@
+id: youth_walk_away
+title: Not worth it
+text: >-
+  The night before last somebody got hurt, and you have not stopped thinking
+  about it. {member.name} says it was nothing, that this is how it is. You
+  look at {crew} the way you looked at it the first day, and you are not sure
+  you like what you see.
+tone: serious
+category: youthcrime
+rarity: uncommon
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: true } }
+    - { crime: { youth: true } }
+    - { crime: { years: { gte: 1 } } }
+weight: { base: 5 }
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: leave
+    label: Tell them you are out
+    check:
+      base: 60
+      stats: [{ key: confidence, weight: 0.25 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          It is quieter than you feared. {member.name} says nobody is keeping you,
+          and nobody does. You walk home feeling lighter and a little afraid.
+        effects:
+          - { type: crime, action: leave, how: left }
+          - { type: stat, key: stress, delta: -4 }
+          - { type: stat, key: discipline, delta: 3 }
+      failure:
+        text: >-
+          They do not make it easy. Words are said, and you leave with your
+          shoulder bruised and your place in {crew} still not settled.
+        effects:
+          - { type: crime, action: standing, delta: -6 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: stay
+    label: Stay for now
+    outcome:
+      text: >-
+        You tell yourself it will be different. {member.name} smiles, and the
+        smile makes you feel worse.
+      effects:
+        - { type: stat, key: stress, delta: 3 }

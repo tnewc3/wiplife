@@ -46,12 +46,13 @@ export function crimeHolds(c: CrimeCondition, state: LifeState, topRank: number,
   if (c.awayYears && !within(k.crew?.away ? k.awayYears : 0, c.awayYears)) return false;
   if (c.suspicion && !within(k.crew?.away?.suspicion ?? 0, c.suspicion)) return false;
   if (c.returned !== undefined && (k.crew?.returned === state.currentYear) !== c.returned) return false;
-  if (c.local !== undefined && (content !== undefined && crewsIn(content, state.character.cityId).length > 0) !== c.local) return false;
+  if (c.local !== undefined && (content !== undefined && crewsIn(content, state.character.cityId, undefined, state.character.age).length > 0) !== c.local) return false;
   if (c.kind !== undefined) {
     const kind = content === undefined ? undefined : crewKind(content, lastCrewId(state));
     if (kind === undefined || !c.kind.includes(kind)) return false;
   }
-  if (c.offered !== undefined && content !== undefined && !c.offered.some((kind) => crewsIn(content, state.character.cityId, kind as OrgKind).length > 0)) return false;
+  if (c.offered !== undefined && content !== undefined && !c.offered.some((kind) => crewsIn(content, state.character.cityId, kind as OrgKind, state.character.age).length > 0)) return false;
+  if (c.youth !== undefined && (k.crew !== null && content?.crews[k.crew.defId]?.youth === true) !== c.youth) return false;
   if (c.war !== undefined && (k.crew?.war !== undefined) !== c.war) return false;
   if (c.territory) {
     const held = k.crew ? holdings(state, k.crew.cityId, k.crew.defId).length : 0;

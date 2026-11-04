@@ -20,7 +20,13 @@ export function crimeFailures(state: LifeState, content: ContentBundle): string[
   };
   const dirty = state.finances.dirty;
   if (!Number.isSafeInteger(dirty) || dirty < 0) fail(`finances.dirty must be a whole-dollar amount of at least 0 (got ${String(dirty)})`);
-  if (state.character.age < adultAge && (k.crew !== null || dirty > 0 || k.past.length > 0)) fail(`crime: you are under ${adultAge} and have a crew, dirty money or a crime past`);
+  const youthMin = content.balance.orgs.youth.minAge;
+  // (O1 follow-up: a teen from the youth age can be in a youth crew; dirty money and every adult crew stay for adults.)
+  if (state.character.age < adultAge) {
+    if (dirty > 0) fail(`crime: you are under ${adultAge} and hold dirty money`);
+    if (k.crew !== null && (state.character.age < youthMin || content.crews[k.crew.defId]?.youth !== true)) fail(`crime: you are under ${adultAge} and in a crew that is not a youth crew you are old enough for`);
+    if (k.past.some((p) => content.crews[p.crewId]?.youth !== true)) fail(`crime: you are under ${adultAge} and have a past in a crew that is not a youth crew`);
+  }
   score('crime.heat', k.heat);
   score('crime.standing', k.standing);
   score('crime.rivalry', k.rivalry);
@@ -33,7 +39,7 @@ export function crimeFailures(state: LifeState, content: ContentBundle): string[
     const top = topRank(content, k.crew.defId);
     if (!Number.isInteger(k.rank) || k.rank < 1 || k.rank > top) fail(`crime: rank ${String(k.rank)} is outside 1 to ${top}`);
     if (k.peak < k.rank) fail('crime: the highest rank held is below the current rank');
-    if (k.crew.since > state.currentYear || k.crew.since < state.birthYear + adultAge) fail('crime: the crew was joined outside the adult years');
+    if (k.crew.since > state.currentYear || k.crew.since < state.birthYear + (def?.youth ? youthMin : adultAge)) fail('crime: the crew was joined before the age it allows');
     if (!content.cities[k.crew.cityId]) fail(`crime: the crew works in an unknown city "${k.crew.cityId}"`);
     if (k.crew.away) {
       // (Moving back mid-year leaves this set until the year step resolves it.)
@@ -53,7 +59,8 @@ export function crimeFailures(state: LifeState, content: ContentBundle): string[
     if (k.crew.informant !== undefined && !k.investigation) fail('crime: an informant without an investigation');
     for (const id of k.crew.members) {
       const p = state.people[id];
-      if (p && state.currentYear - p.birthYear < adultAge) fail(`crime: crew member ${id} is under ${adultAge}`);
+      const floor = def?.youth ? content.balance.orgs.youth.memberAge.min : adultAge;
+      if (p && state.currentYear - p.birthYear < floor) fail(`crime: crew member ${id} is under ${floor}`);
     }
     // O1: the roster, the world around the crew.
     for (const [id, m] of Object.entries(k.crew.roster ?? {})) {

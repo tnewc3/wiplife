@@ -229,6 +229,8 @@ export const orgsBalanceSchema = z.strictObject({
     standing: z.int().min(0).max(100),
     failStanding: z.int().min(0).max(100),
   }),
+  /** Youth crews: the age a teen can join or found one (never below 14), and the ages of the other kids in one (never under the joining age). */
+  youth: z.strictObject({ minAge: z.int().min(14).max(17), memberAge: z.strictObject({ min: z.int().min(14).max(17), max: z.int().min(17).max(19) }) }),
   /** Words (labels.ts): where each band starts above the lowest, for an organization's strength, how it feels about you, and a member's skill and loyalty. */
   bands: z.strictObject({
     strength: z.array(z.int().min(1).max(100)).length(4),

@@ -229,6 +229,23 @@ categories:
       all:
         - { age: { gte: 18 } }
         - { crime: { member: true } }
+  # O1 follow-up: youth crews. Teens from 14 can be asked in, or start one; they are never asked before 14, and a youth event
+  # never has dirty money or a death (the content build checks it).
+  youthoffers:
+    label: A crowd wants you
+    requires:
+      all:
+        - { age: { gte: 14 } }
+        - { age: { lte: 17 } }
+        - { crime: { member: false } }
+  youthcrime:
+    label: The crew
+    requires:
+      all:
+        - { age: { gte: 14 } }
+        - { age: { lte: 17 } }
+        - { crime: { member: true } }
+        - { crime: { youth: true } }
   crimeaway:
     label: Far from the crew
     requires:

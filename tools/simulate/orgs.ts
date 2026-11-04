@@ -109,6 +109,8 @@ export interface OrgsReport {
   underAge: number;
   /** Member deaths in the cities of a leader, the only place the engine kills members. */
   suppliedLives: number;
+  /** Youth crews (teens from the youth age): lives that joined one, that founded their own, the years kids spent in one, and lives that went from a youth crew into an adult one. */
+  youth: { joined: number; founded: number; years: number; grewIntoAdult: number };
 }
 
 const emptyKind = (content: ContentBundle, kind: OrgKind): KindReport => ({ entered: 0, peak: Array.from({ length: Object.values(content.crews).find((c) => c.kind === kind)?.ranks.length ?? 5 }, () => 0), leaders: 0, years: 0, leaderYears: 0 });
@@ -139,6 +141,7 @@ export function emptyOrgsReport(player: string, content: ContentBundle): OrgsRep
     invariantFailures: 0,
     underAge: 0,
     suppliedLives: 0,
+    youth: { joined: 0, founded: 0, years: 0, grewIntoAdult: 0 },
   };
 }
 
@@ -153,6 +156,8 @@ export class OrgsWatcher {
   private lost = false;
   private supplied = false;
   private arrestsAtLead = 0;
+  private teen = false;
+  private grew = false;
 
   constructor(
     private readonly r: OrgsReport,
@@ -168,7 +173,20 @@ export class OrgsWatcher {
     const { r } = this;
     const crew = after.crime.crew;
     const adultAge = this.content.balance.relationships.adultAge;
-    if (crew && after.character.age < adultAge) r.underAge++;
+    const crewDefNow = crew ? crewDef(this.content, crew.defId) : undefined;
+    if (crew && after.character.age < adultAge && (crewDefNow?.youth !== true || after.character.age < this.content.balance.orgs.youth.minAge)) r.underAge++;
+    if (crew && after.character.age < adultAge && crewDefNow?.youth === true) {
+      r.youth.years++;
+      if (!this.teen) {
+        this.teen = true;
+        r.youth.joined++;
+        if (isLeader(after, this.content)) r.youth.founded++;
+      }
+    }
+    if (crew && after.character.age >= adultAge && crewDefNow?.youth !== true && this.teen && !this.grew) {
+      this.grew = true;
+      r.youth.grewIntoAdult++;
+    }
     if (!crew) return;
     const def = crewDef(this.content, crew.defId);
     if (!def) return;
@@ -254,6 +272,7 @@ export function formatOrgs(r: OrgsReport, content: ContentBundle): string[] {
   lines.push(`  law and death: leaders arrested ${pct(r.leaderArrestedLives, r.leaderLives)}; leaders who died a crew death ${pct(r.leaderDeaths, r.leaderLives)}; members killed ${r.world.killed}; informants ${r.world.informants}`);
   lines.push(`  world: ${r.world.fights} fights, ${r.world.wars} wars, truces in ${pct(r.truceLives, r.entered)} of lives, alliances in ${pct(r.allianceLives, r.entered)}, lost a neighborhood in ${pct(r.hoodLostLives, r.entered)}; ${r.world.promoted} members promoted, ${r.world.cut} cut loose`);
   lines.push(`  supply: ${r.world.supplied} units supplied by cartels to dealers and gangs (${r.units} by the player's own organization), in ${pct(r.suppliedLives, r.entered)} of lives`);
+  lines.push(`  youth crews (teens from ${content.balance.orgs.youth.minAge}): ${r.youth.joined} lives joined one (${pct(r.youth.joined, r.lives)} of all lives), ${r.youth.founded} founded their own, ${r.youth.years} kid-years in them, ${r.youth.grewIntoAdult} went on into an adult crew`);
   lines.push(`  decisions: ${Object.entries(r.decisions).map(([k, n]) => `${k} ${n}`).join(', ') || 'none'}; under 18 in an organization: ${r.underAge}`);
   return lines;
 }
@@ -268,7 +287,7 @@ export function orgsTargets(report: SimulationReport, content: ContentBundle): T
     out.push({ label, value: fmt(value), short: fmt(value), goal: `${goal.min !== undefined ? fmt(goal.min) : ''}–${goal.max !== undefined ? fmt(goal.max) : ''}`, met });
   };
   const share = (n: number, d: number) => (d === 0 ? 0 : n / d);
-  range('lives under 18 in an organization', r.underAge, t.underAge, (n) => n.toFixed(0));
+  range('lives under 18 in an adult organization, or under the youth age in any', r.underAge, t.underAge, (n) => n.toFixed(0));
   range('invariant failures about organizations', r.invariantFailures, t.invariantFailures, (n) => n.toFixed(0));
   if (report.player === 'careful') return out;
   if (report.player !== 'criminal') return out;
@@ -280,5 +299,6 @@ export function orgsTargets(report: SimulationReport, content: ContentBundle): T
   range('leaders that died a crew death', share(r.leaderDeaths, r.leaderLives), t.leaderDeaths);
   range('units cartels supplied to dealers and gangs', r.world.supplied, t.supplied, (n) => n.toFixed(0));
   range('lives with a truce', share(r.truceLives, r.entered), t.truce);
+  range('lives that joined a youth crew as a teen', share(r.youth.joined, r.lives), t.youthJoined);
   return out;
 }

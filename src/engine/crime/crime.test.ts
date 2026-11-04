@@ -39,13 +39,17 @@ const yearStep = (life: LifeState) =>
   });
 
 describe('joining a crew', () => {
-  it('is for adults only: nothing under 18 can join, whatever asks', () => {
+  it('adult crews are for adults: under 14 nothing can join, and a teen can only join a youth crew (O1 follow-up)', () => {
+    const child = lifeAtAge('crime-child', 12);
+    expect(joinBlock(child, content)).toBe('age');
+    expect(apply(child, (d) => void joinCrew(d, content)).crime.crew).toBeNull();
     const teen = lifeAtAge('crime-teen', 16);
-    expect(joinBlock(teen, content)).toBe('age');
-    const after = apply(teen, (d) => void joinCrew(d, content));
-    expect(after.crime.crew).toBeNull();
-    const viaEffect = apply(teen, (d) => void applyEffects(d, [{ type: 'crime', action: 'join' }], { def: content.events.offer_through_a_friend!, cast: {}, rng: d.rng, content }));
+    expect(joinBlock(teen, content, 'mafia')).toBe('none');
+    expect(apply(teen, (d) => void joinCrew(d, content, undefined, undefined, 'mafia')).crime.crew).toBeNull();
+    const viaEffect = apply(teen, (d) => void applyEffects(d, [{ type: 'crime', action: 'join', kind: 'cartel' }], { def: content.events.offer_through_a_friend!, cast: {}, rng: d.rng, content }));
     expect(viaEffect.crime.crew).toBeNull();
+    const youth = apply(teen, (d) => void joinCrew(d, content));
+    expect(content.crews[youth.crime.crew!.defId]!.youth).toBe(true);
     expect(checkInvariants({ ...teen, crime: { ...emptyCrime(), crew: { defId: 'cinder_row_outfit', cityId: 'chicago', since: teen.currentYear, members: [], rivalMembers: [] }, rank: 1, peak: 1 } }, content).join('\n')).toMatch(/under 18/);
   });
 

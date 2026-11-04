@@ -1,0 +1,9 @@
+id: stairwell_boys
+name: the Stairwell Set
+kind: street_gang
+youth: true
+blurb: The crew from one building, protective of every floor of it. Younger than they sound and more serious than they should be.
+cities: [chicago, guadalajara, houston, london, los_angeles, manchester, mexico_city, monterrey, montreal, nyc, small_town, small_town_ca, small_town_mx, small_town_uk, toronto, vancouver]
+ranks: [lookout, runner, shot-caller, leader]
+rivals: [back_lot_kids, underpass_set, bus_loop_crew]
+traits: { riskTaking: 10, sociability: 8, discipline: -6 }

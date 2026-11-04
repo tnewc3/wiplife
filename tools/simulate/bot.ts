@@ -568,7 +568,7 @@ export function personalityChoice(content: ContentBundle, crime: 'refuse' | 'acc
     };
     // E6a: the law-abiding player never takes a place in a crew; the criminal one takes every one it is offered.
     const joins = card.choices.filter((c) => traitsOf(c.id)?.joinsCrew === true);
-    if (crime === 'accept' && def?.category === 'crimeoffers' && joins.length > 0) return joins[0]!.id;
+    if (crime === 'accept' && (def?.category === 'crimeoffers' || def?.category === 'youthoffers') && joins.length > 0) return joins[0]!.id;
     const open = crime === 'refuse' && joins.length < card.choices.length ? card.choices.filter((c) => !joins.includes(c)) : card.choices;
     const options = open.map((c) => {
       const traits = traitsOf(c.id);
