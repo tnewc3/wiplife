@@ -102,7 +102,7 @@ test.describe('sports big moments', () => {
     await expect(game(page)).toContainText('Penalty kick');
     await page.getByTestId('minigame-auto').click();
     await expect(game(page)).toHaveCount(0);
-    await expect(page.getByTestId('event-card')).toContainText('first round');
+    await expect(page.getByTestId('event-card')).toContainText('quarter-final');
   });
 
   test('a sport with no game for it plays the choice as before', async ({ page }) => {
