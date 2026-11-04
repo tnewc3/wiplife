@@ -114,11 +114,12 @@ export function WorldSection({ view, disabled, act }: { view: SportsView; disabl
 }
 
 /** Batch 6: the teams of the sports you are looking at, by name (the ones you could play for). */
-export function LeaguesSection({ view }: { view: SportsView }) {
-  if (view.leagues.length === 0) return null;
+export function LeaguesSection({ view, skipFirst = false }: { view: SportsView; /** The standings table already shows the first league. */ skipFirst?: boolean }) {
+  const leagues = skipFirst ? view.leagues.slice(1) : view.leagues;
+  if (leagues.length === 0) return null;
   return (
     <div className="flex flex-col gap-3" data-testid="leagues">
-      {view.leagues.map((l) => (
+      {leagues.map((l) => (
         <div key={l.sportId} className="flex flex-col gap-1" data-testid={`league-${l.sportId}`}>
           <SectionLabel>
             {l.sport}: {l.league}

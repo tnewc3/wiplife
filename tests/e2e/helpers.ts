@@ -335,11 +335,13 @@ export async function expandGroups(page: Page): Promise<void> {
 
 /** C2: closes screens opened over a tab from the Career tab (sheets that are not an event). */
 export async function closeSheets(page: Page): Promise<void> {
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 8; i++) {
     const sheet = page.locator('[role="dialog"]').filter({ hasNot: page.getByTestId('event-card') }).last();
-    if (!(await sheet.isVisible())) return;
+    // U3: a feature screen over the tab goes back with Escape too (when no sheet is on top of it).
+    const screen = page.locator('[data-feature-screen]').last();
+    if (!(await sheet.isVisible()) && !(await screen.isVisible())) return;
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(250);
   }
 }
 

@@ -19,16 +19,21 @@ export function DoctorPanel({ life }: { life: LifeState }) {
   const cost = view.doctor.visitCost + view.doctor.treatmentCost;
   return (
     <>
+      {view.doctor.block && (
+        <p className="px-1" data-testid="doctor-status">
+          {DOCTOR_BLOCK_LABELS[view.doctor.block]}
+        </p>
+      )}
       <OptionCard
         name="See a doctor"
         chips={
           <>
             <EffectChip tone="good">+ Health</EffectChip>
-            {view.familyPays && <FactChip>Family pays</FactChip>}
+            {view.familyPays && <FactChip>Your family takes you and pays the bill.</FactChip>}
           </>
         }
         price={view.familyPays ? 'Free' : money(view.doctor.visitCost)}
-        reason={view.doctor.block ? DOCTOR_BLOCK_LABELS[view.doctor.block] : busy ? 'Not now' : undefined}
+        reason={view.doctor.block ? 'Not now' : busy ? 'Not now' : undefined}
         testId="do-see-doctor"
         onClick={() => setConfirming(true)}
       />

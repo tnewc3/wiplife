@@ -402,7 +402,7 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
           {tab === 'league' && (
             <div className="flex flex-col gap-3" data-testid="sports-league">
               <LeagueTable view={view} />
-              <LeaguesSection view={view} />
+              <LeaguesSection view={view} skipFirst />
             </div>
           )}
 

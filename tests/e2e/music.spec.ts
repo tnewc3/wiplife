@@ -25,18 +25,25 @@ test('form a band from an open-mic start, rename it and replace a member', async
   await page.getByTestId('band-open').click();
   const band = page.getByTestId('band-screen');
   await expect(band).toContainText('You perform on your own.');
+  await band.getByTestId('band-start').click();
+  const parts = page.getByTestId('band-part-sheet');
+  if (await parts.isVisible()) await parts.locator('[data-testid^="band-part-"]').first().click();
   await band.getByTestId('band-name-input').fill('  The Night   Shift  ');
   await band.getByTestId('band-form').click();
-  await expect(page.getByRole('dialog', { name: 'The Night Shift' })).toBeVisible();
-  await expect(band.getByTestId('band-overview')).toContainText('You lead it.');
+  await expect(page.getByTestId('band-screen').filter({ hasText: 'The Night Shift' })).toBeVisible();
+  await band.getByTestId('screen-info').click();
+  await expect(page.getByRole('dialog')).toContainText('You lead it.');
+  await page.keyboard.press('Escape');
   await expectTouchTargets(page);
 
-  // A name that can't be a title is refused before it is sent.
+  // A name that can't be a title is refused before it is sent (the rename is a dialog in the ⋯ menu).
+  await band.getByTestId('screen-overflow').click();
+  await page.getByTestId('band-rename-open').click();
   await band.getByTestId('band-rename-input').fill('<b>loud</b>');
   await expect(band.getByTestId('band-rename')).toBeDisabled();
   await band.getByTestId('band-rename-input').fill('Static Bloom');
   await band.getByTestId('band-rename').click();
-  await expect(page.getByRole('dialog', { name: 'Static Bloom' })).toBeVisible();
+  await expect(page.getByTestId('band-screen').filter({ hasText: 'Static Bloom' })).toBeVisible();
 
   // Replace someone: they go, and auditions for their part open.
   await band.getByTestId('band-tab-members').click();
@@ -79,14 +86,15 @@ test('release an off-genre single with a typed title', async ({ page }) => {
   await expect(sheet.getByTestId('project-off-genre')).toContainText('Outside your sound');
   await expectTouchTargets(page);
   await sheet.getByTestId('project-save').click();
-  await expect(page.getByTestId('plan-summary')).toContainText('A single called “Night Bus Hymn”: metal');
-  await expect(page.getByTestId('plan-summary')).toContainText('outside your usual sound');
+  await expect(page.getByTestId('plan-summary')).toContainText('A single “Night Bus Hymn”: metal');
+  await expect(page.getByTestId('plan-summary')).toContainText('outside your sound');
   // The year begins and it comes out.
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('fame-screen')).toBeHidden();
   await ageUp(page);
   await goTab(page, 'Job');
   await page.getByTestId('fame-open').click();
+  await page.getByTestId('fame-tab-releases').click();
   const row = page.getByTestId('project-row').first();
   await expect(row).toContainText('Night Bus Hymn');
   await expect(row).toContainText('metal (outside your sound)');

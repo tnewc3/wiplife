@@ -59,7 +59,7 @@ export function FeatureScreen({ open, title, onBack, backLabel = 'Back', info, a
     <div ref={root} data-feature-screen="" role="region" aria-label={title} data-testid={testId} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="fixed inset-0 z-30 flex justify-center bg-bg animate-[wl-slide-in_220ms_ease-out]">
       <div className="flex h-full w-full max-w-lg flex-col md:border-x md:border-border">
         <ScreenHeader title={title} onBack={onBack} backLabel={backLabel} onInfo={info ? () => setInfoOpen(true) : undefined} onOverflow={actions && actions.length > 0 ? () => setMenuOpen(true) : undefined} />
-        <main data-testid="feature-main" className="px-safe flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3 pb-[max(env(safe-area-inset-bottom),1rem)]">
+        <main data-testid="feature-main" className="px-safe flex min-h-0 flex-1 scroll-pt-16 flex-col gap-3 overflow-y-auto pt-3 [&>*]:shrink-0 pb-[max(env(safe-area-inset-bottom),1rem)]">
           {children}
         </main>
       </div>

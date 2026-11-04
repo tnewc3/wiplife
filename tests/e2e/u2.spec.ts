@@ -38,12 +38,15 @@ test('a rich life sees Luxury with Activities and Shopping, and buys through a p
   await expectTouchTargets(page);
   // A luxury store: the price is on the button, and it is a possession afterwards.
   await page.getByTestId('activity-hub-lux_boats').click();
-  const sheet = page.getByRole('dialog', { name: 'Boats and yachts' });
-  await expect(sheet.getByTestId('do-buy_a_sailboat')).toContainText('$');
-  await expect(sheet.getByTestId('do-buy_a_yacht')).toContainText('$');
+  const store = page.getByTestId('activity-sheet-lux_boats');
+  await expect(store.getByTestId('item-buy_a_sailboat')).toContainText('$');
+  await expect(store.getByTestId('item-buy_a_yacht')).toContainText('$');
   await expectTouchTargets(page);
-  await sheet.getByTestId('do-buy_a_sailboat').click();
-  await expect(sheet.getByTestId('receipt-money')).toContainText('You now have $');
+  await store.getByTestId('item-buy_a_sailboat').click();
+  await page.getByTestId('item-buy').click();
+  const yes = page.getByRole('button', { name: 'Yes, buy it' });
+  if (await yes.isVisible()) await yes.click();
+  await expect(store.getByTestId('receipt-money')).toContainText('You now have $');
   await page.keyboard.press('Escape');
   await goTab(page, 'Assets');
   await page.getByTestId('assets-tab-things').click();

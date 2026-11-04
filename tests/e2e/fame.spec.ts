@@ -74,7 +74,7 @@ test('the project step takes the creative choices', async ({ page }) => {
   await sheet.getByTestId('project-press').click();
   await expectTouchTargets(page);
   await sheet.getByTestId('project-save').click();
-  await expect(page.getByTestId('plan-summary')).toContainText(/An EP called “.+”: .*artistic, bold, with a press run/);
+  await expect(page.getByTestId('plan-summary')).toContainText(/An EP “.+”: .*artistic, bold, press run/);
 });
 
 test('with no career the Fame screen shows the ways in, and starting one puts you on the ladder', async ({ page }) => {

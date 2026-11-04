@@ -14,7 +14,7 @@ import { HeroCard, StatCell } from '../../components/HeroCard';
 import { SegmentedTabs } from '../../components/SegmentedTabs';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { StatBar } from '../../components/StatBar';
-import { BUSINESS_DECISION_HINTS, BUSINESS_DECISION_LABELS, BUSINESS_END_LABELS, BUSINESS_HOW_LABELS, BUSINESS_ROLE_LABELS, BUSINESS_TABS, BUSINESS_TITLES, ECONOMY_TONES, SUPPLIER_ARROWS, TRAINING_HINTS, businessStakeLine, money, rateLabel } from '../../labels';
+import { BUSINESS_DECISION_HINTS, BUSINESS_DECISION_LABELS, BUSINESS_END_LABELS, BUSINESS_HOW_LABELS, BUSINESS_ROLE_LABELS, BUSINESS_TABS, BUSINESS_TITLES, ECONOMY_TONES, SUPPLIER_ARROWS, SUPPLIER_MOODS, TRAINING_HINTS, businessStakeLine, money, rateLabel } from '../../labels';
 import { FranchiseTab } from './business/FranchiseTab';
 import { PlacesTab } from './business/PlacesTab';
 import { ProductsTab } from './business/ProductsTab';
@@ -256,7 +256,7 @@ function WorldStrip({ owned }: { owned: BusinessView[] }) {
         {[...moods.entries()].slice(0, 6).map(([id, m]) => (
           <li key={id}>
             <FactChip>
-              {SUPPLIER_ARROWS[m.mood]} {m.label}
+              {SUPPLIER_ARROWS[m.mood]} {m.label} {SUPPLIER_MOODS[m.mood]}
             </FactChip>
           </li>
         ))}

@@ -41,6 +41,7 @@ test('you can join a club, see your role, change how committed you are, and leav
   const life = groupsLife({ seed: 'e2e-groups-2' });
   const club = aClubOf(life);
   await open(page, { seed: 'e2e-groups-2' });
+  if (await page.getByTestId('groups-show-more').isVisible()) await page.getByTestId('groups-show-more').click();
   await page.getByTestId(`group-join-${club.id}`).click();
   await expect(page.getByRole('dialog')).toContainText(club.name);
   await expectTouchTargets(page);

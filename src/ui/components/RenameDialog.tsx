@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from './Button';
 import { TextField } from './TextField';
 
@@ -7,7 +8,7 @@ import { TextField } from './TextField';
  * one lives. It opens from an overflow menu and closes on Save, Cancel or Escape.
  */
 export function RenameDialog(props: RenameDialogProps) {
-  return props.open ? <Dialog {...props} /> : null;
+  return props.open ? createPortal(<Dialog {...props} />, document.body) : null;
 }
 
 interface RenameDialogProps {

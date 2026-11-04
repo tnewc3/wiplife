@@ -9,10 +9,11 @@ export interface SheetProps {
   footer?: ReactNode;
   /** U3: a header of your own (an icon, one line, a balance) in place of the plain title; `title` still names the dialog. */
   header?: ReactNode;
+  testId?: string;
 }
 
 /** A modal bottom sheet. Closes on Escape or a tap outside. */
-export function Sheet({ open, title, onClose, children, footer, header }: SheetProps) {
+export function Sheet({ open, title, onClose, children, footer, header, testId }: SheetProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +43,7 @@ export function Sheet({ open, title, onClose, children, footer, header }: SheetP
       <div
         ref={panelRef}
         role="dialog"
+        data-testid={testId}
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}

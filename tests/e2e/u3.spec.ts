@@ -74,7 +74,7 @@ test('the Practice tile is an option picker: cards with effect chips, a price an
   await page.getByTestId('sports-open').click();
   await page.getByTestId('tile-practice').click();
   const sheet = page.getByRole('dialog');
-  await expect(sheet.getByTestId('practice-picker')).toBeVisible();
+  await expect(page.getByTestId('practice-picker')).toBeVisible();
   await expect(sheet.getByRole('tablist')).toHaveCount(0);
   await expect(sheet.locator('input, textarea, select, details')).toHaveCount(0);
   await expect(sheet.locator('[data-tone="good"]').first()).toBeVisible();
@@ -143,7 +143,7 @@ test('Dealing is a feature screen: start from a picker, tabs, and stop in the â‹
   await expect(page.getByTestId('dealing-sheet')).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByTestId('deal-start').click();
-  await expect(page.getByRole('dialog').getByTestId('deal-start-picker')).toBeVisible();
+  await expect(page.getByTestId('deal-start-picker')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('tablist', { name: 'Dealing' }).getByRole('tab')).toHaveCount(3);
   await expectNoTruncation(page);

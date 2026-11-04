@@ -21,18 +21,19 @@ export function GrindSection({ view, disabled }: { view: FameView; disabled: boo
   const shows = view.shows;
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3" data-testid="shows">
       <SectionLabel>Shows and tours</SectionLabel>
       <CompactList label="Shows and tours">
         {shows.venue ? (
           <>
-            <CompactRow label={`${shows.venue.label}`} value={`${shows.played} of ${shows.max}`} testId="shows-count" />
+            <CompactRow label={`${shows.played} of ${shows.max} shows this year`} value={`${shows.venue.label}`} testId="shows-count" />
             <CompactRow label="A good night pays about" value={money(shows.pay)} />
-            {shows.block !== null && shows.block !== 'path' && <CompactRow muted label={SHOW_BLOCK_LABELS[shows.block]} />}
+            <CompactRow label="Play a show" value={shows.block !== null && shows.block !== 'path' ? SHOW_BLOCK_LABELS[shows.block] : 'Go'} muted={disabled || shows.block !== null} onClick={() => !disabled && shows.block === null && void act('play_show')} testId="play-show" />
             {shows.last && (
               <CompactRow
                 testId="show-result"
                 label={`${SHOW_OUTCOME_LABELS[shows.last.outcome]} at ${shows.last.venue.toLowerCase()}: about ${shows.last.fans.toLocaleString('en-US')} new fans`}
-                value={`+${money(shows.last.pay)}`}
+                value={`+${money(shows.last.pay)} in your yearly ledger`}
               />
             )}
           </>
@@ -50,8 +51,7 @@ export function GrindSection({ view, disabled }: { view: FameView; disabled: boo
           />
         ) : null}
       </CompactList>
-      {view.tour && <span className="sr-only" data-testid="tour-cancel" />}
-      {main.tourQuote && !view.tour && <span className="sr-only" data-testid="tour-book" />}
+      </div>
 
       {main.genres.length > 0 && (
         <>
@@ -82,7 +82,7 @@ export function GrindSection({ view, disabled }: { view: FameView; disabled: boo
                 value={<MiniBar label={sk.label} value={sk.level} />}
                 ending="chevron"
                 muted={disabled || sk.block !== null}
-                onClick={disabled || sk.block !== null ? undefined : () => void act('practice', { pathId: main.id, skillId: sk.id })}
+                onClick={() => !disabled && sk.block === null && void act('practice', { pathId: main.id, skillId: sk.id })}
                 testId={`practise-${sk.id}`}
               />
             ))}

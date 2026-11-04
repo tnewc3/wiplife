@@ -102,7 +102,7 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await page.getByLabel(/Bring my family/).check();
   await expect(page.getByTestId('family-note')).toBeVisible();
   // $1,600 plus $560 for each of three people.
-  await expect(page.getByText(/Up front: \$3,280/)).toBeVisible();
+  await expect(page.getByTestId('abroad-cost')).toContainText('$3,280');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Start temporary work' }).click(); await settle(page);
@@ -110,7 +110,7 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await expect(page.getByTestId('event-money')).toContainText('£2,591');
   await playThroughEvents(page);
   await expect(page.getByTestId('work-residence')).toContainText('London');
-  await expect(page.getByTestId('work-family')).toContainText('Your family is with you.');
+  await expect(page.getByTestId('work-family')).toContainText('With you');
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await goTab(page, 'Job');

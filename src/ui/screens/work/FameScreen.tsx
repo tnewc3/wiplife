@@ -243,7 +243,7 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
                     <ListRow
                       key={`${p.year}-${p.title}`}
                       title={p.title}
-                      subtitle={`${p.year} · ${cap(p.noun)}${p.genre ? ` · ${p.genre.toLowerCase()}` : ''} · ${RECEPTION_LABELS[p.band]} · critics ${reactionWord(p.critics).toLowerCase()}, fans ${reactionWord(p.fans).toLowerCase()} · ${money(p.earned)}`}
+                      subtitle={`${p.year} · ${cap(p.noun)}${p.genre ? ` · ${p.genre.toLowerCase()}${p.offGenre ? ' (outside your sound)' : ''}` : ''} · ${RECEPTION_LABELS[p.band]} · critics ${reactionWord(p.critics).toLowerCase()}, fans ${reactionWord(p.fans).toLowerCase()} · ${money(p.earned)}`}
                       value={<MiniBar label={p.title} value={p.quality} />}
                       testId="project-row"
                     />

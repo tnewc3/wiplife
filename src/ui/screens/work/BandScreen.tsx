@@ -93,7 +93,7 @@ export function BandScreen({ life, open, onClose }: { life: LifeState; open: boo
       />
       <RenameDialog open={dialog === 'rename'} title={BAND_HUB_LABELS.rename} label="Band name" initial={band?.name ?? ''} error={nameCheck} testId="band-rename-input" saveTestId="band-rename" busy={busy} onCancel={() => setDialog(null)} onSave={(t) => { setDialog(null); void act('rename_band', { bandName: t }); }} />
       <RenameDialog open={dialog === 'form'} title="Name your band" label="Band name" initial={bandNameSuggestion(life, suggest, content)} allowSame error={nameCheck} testId="band-name-input" saveTestId="band-form" saveLabel="Hold auditions" hint="Type your own, or keep the suggestion." onCancel={() => setDialog(null)} onSave={(t) => { setDialog(null); void act('form_band', { bandName: t, ...(part || fame.parts[0] ? { part: part || fame.parts[0]!.id } : {}) }); }} />
-      <OptionPickerSheet open={partPicker} title="Your part" icon="guitar" onClose={() => setPartPicker(false)} testId="band-part-picker">
+      <OptionPickerSheet open={partPicker} title="Your part" icon="guitar" onClose={() => setPartPicker(false)} testId="band-part-sheet">
         {fame.parts.map((p) => (
           <OptionCard key={p.id} name={p.label} testId={`band-part-${p.id}`} onClick={() => { setPart(p.id); setPartPicker(false); setSuggest((n) => n + 1); setDialog('form'); }} />
         ))}
@@ -186,7 +186,7 @@ export function BandScreen({ life, open, onClose }: { life: LifeState; open: boo
       <ActionTileRow>
         <ActionTile label={BAND_HUB_LABELS.rehearse} icon="drum" tone="fame" status={BAND_HUB_LABELS.rehearsals(hub.rehearsals.done, hub.rehearsals.budget)} disabled={disabled || hub.rehearsals.block !== null} onClick={() => void act('rehearse')} testId="rehearse" />
         {fame.active && <ActionTile label="Write" icon="memo" tone="fame" status={fame.plan ? 'Lined up' : 'Nothing yet'} disabled={disabled || fame.projectBlock !== null} onClick={() => setProject(true)} testId="band-make-release" />}
-        <ActionTile label="Play a show" icon="microphone" tone="fame" status={fame.shows.venue ? `${fame.shows.played} of ${fame.shows.max}` : 'None'} disabled={disabled || fame.shows.block !== null} onClick={() => void act('play_show')} testId="play-show" />
+        <ActionTile label="Play a show" icon="microphone" tone="fame" status={fame.shows.venue ? `${fame.shows.played} of ${fame.shows.max}` : 'None'} disabled={disabled || fame.shows.block !== null} onClick={() => void act('play_show')} testId="band-play-show" />
       </ActionTileRow>
       <span className="sr-only" data-testid="rehearsal-count">
         {BAND_HUB_LABELS.rehearsals(hub.rehearsals.done, hub.rehearsals.budget)}

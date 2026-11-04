@@ -90,7 +90,9 @@ test('a rival can be offered a truce or an alliance from its row', async ({ page
 test('someone who does not run the organization sees it but cannot decide', async ({ page }) => {
   await open(page, { seed: 'e2e-o1-member', kind: 'mafia', rank: 1 });
   await openOrg(page);
-  await expect(page.getByText(/Only the one who runs it makes these decisions/)).toBeVisible();
+  await page.getByTestId('screen-info').click();
+  await expect(page.getByRole('dialog').getByText(/Only the one who runs it makes these decisions/)).toBeVisible();
+  await page.keyboard.press('Escape');
   await expect(page.getByTestId('org-row-cut')).toHaveCount(0);
   await page.getByTestId('org-tab-members').click();
   await page.locator('[data-testid^="org-member-more-"]').first().click();
@@ -100,7 +102,9 @@ test('someone who does not run the organization sees it but cannot decide', asyn
 test('a teen in a youth crew has the screen with no decisions to make (a kid has no business to run)', async ({ page }) => {
   await open(page, { seed: 'e2e-o1-youth', age: 16, youth: true });
   await openOrg(page);
-  await expect(page.getByText(/A kids’ crew has no business to run|Only the one who runs it makes these decisions/)).toBeVisible();
+  await page.getByTestId('screen-info').click();
+  await expect(page.getByRole('dialog').getByText(/A kids’ crew has no business to run|Only the one who runs it makes these decisions/).first()).toBeVisible();
+  await page.keyboard.press('Escape');
   await expect(page.getByTestId('org-row-dirty')).toContainText('$0');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);

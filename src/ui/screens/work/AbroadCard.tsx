@@ -37,7 +37,7 @@ export function AbroadCard({ life }: { life: LifeState }) {
   return (
     <div className="flex flex-col gap-3">
       <HeroCard lead={<Icon id="airplane" size={44} />} title={study ? 'Study abroad' : 'Temporary work abroad'} status={study ? 'One annual turn' : `${view.years} years; working holidays through age ${view.holidayMaxAge}`}>
-        <StatCell label="Up front" value={money(view.cost)} />
+        <StatCell label="Up front" value={money(view.cost)} testId="abroad-cost" />
       </HeroCard>
       <ChipSelect label={study ? 'Partner school city' : 'Work destination'} testId="abroad-destination" value={destinationId} onChange={setDestination} options={cities.map((d) => ({ id: d.id, label: `${d.name} · ${d.country}` }))} />
       <ChipSelect<Residence['route']> label="Length or route" testId="abroad-route" value={route} onChange={setChoice} options={(study ? (['semester', 'year'] as const) : (['working_holiday', 'transfer'] as const)).map((r) => ({ id: r, label: STAY_ROUTE_LABELS[r] }))} />

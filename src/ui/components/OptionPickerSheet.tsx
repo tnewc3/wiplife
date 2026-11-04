@@ -29,6 +29,7 @@ export function OptionPickerSheet({ open, title, icon, line, balance, freshness,
       open={open}
       title={title}
       onClose={onClose}
+      {...(testId ? { testId } : {})}
       header={
         <div className="flex items-start gap-3">
           {icon && <Icon id={icon} size={36} />}
@@ -49,7 +50,7 @@ export function OptionPickerSheet({ open, title, icon, line, balance, freshness,
         </div>
       }
     >
-      <div data-testid={testId} className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         {children}
         {footnote && <p className="px-1 text-xs text-muted">ⓘ {footnote}</p>}
       </div>

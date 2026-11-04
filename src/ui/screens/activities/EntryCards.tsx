@@ -43,10 +43,10 @@ function chipsOf(entry: ActivityEntryView) {
           {c.text}
         </EffectChip>
       ))}
-      {entry.minigame && <FactChip>{MINIGAME_LABELS.playOrAuto}</FactChip>}
+      {entry.minigame && <FactChip testId="entry-minigame">{MINIGAME_LABELS.playOrAuto}</FactChip>}
       {entry.hobby && <FactChip testId={`hobby-${entry.id}`}>{ACTIVITY_TAB_LABELS.hobbySkill(HOBBY_LEVEL_LABELS[Math.min(entry.hobby.level, HOBBY_LEVEL_LABELS.length - 1)]!, entry.hobby.skill)}</FactChip>}
       {entry.buys && <FactChip>A belonging: {entry.buys}</FactChip>}
-      {entry.evidence !== null && <FactChip>{evidenceWords(entry.evidence)}</FactChip>}
+      {entry.evidence !== null && <FactChip testId={`evidence-${entry.id}`}>{evidenceWords(entry.evidence)}</FactChip>}
     </>
   );
 }
