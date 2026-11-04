@@ -19,3 +19,11 @@ schools:
   elite: Universidad Alameda
   trade: Instituto Técnico Reforma
   grad: Escuela de Posgrado Insurgentes
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: colonia_salinera, name: Colonia Salinera, income: 3, attention: 54 }
+  - { id: calle_de_los_herreros, name: Calle de los Herreros, income: 5, attention: 54 }
+  - { id: el_mercadillo, name: El Mercadillo, income: 3, attention: 44 }
+  - { id: barrio_santa_aurora, name: Barrio Santa Aurora, income: 2, attention: 75 }
+  - { id: las_terrazas, name: Las Terrazas, income: 2, attention: 69 }

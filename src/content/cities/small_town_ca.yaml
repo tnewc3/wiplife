@@ -20,3 +20,11 @@ schools:
   trade: Riverbend Trade School
   grad: Provincial Graduate School
 legalAges: { drinking: 19, gambling: 19 }
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: front_street, name: Front Street, income: 1, attention: 16 }
+  - { id: the_grain_elevators, name: The Grain Elevators, income: 3, attention: 37 }
+  - { id: rail_yard_lane, name: Rail Yard Lane, income: 2, attention: 35 }
+  - { id: lakeside_trailer_park, name: Lakeside Trailer Park, income: 3, attention: 36 }
+  - { id: old_highway_strip, name: Old Highway Strip, income: 2, attention: 24 }

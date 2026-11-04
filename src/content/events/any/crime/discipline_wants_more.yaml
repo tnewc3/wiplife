@@ -1,0 +1,42 @@
+id: discipline_wants_more
+title: A bigger share
+text: >-
+  {member.name} says that the work {member.they} {member:does|do} has grown, and
+  the share has not. It is said politely, with no threat in it, which is how you
+  know how serious it is.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { leader: true } }
+    - { crime: { away: false } }
+    - { finances: { dirty: { gte: 1000 } } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: give_it
+    label: Give {member.them} a larger share
+    outcome:
+      text: >-
+        {member.name} nods, takes it and says nothing more. The mood in the room
+        is better by the following week.
+      effects:
+        - { type: dirtyMoney, pay: small }
+        - { type: crime, action: loyalty, delta: 5 }
+        - { type: relationship, role: member, trust: 4 }
+  - id: refuse
+    label: Tell {member.them} that is the share
+    outcome:
+      text: >-
+        {member.name} says that is fair. It does not sound like agreement, and
+        the room after that is a little quieter.
+      effects:
+        - { type: crime, action: loyalty, delta: -4 }
+        - { type: relationship, role: member, trust: -4 }

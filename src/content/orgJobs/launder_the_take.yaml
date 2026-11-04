@@ -1,0 +1,10 @@
+id: launder_the_take
+name: Launder the take
+blurb: Turns your dirty money into savings through the family's businesses, for a share.
+kinds: [mafia, cartel]
+effect: launder
+size: solid
+danger: low
+minRank: 2
+done: "{member} put {amount} of the organization's cash through the books and into your savings."
+bust: "{member}'s deposits were flagged this year. Only {amount} made it into your savings."

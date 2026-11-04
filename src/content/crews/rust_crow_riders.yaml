@@ -1,0 +1,8 @@
+id: rust_crow_riders
+name: the Rust Crow Riders
+kind: motorcycle_club
+blurb: A rowdier club that treats every other club as an insult. They are good at runs and bad at forgiving.
+cities: [manchester, london, small_town_uk, montreal, nyc, small_town_ca, chicago, vancouver]
+ranks: [hang-around, prospect, patched member, officer, president]
+rivals: [iron_mercy_riders, last_mile_riders]
+traits: { riskTaking: 14, sociability: 6, kindness: -4 }

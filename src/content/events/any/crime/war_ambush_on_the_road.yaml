@@ -1,0 +1,62 @@
+id: war_ambush_on_the_road
+title: The road home
+text: >-
+  The war has been getting worse. Windows, cars, a warehouse. {member.name}
+  says someone saw the other side asking where you drive and when. There is a
+  road you take every night, and you could take it differently, or not at
+  all, or take the fight to them first.
+tone: dark
+category: crime
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { war: true } }
+    - { crime: { heat: { gte: 10 } } }
+    - { crime: { away: false } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: change_the_route
+    label: Change your routes and stay with people
+    outcome:
+      text: >-
+        You lose a good deal of sleep and some convenience. Nothing happens,
+        and you cannot know whether that is because of what you did or in spite of it.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: crime, action: heat, delta: -3 }
+  - id: strike_first
+    label: Hit them before they hit you
+    check:
+      base: 55
+      stats: [{ key: riskTaking, weight: 0.2 }, { key: fitness, weight: 0.15 }, { key: luck, weight: 0.3 }]
+      success:
+        text: >-
+          They never see it coming. It does not end the war, but the other side
+          is quieter, and {crew} treats you like someone not to cross.
+        effects:
+          - { type: crime, action: standing, delta: 12 }
+          - { type: crime, action: strength, delta: 4 }
+          - { type: crime, action: heat, delta: 14 }
+          - { type: mental, action: trauma, amount: 8 }
+      failure:
+        text: >-
+          They were waiting. By the time you understood how much they knew, it was
+          too late to do anything with the knowledge.
+        effects:
+          - { type: death, cause: crew_war_killing }
+  - id: ask_for_a_truce
+    label: Send word that you would talk
+    outcome:
+      text: >-
+        Messages go back and forth. Nobody agrees to anything, but the next
+        week is quieter than the last.
+      effects:
+        - { type: crime, action: rivalry, delta: -6 }
+        - { type: crime, action: standing, delta: -3 }

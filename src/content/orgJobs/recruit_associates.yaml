@@ -1,0 +1,8 @@
+id: recruit_associates
+name: Recruit
+blurb: Bring in adults who will work for the gang. Not a quiet job, and not for the squeamish.
+kinds: [street_gang]
+effect: recruit
+danger: low
+done: "{member} spent the year bringing new people around, and some of them stayed."
+bust: "{member} came back with no one new, and a story about why."

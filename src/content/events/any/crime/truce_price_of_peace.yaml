@@ -1,0 +1,43 @@
+id: truce_price_of_peace
+title: The price of peace
+text: >-
+  The other side would stop, they say, for a price. {member.name} thinks it is
+  a fair one, or a first offer, or the cost of being left alone for the year.
+  Either way, {crew} has to decide whether it is worth more to be right or to be
+  safe.
+tone: serious
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { war: true } }
+    - { crime: { away: false } }
+    - { finances: { dirty: { gte: 1000 } } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: pay
+    label: Pay it and end the war
+    outcome:
+      text: >-
+        The money moves quietly and the war stops the same way. {crew} grumbles,
+        and the neighborhood goes back to sleeping.
+      effects:
+        - { type: dirtyMoney, pay: solid }
+        - { type: crime, action: truce }
+        - { type: crime, action: standing, delta: -2 }
+  - id: refuse
+    label: Tell them to keep fighting
+    outcome:
+      text: >-
+        You hold out, and so do they. It is a choice, and it will be
+        made again next year if nobody wins.
+      effects:
+        - { type: crime, action: rivalry, delta: 5 }
+        - { type: crime, action: standing, delta: 3 }

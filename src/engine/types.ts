@@ -1,7 +1,7 @@
 import type { BrowStyle, ClothingColor, Earrings, EyeColor, EyeShape, Eyewear, FacialHair, Hairstyle, HairColor, Hat, HatColor, LashStyle, NoseShape, Outfit, SkinColor } from '../portraits/ids';
 import type { TravelState } from './travel/types';
 import type { MigrationState } from './migration/types';
-import type { CountryId } from '../content/schemas';
+import type { CountryId, OrgKind } from '../content/schemas';
 import type { DealPrice } from '../content/schemas/drugs';
 import type { LanguageSkill } from '../content/schemas/languages';
 import type { LanguageLearning } from './languages';
@@ -1318,6 +1318,8 @@ export interface LifeState {
   hub: HubState;
   /** D1: drugs: what you hold, your habits (tolerance, dependence), the dealers you know, dealing, and the grow operations and labs you run. */
   drugs: DrugsState;
+  /** O1: organizations by city and who holds each neighborhood. */
+  orgs: OrgWorld;
 }
 
 /** D1: a drug you hold: units, the average quality (0–100) and whether it is kept hidden. */
@@ -2068,6 +2070,98 @@ export interface CrimeCrew {
   away?: { since: number; standing: number; suspicion: number };
   /** The year you came back to the crew's city (it is a story that year). */
   returned?: number;
+  /** O1: each member as a person in an organization: skill, loyalty, their own heat and the job they have this year. Absent in saves from before O1 (made when the life is loaded). */
+  roster?: Record<Id, OrgMember>;
+  /** O1: the share of a job's take you keep as its leader (what the members feel about it moves their loyalty). */
+  cut?: CutLevel;
+  /** O1: the cartel (a world organization) you buy from (gangs and clubs) and that supplies your dealers. */
+  supplier?: Id;
+  /** O1: the world organization you are at war with. */
+  war?: Id;
+  /** O1: what the leader has ordered for this year: an attack on a neighborhood. */
+  plan?: { expand?: Id };
+  /** O1: the last year's results (for the Organization screen and the year recap). */
+  recap?: OrgRecap;
+  /** O1: you passed the organization's initiation (an event); ranks past it need it. */
+  initiated?: boolean;
+}
+
+/** O1: how much of a job's take the leader keeps. */
+export type CutLevel = 'low' | 'fair' | 'high';
+
+/** O1: a member of the organization you are in. */
+export interface OrgMember {
+  /** How good they are at the work (0-100); it grows with years of work. */
+  skill: number;
+  /** How far they stand with you and the organization (0-100). Low loyalty means quitting, skimming and talking. */
+  loyalty: number;
+  /** The police attention on them (0-100). */
+  heat: number;
+  /** Their rank in the organization (1 up to one below yours). */
+  rank: number;
+  /** The member job (src/content/orgJobs) you gave them for this year; none means the organization picks one. */
+  job?: Id;
+  /** The year they joined. */
+  since: number;
+  /** In jail until this year (they cannot work). */
+  jailed?: number;
+}
+
+/** O1: one member's year, as the Organization screen and the recap tell it. */
+export interface OrgResult {
+  id: Id;
+  name: string;
+  job: Id;
+  outcome: 'done' | 'bust' | 'arrested' | 'hurt' | 'killed' | 'quit' | 'turned' | 'idle';
+  /** Dirty money the job brought in (before your cut), or the units supplied. */
+  amount: number;
+}
+
+/** O1: what a year of leading brought. */
+export interface OrgRecap {
+  year: number;
+  results: OrgResult[];
+  /** Dirty money you were paid from jobs and from neighborhoods, and what members kept. */
+  jobs: number;
+  hoods: number;
+  hoodCount: number;
+  kept: number;
+  /** Cash that reached your savings through the ledger (laundering). */
+  cleaned: number;
+  units: number;
+  /** What happened beside the jobs: neighborhoods taken or lost, wars, truces, betrayals. */
+  notes: string[];
+}
+
+/** O1: an organization in a city: a named one from content (defId) or a generated one. */
+export interface WorldOrg {
+  id: Id;
+  defId?: Id;
+  name: string;
+  kind: OrgKind;
+  cityId: Id;
+  /** 0-100. */
+  strength: number;
+  /** How it feels about you (-100 to 100). */
+  attitude: number;
+  /** How hot a war with you is (0-100). */
+  war: number;
+  status: 'neutral' | 'war' | 'truce' | 'allied';
+  /** A truce holds from this year until it lapses. */
+  truceSince?: number;
+  /** The cartel it buys from, if it is a gang or a club. */
+  supplier?: Id;
+  /** The last year you made a move toward it (a truce or an alliance): one a year. */
+  tried?: number;
+}
+
+/** O1: the organizations of the cities you have crossed paths with, and who holds each neighborhood (an organization id, or null for no one). */
+export interface OrgWorld {
+  cities: Record<Id, WorldOrg[]>;
+  hoods: Record<Id, Record<Id, Id | null>>;
+  /** For the ids of generated organizations. */
+  next: number;
+  totals: { income: number; supplied: number; fights: number; wars: number; killed: number; informants: number; promoted: number; cut: number };
 }
 
 /** E6a: a crew you were in once. */

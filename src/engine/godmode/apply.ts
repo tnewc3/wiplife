@@ -5,6 +5,8 @@
  * rules can report every reason together.
  */
 import type { ContentBundle } from '../../content/schemas';
+import { staffCrew } from '../crime/crew';
+import { initiationRank, topRank } from '../crime/query';
 import { endJob, levelPay, performanceAim, rollOpenings } from '../career';
 import { addDebt, setMinPayment } from '../finance';
 import { moveTo, settleHousehold } from '../housing';
@@ -464,5 +466,37 @@ function applyCareer(draft: LifeState, career: NonNullable<EditPayload['career']
     if (e.agent !== undefined) f.agent = e.agent === null ? null : { agentId: e.agent, since: draft.currentYear };
     if (e.contract === 'end') f.contract = null;
   }
-  void content;
+  const k = career.crime;
+  if (k) {
+    const crime = draft.crime;
+    const crew = crime.crew;
+    if (k.heat !== undefined) crime.heat = k.heat;
+    if (k.dirty !== undefined) draft.finances.dirty = k.dirty;
+    if (crew) {
+      if (k.standing !== undefined) crime.standing = k.standing;
+      if (k.cut !== undefined) crew.cut = k.cut;
+      if (k.rank !== undefined) {
+        crime.rank = Math.min(k.rank, topRank(content, crew.defId));
+        crime.peak = Math.max(crime.peak, crime.rank);
+        crime.rankSince = draft.currentYear;
+        if (crime.rank >= initiationRank(content, crew.defId)) crew.initiated = true;
+        staffCrew(draft, content);
+      }
+      for (const edit of k.members ?? []) {
+        const m = crew.roster?.[edit.id];
+        if (m) {
+          m.skill = edit.skill;
+          m.loyalty = edit.loyalty;
+        }
+      }
+      if (k.war === 'end' && crew.war !== undefined) {
+        const o = draft.orgs.cities[crew.cityId]?.find((x) => x.id === crew.war);
+        if (o) {
+          o.status = 'neutral';
+          o.war = 0;
+        }
+        delete crew.war;
+      }
+    }
+  }
 }

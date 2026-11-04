@@ -1,0 +1,8 @@
+id: iron_mercy_riders
+name: the Iron Mercy Riders
+kind: motorcycle_club
+blurb: A club with a clubhouse, a patch and rules about everything, including what you do on your own time. The loyalty is real.
+cities: [houston, chicago, los_angeles, small_town, small_town_ca, vancouver, toronto]
+ranks: [hang-around, prospect, patched member, officer, president]
+rivals: [rust_crow_riders, last_mile_riders]
+traits: { sociability: 8, discipline: 4, riskTaking: 10 }

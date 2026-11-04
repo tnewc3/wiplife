@@ -1,0 +1,10 @@
+id: supply_the_dealers
+name: Supply the dealers
+blurb: Sell wholesale to the people who deal on the street. Fills their stock and your pockets.
+kinds: [cartel]
+effect: supply
+size: big
+danger: medium
+drug: true
+done: "{member} kept the dealers supplied this year, {amount} from the wholesale."
+bust: "{member}'s dealers fell short or were picked up. The wholesale came to {amount}."

@@ -29,3 +29,11 @@ heritageWeights:
   chinese: 3
   arab: 5
   west_african: 5
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: tanner_wharf, name: Tanner Wharf, income: 4, attention: 28 }
+  - { id: greywater_estate, name: Greywater Estate, income: 2, attention: 27 }
+  - { id: lamplight_row, name: Lamplight Row, income: 5, attention: 33 }
+  - { id: marrowfield, name: Marrowfield, income: 3, attention: 51 }
+  - { id: bellfounder_yard, name: Bellfounder Yard, income: 2, attention: 59 }

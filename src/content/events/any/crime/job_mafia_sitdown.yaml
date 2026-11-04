@@ -1,0 +1,48 @@
+id: job_mafia_sitdown
+title: A sit-down
+text: >-
+  {member.name} says two people have a disagreement that {crew} would like to
+  settle, quietly and in its own favour. You are to sit at the table, say very
+  little and remember everything that is said.
+tone: serious
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [mafia] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: sit_in
+    label: Take the seat and listen
+    check:
+      base: 66
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.25 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          Both sides leave convinced they won. {crew} collects a fee from each,
+          and your share comes in an envelope the following week.
+        effects:
+          - { type: dirtyMoney, gain: solid }
+          - { type: crime, action: job, size: solid }
+          - { type: relationship, role: member, trust: 3 }
+      failure:
+        text: >-
+          You reach too soon for a word that was meant to be left alone. The
+          room goes cool. {member.name} gives you a very small shake of the head.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: standing, delta: -5 }
+          - { type: crime, action: heat, delta: 4 }
+  - id: decline
+    label: Say you would rather not
+    outcome:
+      text: '{member.name} says it is not an offer you will be given twice.'
+      effects:
+        - { type: crime, action: standing, delta: -5 }

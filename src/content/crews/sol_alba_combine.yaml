@@ -1,0 +1,8 @@
+id: sol_alba_combine
+name: the Sol Alba Combine
+kind: cartel
+blurb: Supply from the source to the street, with a chain of command that stretches across a country. Nobody at the bottom has met anybody at the top.
+cities: [guadalajara, mexico_city, monterrey, small_town_mx, houston, los_angeles, chicago]
+ranks: [worker, runner, lieutenant, plaza boss, leader]
+rivals: [harrowgate_freight, the_obsidian_line]
+traits: { discipline: 8, riskTaking: 12, kindness: -10 }

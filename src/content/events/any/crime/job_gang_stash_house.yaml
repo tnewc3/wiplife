@@ -1,0 +1,47 @@
+id: job_gang_stash_house
+title: The house on the corner
+text: >-
+  {crew} keeps what it keeps in a house that looks like every other house, and
+  someone has to be in it. {member.name} says the job is a week of sitting
+  still, which {member.they} {member:says|say} is harder than it sounds.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [street_gang] } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: sit
+    label: Take the week
+    check:
+      base: 64
+      stats: [{ key: discipline, weight: 0.35 }, { key: luck, weight: 0.2 }, { crime: heat, weight: -0.25 }]
+      success:
+        text: >-
+          Nothing happens, and that is the point. A bag of cash is left on the
+          table when the week is up.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: crime, action: job, size: small }
+      failure:
+        text: >-
+          A neighbour calls it in. You are gone before anybody arrives, with less
+          than you came for. The house is lost to {crew}.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 8 }
+          - { type: crime, action: standing, delta: -4 }
+  - id: decline
+    label: Say it is not for you
+    outcome:
+      text: '{member.name} does not argue. Somebody else spends the week in the house.'
+      effects:
+        - { type: crime, action: standing, delta: -3 }

@@ -1,0 +1,9 @@
+id: loan_collection
+name: Loans and collections
+blurb: Money lent at a price, and the people who ask for it back.
+kinds: [mafia]
+effect: earn
+size: big
+danger: high
+done: "{member} lent and collected through the year, and {amount} came back with interest."
+bust: "{member}'s collections turned ugly this year. {amount} was recovered, with a cost."

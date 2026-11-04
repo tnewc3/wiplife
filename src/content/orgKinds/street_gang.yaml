@@ -1,0 +1,15 @@
+id: street_gang
+name: Street gang
+noun: gang
+blurb: Fast, loud and young. A block, a name and a lot of people who will not back down in front of their friends.
+ranks: [associate, member, shot-caller, leader]
+tiers: [1, 2, 4, 5]
+initiation:
+  rank: 2
+  name: Getting jumped in
+  blurb: Associates are tested before they are members. Nobody tells you what the test is until it starts.
+jobs: [corner_dealing, street_robbery, protect_the_block, collect_on_the_block, recruit_associates, lie_low]
+codes:
+  - { id: stay_loud, text: "Quiet years cost you respect. A gang that is not seen is a gang that is forgotten.", check: idle, standing: 4 }
+  - { id: no_names, text: "Nobody gives the police a name. Not under pressure and not for a deal.", check: arrest, standing: 3 }
+buys: true

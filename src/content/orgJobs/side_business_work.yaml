@@ -1,0 +1,9 @@
+id: side_business_work
+name: Run the side business
+blurb: Garages, bars and tattoo shops with a quiet second purpose. Steady money.
+kinds: [motorcycle_club]
+effect: earn
+size: solid
+danger: low
+done: "{member} ran the club's side business, and {amount} came to the club."
+bust: "{member}'s side business had a quiet inspection this year. It returned {amount}."

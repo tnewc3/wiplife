@@ -32,3 +32,11 @@ heritageWeights:
   west_african: 2
   vietnamese: 1
   japanese: 1
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: the_lowline_blocks, name: The Lowline Blocks, income: 1, attention: 67 }
+  - { id: harbor_steps, name: Harbor Steps, income: 1, attention: 73 }
+  - { id: gantry_avenue, name: Gantry Avenue, income: 5, attention: 61 }
+  - { id: seventh_pier, name: Seventh Pier, income: 3, attention: 46 }
+  - { id: tenement_row, name: Tenement Row, income: 3, attention: 63 }

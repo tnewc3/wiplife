@@ -1,0 +1,9 @@
+id: street_robbery
+name: Robberies
+blurb: Quick hits on cash and goods. Big when they work and loud when they do not.
+kinds: [street_gang]
+effect: earn
+size: solid
+danger: high
+done: "{member} pulled off a run of robberies and handed you {amount}."
+bust: "{member}'s robberies came apart. What was salvaged came to {amount}."

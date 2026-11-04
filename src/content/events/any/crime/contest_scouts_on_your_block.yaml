@@ -1,0 +1,51 @@
+id: contest_scouts_on_your_block
+title: Strangers measuring the street
+text: >-
+  A van parks twice in the same place. A man takes photographs of a doorway that
+  has never been photographed. {member.name} thinks someone is deciding
+  whether {crew} can hold what it has, and wants to know whether you would rather
+  show strength or keep quiet.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { territory: { gte: 1 } } }
+    - { crime: { away: false } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: show_strength
+    label: Make it clear this block is held
+    check:
+      base: 62
+      stats: [{ key: confidence, weight: 0.25 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          Word gets back to whoever sent them. The van does not return, and the
+          neighborhood is quieter for a while.
+        effects:
+          - { type: crime, action: strength, delta: 4 }
+          - { type: crime, action: standing, delta: 4 }
+          - { type: crime, action: heat, delta: 4 }
+      failure:
+        text: >-
+          The message is received as an invitation. Within weeks it is clear someone
+          has decided to try.
+        effects:
+          - { type: crime, action: rivalry, delta: 10 }
+          - { type: crime, action: heat, delta: 4 }
+  - id: keep_quiet
+    label: Say nothing and watch
+    outcome:
+      text: >-
+        You watch and are watched. Nothing happens. Whatever was being decided is
+        decided without you, and you do not learn which way it went.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

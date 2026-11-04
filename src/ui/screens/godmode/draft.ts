@@ -123,6 +123,20 @@ export function toPayload(base: EditView, draft: EditView): EditPayload | null {
       if (df.endContract) fame.contract = 'end';
       if (Object.keys(fame).length > 0) career.fame = fame;
     }
+    const bc = base.career.crime;
+    const dc = draft.career.crime;
+    if (bc && dc) {
+      const crime: NonNullable<NonNullable<EditPayload['career']>['crime']> = {};
+      if (bc.rank !== dc.rank && bc.ranks > 0) crime.rank = dc.rank;
+      if (bc.standing !== dc.standing && bc.ranks > 0) crime.standing = dc.standing;
+      if (bc.heat !== dc.heat) crime.heat = dc.heat;
+      if (bc.dirty !== dc.dirty) crime.dirty = dc.dirty;
+      if (bc.cut !== dc.cut && dc.cut !== null) crime.cut = dc.cut;
+      const members = dc.members.filter((m, i) => m.skill !== bc.members[i]?.skill || m.loyalty !== bc.members[i]?.loyalty).map((m) => ({ id: m.id, skill: m.skill, loyalty: m.loyalty }));
+      if (members.length > 0) crime.members = members;
+      if (dc.endWar) crime.war = 'end';
+      if (Object.keys(crime).length > 0) career.crime = crime;
+    }
     if (Object.keys(career).length > 0) set('career', career);
   }
 

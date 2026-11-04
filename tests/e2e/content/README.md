@@ -23,6 +23,8 @@ event (`registries/actions.yaml` here replaces the real one): asking out
 always gets a yes (or "Never mind"), proposing and marrying always succeed,
 and breaking up, divorcing, cutting contact and reconciling do just that.
 
+A pregnancy that starts is always carried (`balance/family.yaml` here has no miscarriage), so the family flow tests don't depend on a seed.
+
 Money trouble (a missed payment, collections, garnishment, eviction or
 foreclosure) answers with `test_money_trouble`, a single card with no
 choices (`registries/triggers.yaml` here replaces the real one).

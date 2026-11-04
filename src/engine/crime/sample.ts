@@ -4,11 +4,12 @@
  * requirements ask for, and puts the people cast from the crew in it. Not
  * used by the game itself.
  */
-import type { Compare, Condition, ContentBundle, CrimeCondition, EventDef } from '../../content/schemas';
+import type { Compare, Condition, ContentBundle, CrimeCondition, EventDef, OrgKind } from '../../content/schemas';
 import type { Id, LifeState } from '../types';
 import { joinCrew, leaveCrew, shapePerson } from './crew';
 import { openInvestigation } from './money';
-import { crewDef } from './query';
+import { crewDef, initiationRank, topRank } from './query';
+import { ensureCity, holdings } from './orgs';
 import { sameCountryCities } from '../country';
 
 /** The crime conditions an event cannot do without (those under `all`, not `any` or `not`), merged. */
@@ -50,19 +51,38 @@ export function giveSampleCrime(state: LifeState, def: EventDef, cast: Record<st
   const text = JSON.stringify(def);
   const names = text.includes('{crew}') || text.includes('{rank}') || text.includes('{rivalCrew}');
   if (!adult || (roles.length === 0 && Object.keys(want).length === 0 && !names)) return;
-  const needsCrew = roles.length > 0 || want.member === true || want.former === true || want.rank !== undefined || want.standing !== undefined || want.leader === true || want.informant === true || want.rival === true || names;
+  const needsCrew = roles.length > 0 || want.member === true || want.former === true || want.rank !== undefined || want.standing !== undefined || want.leader === true || want.informant === true || want.rival === true || want.kind !== undefined || want.war === true || want.territory !== undefined || want.initiating === true || names;
   if (!needsCrew && want.heat === undefined && want.investigated === undefined) return;
   const k = state.crime;
   if (needsCrew && want.member !== false) {
     state.career.job = null;
-    joinCrew(state, content);
+    joinCrew(state, content, undefined, undefined, want.kind?.[0] as OrgKind | undefined);
     const crew = k.crew;
     if (crew) {
       const def2 = crewDef(content, crew.defId);
-      const rank = Math.min(content.balance.crime.ranks.length, Math.max(bound(want.rank) ?? 1, want.leader ? content.balance.crime.ranks.length : 1));
+      const top = topRank(content, crew.defId);
+      const rank = Math.min(top, Math.max(bound(want.rank) ?? 1, want.leader ? top : 1));
       while (k.rank < rank) {
         k.rank += 1;
         k.peak = Math.max(k.peak, k.rank);
+      }
+      if (want.initiating === true) {
+        k.rank = Math.max(1, initiationRank(content, crew.defId) - 1);
+        k.peak = Math.max(k.peak, k.rank);
+        crew.initiated = false;
+      }
+      if (want.war === true) {
+        const rival = ensureCity(state, content, crew.cityId).find((o) => o.id !== crew.defId);
+        if (rival) {
+          rival.status = 'war';
+          rival.war = content.balance.orgs.war.at + 10;
+          crew.war = rival.id;
+        }
+      }
+      if (want.territory !== undefined) {
+        const map = state.orgs.hoods[crew.cityId] ?? {};
+        const need = bound(want.territory) ?? 1;
+        for (const h of Object.keys(map).sort()) if (holdings(state, crew.cityId, crew.defId).length < need) map[h] = crew.defId;
       }
       k.standing = bound(want.standing) ?? bound(want.standing, false) ?? k.standing;
       // The people cast from the crew are in it.
@@ -76,11 +96,11 @@ export function giveSampleCrime(state: LifeState, def: EventDef, cast: Record<st
           if (!crew.members.includes(id)) crew.members.push(id);
           shapePerson(state.people[id]!, def2, `crew:${def2.id}`);
           state.relationships[id]!.kind = 'friend';
-          if (spec.crew === 'boss' && k.rank < content.balance.crime.ranks.length) crew.leader = id;
+          if (spec.crew === 'boss' && k.rank < top) crew.leader = id;
           if (spec.crew === 'informant') crew.informant = id;
         }
       }
-      if (k.rank >= content.balance.crime.ranks.length) delete crew.leader;
+      if (k.rank >= top) delete crew.leader;
       if (want.informant === true && crew.informant === undefined && crew.members[0] !== undefined) crew.informant = crew.members[0];
       if (crew.informant !== undefined) openInvestigation(state, content);
       if (want.rival === true || want.rivalry !== undefined) k.rivalry = bound(want.rivalry) ?? k.rivalry;

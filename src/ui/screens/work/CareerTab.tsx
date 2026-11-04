@@ -16,6 +16,7 @@ import { AbroadCard } from './AbroadCard';
 import { BandScreen } from './BandScreen';
 import { BusinessCard } from './BusinessCard';
 import { CrimeCard } from './CrimeCard';
+import { OrganizationScreen } from '../org/OrganizationScreen';
 import { DealingSheet } from '../drugs/DealingSheet';
 import { FameScreen } from './FameScreen';
 import { JobCard } from './JobCard';
@@ -220,9 +221,10 @@ export function CareerTab({ life }: { life: LifeState }) {
       <Sheet open={idle && (opened === 'business')} title={CAREER_LABELS.specials.business} onClose={close}>
         <BusinessCard life={life} />
       </Sheet>
-      <Sheet open={idle && (opened === 'crime')} title={CAREER_LABELS.specials.crime} onClose={close}>
+      <Sheet open={idle && opened === 'crime' && life.crime.crew === null} title={CAREER_LABELS.specials.crime} onClose={close}>
         <CrimeCard life={life} />
       </Sheet>
+      <OrganizationScreen life={life} open={idle && opened === 'crime' && life.crime.crew !== null} onClose={close} />
       <Sheet open={idle && (opened === 'drugs' || opened === 'dealing')} title={CAREER_LABELS.specials.drugs} onClose={close}>
         <DealingSheet life={life} />
       </Sheet>

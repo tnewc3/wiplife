@@ -4,8 +4,8 @@
  * rank, the people in it, and the bands heat, standing and rivalry fall in.
  * Numbers: balance/crime.yaml.
  */
-import type { ContentBundle, CrewDef } from '../../content/schemas';
-import type { CrimeCrew, CrimeState, Id, LifeState } from '../types';
+import type { ContentBundle, CrewDef, OrgKind, OrgKindDef } from '../../content/schemas';
+import type { CrimeCrew, CrimeState, Id, LifeState, OrgWorld } from '../types';
 
 export const emptyCrime = (): CrimeState => ({
   crew: null,
@@ -21,6 +21,13 @@ export const emptyCrime = (): CrimeState => ({
   past: [],
   laundered: { year: 0, byFront: {} },
   totals: { jobs: 0, earned: 0, cleaned: 0, fees: 0, lost: 0, spent: 0, arrests: 0, years: 0 },
+});
+
+export const emptyOrgs = (): OrgWorld => ({
+  cities: {},
+  hoods: {},
+  next: 1,
+  totals: { income: 0, supplied: 0, fights: 0, wars: 0, killed: 0, informants: 0, promoted: 0, cut: 0 },
 });
 
 /** In a crew now. */
@@ -40,7 +47,33 @@ export function isAway(state: LifeState): boolean {
 
 /** Runs the crew you are in (the top rank). */
 export function isLeader(state: LifeState, content: ContentBundle): boolean {
-  return state.crime.crew !== null && state.crime.rank >= content.balance.crime.ranks.length;
+  return state.crime.crew !== null && state.crime.rank >= topRank(content, state.crime.crew.defId);
+}
+
+/** O1: the top rank of an organization (4 in a street gang, 5 in the others); it runs the organization. */
+export function topRank(content: ContentBundle, id: Id | undefined): number {
+  return crewDef(content, id)?.ranks.length ?? content.balance.crime.ranks.length;
+}
+
+/** O1: the kind of organization a crew is. */
+export function crewKind(content: ContentBundle, id: Id | undefined): OrgKind | undefined {
+  return crewDef(content, id)?.kind;
+}
+
+export function kindDef(content: ContentBundle, kind: OrgKind | undefined): OrgKindDef | undefined {
+  return kind === undefined ? undefined : content.orgKinds[kind];
+}
+
+/** O1: which of balance/crime.yaml's five rank tiers a rank in an organization pays and asks like (1 to 5). */
+export function tierOf(content: ContentBundle, crewId: Id | undefined, rank: number): number {
+  const tiers = kindDef(content, crewKind(content, crewId))?.tiers;
+  const r = Math.max(1, rank);
+  return tiers?.[r - 1] ?? Math.min(r, content.balance.crime.ranks.length);
+}
+
+/** O1: the rank that is earned by an initiation (the one you are offered by passing it). */
+export function initiationRank(content: ContentBundle, crewId: Id | undefined): number {
+  return kindDef(content, crewKind(content, crewId))?.initiation.rank ?? 0;
 }
 
 /** The definition of a crew by id, or undefined. */
@@ -52,7 +85,7 @@ export function crewName(content: ContentBundle, id: Id | undefined): string {
   return crewDef(content, id)?.name ?? '';
 }
 
-/** The title of a rank (1 to 5) in a crew. */
+/** The title of a rank (1 up to the top) in a crew. */
 export function rankTitle(content: ContentBundle, crewId: Id | undefined, rank: number): string {
   return crewDef(content, crewId)?.ranks[rank - 1] ?? '';
 }

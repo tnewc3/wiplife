@@ -19,3 +19,11 @@ schools:
   elite: Universidad del Bajío
   trade: Instituto Técnico del Pueblo
   grad: Escuela de Posgrado Regional
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: calle_principal, name: Calle Principal, income: 3, attention: 27 }
+  - { id: barrio_de_la_estacion, name: Barrio de la Estacion, income: 3, attention: 26 }
+  - { id: las_bodegas, name: Las Bodegas, income: 1, attention: 45 }
+  - { id: colonia_nueva, name: Colonia Nueva, income: 2, attention: 26 }
+  - { id: el_camino_viejo, name: El Camino Viejo, income: 1, attention: 34 }

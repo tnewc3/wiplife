@@ -1,0 +1,8 @@
+id: recruit_hangarounds
+name: Bring people around
+blurb: Find riders and hangers-on who might become prospects. Slow, and the club needs it.
+kinds: [motorcycle_club]
+effect: recruit
+danger: low
+done: "{member} brought new faces to the clubhouse, and some of them kept coming back."
+bust: "{member} found no one new this year."

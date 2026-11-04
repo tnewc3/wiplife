@@ -1,0 +1,9 @@
+id: guard_the_route
+name: Guard the route
+blurb: Armed men and open eyes on what is yours. No take, but a route that is held.
+kinds: [cartel]
+effect: protect
+danger: high
+needsHood: true
+done: "{member} guarded the route all year, and nothing that mattered was touched."
+bust: "{member} was hurt or arrested holding the route this year."

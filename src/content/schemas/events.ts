@@ -21,7 +21,7 @@ import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema } from './family';
 import { credentialTypeSchema, programSchema, tierSchema, type Tier } from './education';
 import { lifeTierSchema } from './people';
-import { jobSizeSchema } from './crime';
+import { jobSizeSchema, orgKindSchema } from './crime';
 import { SPORT_LEVELS, SPORT_RESULTS, SPORT_RETIRE_ROUTES, SPORT_CONTRACT_KINDS, SPORT_ROLES, TRYOUT_APPROACHES, TRYOUT_RESULTS, type SportLevel, type SportResult, type SportRole, type TryoutResult } from './sports';
 import { SOCIAL_TRIGGERS, type SocialTrigger } from './social';
 import { fameBandSchema, fameCommitmentSchema, fameSceneSchema, fameSizeSchema, fameTermsSchema, FAME_FAN_TYPES, FAME_STALKER_STAGES, type FameBand, type FameCommitment, type FameStalkerStage } from './fame';
@@ -325,6 +325,16 @@ export interface CrimeCondition {
   suspicion?: Compare;
   returned?: boolean;
   local?: boolean;
+  /** O1: the kind of organization you are in (or were last in). */
+  kind?: string[];
+  /** O1: a crew of one of these kinds works in the city you live in now. */
+  offered?: string[];
+  /** O1: you are at war with a rival organization. */
+  war?: boolean;
+  /** O1: neighborhoods your organization holds. */
+  territory?: Compare;
+  /** O1: you are in the rank the organization's initiation opens (the step before it). */
+  initiating?: boolean;
 }
 
 /**
@@ -1200,6 +1210,11 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           suspicion: compareSchema.optional(),
           returned: z.boolean().optional(),
           local: z.boolean().optional(),
+          kind: z.array(orgKindSchema).min(1).optional(),
+          offered: z.array(orgKindSchema).min(1).optional(),
+          war: z.boolean().optional(),
+          territory: compareSchema.optional(),
+          initiating: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -1867,13 +1882,16 @@ export const effectSchema = z.discriminatedUnion('type', [
   z
     .strictObject({
       type: z.literal('crime'),
-      action: z.enum(['join', 'leave', 'heat', 'standing', 'rivalry', 'suspicion', 'promote', 'demote', 'job', 'investigate', 'close', 'remove', 'transfer']),
+      action: z.enum(['join', 'leave', 'heat', 'standing', 'rivalry', 'suspicion', 'promote', 'demote', 'job', 'investigate', 'close', 'remove', 'transfer', 'loyalty', 'strength', 'territory', 'war', 'truce', 'ally', 'informant']),
       delta: z.int().min(-100).max(100).optional(),
       size: jobSizeSchema.optional(),
       how: z.enum(['left', 'pushed', 'drifted', 'deal', 'moved']).optional(),
       role: roleSchema.optional(),
+      /** O1: join an organization of this kind (one that works in your city). */
+      kind: orgKindSchema.optional(),
     })
-    .refine((e) => (e.action === 'heat' || e.action === 'standing' || e.action === 'rivalry' || e.action === 'suspicion') === (e.delta !== undefined && e.delta !== 0), 'heat, standing, rivalry and suspicion need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'heat' || e.action === 'standing' || e.action === 'rivalry' || e.action === 'suspicion' || e.action === 'loyalty' || e.action === 'strength' || e.action === 'territory') === (e.delta !== undefined && e.delta !== 0), 'heat, standing, rivalry, suspicion, loyalty, strength and territory need a non-zero delta (and only they have one)')
+    .refine((e) => e.kind === undefined || e.action === 'join', 'only join takes kind')
     .refine((e) => (e.action === 'job') === (e.size !== undefined), 'job needs size (and only job has it)')
     .refine((e) => (e.action === 'leave') || e.how === undefined, 'only leave takes how')
     .refine((e) => (e.action === 'remove' ? e.role !== undefined : e.action === 'join' || e.role === undefined), 'remove needs role; join may bring a person with it; no other action has one'),

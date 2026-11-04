@@ -1,0 +1,58 @@
+id: initiation_jumped_in
+title: Getting jumped in
+text: >-
+  {member.name} tells you that nobody gets to be a member of {crew} on
+  a recommendation. There is a test, it is tonight, and nobody will say what
+  it is until you are standing where they want you. You can still say no.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [street_gang] } }
+    - { crime: { initiating: true } }
+weight:
+  base: 10
+  modifiers:
+    - { if: { flag: failed_an_initiation }, x: 1.3 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: take_it
+    label: Stand where they put you
+    check:
+      base: 62
+      stats: [{ key: fitness, weight: 0.3 }, { key: confidence, weight: 0.2 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          It is as bad as you were afraid of, and over faster than you hoped.
+          When you get up, somebody hands you a jacket, and you are a member of
+          {crew}. Your ribs will tell you about it for weeks.
+        effects:
+          - { type: crime, action: promote }
+          - { type: flag, key: passed_an_initiation, value: true }
+          - { type: stat, key: health, delta: -4 }
+          - { type: relationship, role: member, affection: 5 }
+      failure:
+        text: >-
+          You stay down, which is the only thing you did wrong. Nobody calls
+          you weak, which is worse. Somebody says you can try again when you
+          are ready, in the tone people use when they mean never.
+        effects:
+          - { type: crime, action: standing, delta: -8 }
+          - { type: flag, key: failed_an_initiation, value: true }
+          - { type: stat, key: health, delta: -6 }
+  - id: say_no
+    label: Say you are not ready
+    outcome:
+      text: >-
+        {member.name} says that is fine and means that it is noted. Your place
+        stays where it is, and so does the question.
+      effects:
+        - { type: crime, action: standing, delta: -4 }
+        - { type: stat, key: stress, delta: -2 }

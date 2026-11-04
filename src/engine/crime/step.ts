@@ -28,7 +28,8 @@ import { applyStatEffects } from '../systems/economy';
 import type { Id, LifeState } from '../types';
 import { leaveCrew, staffCrew } from './crew';
 import { closeInvestigation, openInvestigation } from './money';
-import { crimeYears, inCrew, isFormer, liveMembers } from './query';
+import { applyCodes, runOrgYear } from './orgYear';
+import { crimeYears, inCrew, initiationRank, isFormer, isLeader, liveMembers, tierOf, topRank } from './query';
 
 /** Queues one of a trigger's events for this year, picked by weight among those that fit, unless one of them is already queued. */
 export function queueCrimeEvent(state: LifeState, trigger: CrimeTrigger, content: ContentBundle, dueYear = state.currentYear): boolean {
@@ -95,7 +96,7 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
   runInvestigation(state, content);
 
   const crew = crime.crew;
-  const top = b.ranks.length;
+  const top = crew ? topRank(content, crew.defId) : b.ranks.length;
   let pushedOut = false;
   let away = false;
   let returned = false;
@@ -124,7 +125,7 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
       staffCrew(state, content);
     }
     if (!away) {
-      applyStatEffects(state, { stress: { perYear: b.ranks[crime.rank - 1]!.stress + b.life.stress, limit: b.life.stressLimit } });
+      applyStatEffects(state, { stress: { perYear: b.ranks[tierOf(content, crew.defId, crime.rank) - 1]!.stress + b.life.stress, limit: b.life.stressLimit } });
       crime.lowYears = crime.standing <= b.standing.lowAt ? crime.lowYears + 1 : 0;
       pushedOut = crime.lowYears >= b.standing.lowYears;
     }
@@ -135,6 +136,10 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
     }
   }
 
+  // O1: the organization's year (a leader's members work, neighborhoods are contested, a war moves).
+  let orgTriggers: CrimeTrigger[] = [];
+  if (crime.crew && !away) orgTriggers = runOrgYear(state, content).triggers;
+
   // The police.
   let arrested = false;
   let investigationOpened = false;
@@ -142,6 +147,8 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
     arrested = chance(state.rng, arrestChance(state, content));
     if (!arrested && chance(state.rng, investigationChance(state, content))) investigationOpened = openInvestigation(state, content);
   }
+
+  if (crime.crew && !away) applyCodes(state, content, { arrested, done });
 
   // Events, most serious first.
   let room = b.jobs.maxQueued;
@@ -164,16 +171,20 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
     } else if (room > 0 && chance(state.rng, curveAt(b.away.reachChance, crew.away!.suspicion))) queue('away');
   } else if (crew) {
     if (returned) queue('back');
-    if (!arrested && b.ranks[crime.rank - 1]!.cut) queue('cut');
-    const next = b.ranks[crime.rank];
-    if (next?.reach && crime.standing >= next.reach.standing && state.currentYear - crime.rankSince >= next.reach.years && chance(state.rng, next.reach.chance)) queue('promotion');
+    for (const trigger of orgTriggers) queue(trigger);
+    // (A leader's yearly money comes from the organization's year, not from a share paid as an event.)
+    if (!arrested && b.ranks[tierOf(content, crew.defId, crime.rank) - 1]!.cut && !isLeader(state, content)) queue('cut');
+    const next = crime.rank < top ? b.ranks[tierOf(content, crew.defId, crime.rank + 1) - 1] : undefined;
+    if (next?.reach && crime.standing >= next.reach.standing && state.currentYear - crime.rankSince >= next.reach.years && chance(state.rng, next.reach.chance)) {
+      queue(crime.rank + 1 === initiationRank(content, crew.defId) && crew.initiated !== true ? 'initiation' : 'promotion');
+    }
     if (crew.rival && chance(state.rng, curveAt(b.rivalry.eventChance, crime.rivalry))) queue('rival');
     if (crew.informant !== undefined && chance(state.rng, 0.5)) queue('informant');
   } else if (isFormer(state) && chance(state.rng, curveAt(b.past.eventChance, crimeYears(state)))) queue('past');
 
   // This year's jobs, from what the registry offers and the rank allows.
   if (crew && !away && !arrested && room > 0) {
-    const range = b.jobs.perYear[crime.rank - 1]!;
+    const range = b.jobs.perYear[tierOf(content, crew.defId, crime.rank) - 1]!;
     const n = Math.min(room, nextInt(state.rng, range.min, range.max));
     const taken = new Set<Id>();
     for (let i = 0; i < n; i++) {

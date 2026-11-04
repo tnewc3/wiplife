@@ -1,7 +1,8 @@
 id: velvet_hand
 name: the Velvet Hand
-blurb: A crew of smooth talkers and paperwork. Nobody gets hurt, they say, and they say it often.
-cities: [nyc, los_angeles, houston, montreal, london, mexico_city]
-ranks: [shill, fixer, closer, partner, ringleader]
-rivals: [marrow_street_crew, larkspur_collective]
+kind: mafia
+blurb: A family of smooth talkers and paperwork. Nobody gets hurt, they say, and they say it often.
+cities: [nyc, los_angeles, houston, montreal, london, mexico_city, chicago]
+ranks: [associate, soldier, capo, underboss, boss]
+rivals: [marrow_street_crew, larkspur_collective, orsolo_family]
 traits: { confidence: 12, discipline: 5, kindness: -6 }

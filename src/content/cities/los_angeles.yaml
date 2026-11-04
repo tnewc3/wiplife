@@ -31,3 +31,11 @@ heritageWeights:
   south_asian: 3
   arab: 2.5
   west_african: 0.5
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: palmetto_flats, name: Palmetto Flats, income: 1, attention: 61 }
+  - { id: sunstreak_boulevard, name: Sunstreak Boulevard, income: 3, attention: 60 }
+  - { id: the_culvert, name: The Culvert, income: 2, attention: 31 }
+  - { id: orchard_terrace, name: Orchard Terrace, income: 5, attention: 61 }
+  - { id: dockside_mile, name: Dockside Mile, income: 2, attention: 48 }

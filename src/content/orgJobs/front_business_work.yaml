@@ -1,0 +1,9 @@
+id: front_business_work
+name: Run the front
+blurb: A legitimate-looking business with a second set of books. Slow money, and safe if it stays boring.
+kinds: [mafia]
+effect: earn
+size: small
+danger: low
+done: "{member} kept the family's front business busy, and {amount} found its way back."
+bust: "An audit made {member}'s front business a worry this year. {amount} came through."

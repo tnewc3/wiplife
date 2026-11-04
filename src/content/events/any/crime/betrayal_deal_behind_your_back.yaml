@@ -1,0 +1,50 @@
+id: betrayal_deal_behind_your_back
+title: A deal made without you
+text: >-
+  {member.name} has heard something that was not meant to reach you: two
+  people you work with have been meeting with the other side. Nothing has been
+  agreed. Everyone is waiting to see whether you know.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rival: true } }
+    - { crime: { away: false } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: confront
+    label: Confront them
+    check:
+      base: 58
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.15 }, { role: member, key: trust, weight: 0.15 }]
+      success:
+        text: >-
+          They did not expect you to know. The meetings stop, and {crew} is a little
+          more careful about who sits where.
+        effects:
+          - { type: crime, action: loyalty, delta: 3 }
+          - { type: crime, action: standing, delta: 5 }
+      failure:
+        text: >-
+          You were wrong about one of them, and the others spend the week
+          explaining how that insult should be understood.
+        effects:
+          - { type: crime, action: loyalty, delta: -5 }
+          - { type: crime, action: standing, delta: -4 }
+  - id: let_it_play
+    label: Say nothing and watch what they do
+    outcome:
+      text: >-
+        You learn a great deal about everyone in the room. Some of it you were
+        better off not knowing.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: crime, action: loyalty, delta: -2 }

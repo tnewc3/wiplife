@@ -19,3 +19,11 @@ schools:
   elite: Greyfriars University
   trade: Market Street Technical College
   grad: Shire Graduate School
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: the_high_street, name: The High Street, income: 1, attention: 30 }
+  - { id: mill_lane_estate, name: Mill Lane Estate, income: 1, attention: 21 }
+  - { id: station_approach, name: Station Approach, income: 2, attention: 19 }
+  - { id: common_road, name: Common Road, income: 3, attention: 22 }
+  - { id: the_pit_houses, name: The Pit Houses, income: 2, attention: 27 }

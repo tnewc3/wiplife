@@ -81,3 +81,11 @@ education:
   collegeYears: { community: 2, state: 3, elite: 3 }
   tuition:
     college: { community: 250 }
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: rue_des_tanneurs, name: Rue des Tanneurs, income: 5, attention: 29 }
+  - { id: the_brickworks, name: The Brickworks, income: 1, attention: 57 }
+  - { id: quai_sainte_odile, name: Quai Sainte-Odile, income: 4, attention: 35 }
+  - { id: faubourg_lantern, name: Faubourg Lantern, income: 3, attention: 34 }
+  - { id: passage_du_meunier, name: Passage du Meunier, income: 4, attention: 51 }

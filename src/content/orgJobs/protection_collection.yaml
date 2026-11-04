@@ -1,0 +1,10 @@
+id: protection_collection
+name: Protection
+blurb: Businesses pay for peace. The family sets the price and decides what peace means.
+kinds: [mafia]
+effect: earn
+size: solid
+danger: medium
+needsHood: true
+done: "{member} kept the neighborhood's envelopes coming, {amount} for the year."
+bust: "{member}'s route had a bad year. The envelopes came to {amount}, and some doors stayed shut."

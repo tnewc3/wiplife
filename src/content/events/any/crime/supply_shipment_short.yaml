@@ -1,0 +1,54 @@
+id: supply_shipment_short
+title: A shipment that is short
+text: >-
+  {member.name} says the count is wrong. The people who buy from {crew} are
+  waiting, and what arrived is less than what was sent. Somebody between here
+  and the source made a decision, and there are only a few people who could have.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [cartel] } }
+    - { crime: { leader: true } }
+    - { crime: { away: false } }
+    - { finances: { dirty: { gte: 1000 } } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: make_up_the_difference
+    label: Make up the difference yourself
+    outcome:
+      text: >-
+        The dealers get their order, and nobody learns that there was a problem.
+        It costs you, and it buys quiet.
+      effects:
+        - { type: dirtyMoney, pay: solid }
+        - { type: crime, action: standing, delta: 4 }
+  - id: find_out_who
+    label: Find out who is responsible
+    check:
+      base: 58
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          It takes a month. The person responsible is replaced, the difference
+          is recovered, and the dealers get a very clear sense of how seriously
+          you take your name.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: crime, action: standing, delta: 6 }
+          - { type: crime, action: heat, delta: 5 }
+      failure:
+        text: >-
+          The trail goes cold, or somebody wanted it to. The dealers wait, then
+          stop waiting.
+        effects:
+          - { type: crime, action: standing, delta: -5 }
+          - { type: crime, action: strength, delta: -3 }

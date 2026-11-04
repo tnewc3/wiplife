@@ -1,0 +1,52 @@
+id: discipline_whispers
+title: People are talking
+text: >-
+  {member.name} lets you know that some people in {crew} are not happy, and have
+  stopped hiding it. It is not about you. It is about how things are being
+  run, and people tend to forget the difference when they are afraid.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { leader: true } }
+    - { crime: { away: false } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { flag: held_the_line_in_a_war }, x: 0.7 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: call_a_meeting
+    label: Call everyone together
+    check:
+      base: 62
+      stats: [{ key: confidence, weight: 0.25 }, { key: sociability, weight: 0.2 }, { crime: standing, weight: 0.15 }]
+      success:
+        text: >-
+          You say what is true, and what is wrong, and what you will do about it.
+          People leave quieter and a little more loyal than they came.
+        effects:
+          - { type: crime, action: loyalty, delta: 6 }
+          - { type: crime, action: standing, delta: 3 }
+      failure:
+        text: >-
+          You say too much to people who were already angry. The room gets
+          louder, and not the way you wanted.
+        effects:
+          - { type: crime, action: loyalty, delta: -5 }
+          - { type: crime, action: standing, delta: -3 }
+  - id: ignore_it
+    label: Let it blow over
+    outcome:
+      text: >-
+        Some things do. This one slowly shifts where people stand when you are in
+        the room.
+      effects:
+        - { type: crime, action: loyalty, delta: -3 }

@@ -1,0 +1,8 @@
+id: ash_lane_runners
+name: the Ash Lane Runners
+kind: street_gang
+blurb: Three blocks, one colour of jacket and a habit of settling things in public. They are younger than their reputation.
+cities: [chicago, nyc, los_angeles, houston, toronto, london, manchester, montreal]
+ranks: [associate, runner, shot-caller, head]
+rivals: [cinder_row_outfit, tallow_street_set]
+traits: { riskTaking: 14, sociability: 8, discipline: -6 }

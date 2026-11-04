@@ -1,0 +1,8 @@
+id: last_mile_riders
+name: the Last Mile Riders
+kind: motorcycle_club
+blurb: A smaller club with a long memory. They will tell you exactly how many miles it takes to earn the patch.
+cities: [guadalajara, monterrey, mexico_city, small_town_mx, houston, los_angeles, small_town, manchester, london]
+ranks: [hang-around, prospect, patched member, officer, president]
+rivals: [iron_mercy_riders, rust_crow_riders]
+traits: { discipline: 8, sociability: 6, riskTaking: 8 }

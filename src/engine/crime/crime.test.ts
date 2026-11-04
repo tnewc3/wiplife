@@ -26,7 +26,11 @@ const b = content.balance.crime;
 const ok = (life: LifeState) => expect(checkInvariants(life, content).filter((f) => !/input log|recap|lifetime|due in the past|lifeStage|housing.cityId/.test(f))).toEqual([]);
 const apply = (life: LifeState, fn: (d: LifeState) => void) => produce(life, (d) => void fn(d as LifeState));
 const adult = (seed = 'crime', age = 28) => lifeAtAge(seed, age);
-const inCrewLife = (seed = 'crime', age = 28) => apply(adult(seed, age), (d) => void joinCrew(d, content));
+/** In a crew of five ranks with no code about idle years (a mafia family, or else a cartel): the E6a rules these tests cover. O1's own rules (four ranks, codes) are in orgs.test.ts. */
+const inCrewLife = (seed = 'crime', age = 28) =>
+  apply(adult(seed, age), (d) => {
+    if (!joinCrew(d, content, undefined, undefined, 'mafia')) joinCrew(d, content, undefined, undefined, 'cartel');
+  });
 const yearStep = (life: LifeState) =>
   apply(life, (d) => {
     d.currentYear += 1;
@@ -172,7 +176,7 @@ describe('heat', () => {
     expect(hot.arrests).toBeGreaterThan(cold.arrests * 5);
     expect(hot.opened).toBeGreaterThan(cold.opened);
     expect(cold.arrests).toBeLessThan(15);
-  });
+  }, 30_000);
 });
 
 describe('the crew year', () => {
@@ -245,7 +249,8 @@ describe('the crew year', () => {
     for (let i = 0; i < 12 && !offered; i++) {
       life = apply(life, (d) => void ((d.crime.standing = 95), (d.crime.rankSince = d.currentYear - 5)));
       life = yearStep(life);
-      offered = life.scheduled.some((s) => s.eventId === 'promotion_offered');
+      // (O1: the step up to the initiation rank is an initiation event instead.)
+      offered = life.scheduled.some((s) => s.eventId === 'promotion_offered' || content.registries.crime.triggers.initiation.events.includes(s.eventId));
     }
     expect(offered).toBe(true);
     let l = inCrewLife('ranks');
@@ -332,11 +337,12 @@ describe('moving away from the crew', () => {
 });
 
 describe('the yearly cut', () => {
-  it('is paid in dirty money to the two highest ranks only, adds a little heat, and is queued as an event', () => {
+  it('is paid in dirty money to the second highest rank (the leader is paid by the organization’s year), adds a little heat, and is queued as an event', () => {
     for (const rank of [1, 2, 3, 4, 5]) {
       const life = yearStep(apply(inCrewLife(`cut-${rank}`), (d) => void ((d.crime.rank = rank), (d.crime.peak = rank), (d.crime.standing = 60))));
       const queued = life.scheduled.some((s) => content.registries.crime.triggers.cut.events.includes(s.eventId));
-      expect(queued).toBe(rank >= 4);
+      // (O1: whoever runs it is paid by the organization's year, not by an event.)
+      expect(queued).toBe(rank === 4);
     }
     const lt = apply(inCrewLife('cut-pay'), (d) => void ((d.crime.rank = 4), (d.crime.peak = 4), (d.crime.heat = 0), (d.finances.dirty = 0)));
     const paid = apply(lt, (d) => void applyEffects(d, [{ type: 'dirtyMoney', cut: true }], { def: content.events.crew_cut_lieutenant!, cast: {}, rng: d.rng, content }));

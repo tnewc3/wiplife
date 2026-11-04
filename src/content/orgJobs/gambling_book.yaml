@@ -1,0 +1,9 @@
+id: gambling_book
+name: The book
+blurb: Betting and cards, run quietly. Steady, and the police like to know about it.
+kinds: [mafia]
+effect: earn
+size: solid
+danger: low
+done: "{member} ran the family's book this year and cleared {amount}."
+bust: "A raid shut {member}'s book for part of the year. The family cleared {amount}."

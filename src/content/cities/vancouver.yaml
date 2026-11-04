@@ -32,3 +32,11 @@ heritageWeights:
   hispanic: 3
   french: 3
   west_african: 0.5
+
+# O1: neighborhoods organizations hold and contest: income value 1 to 5 and police attention 0 to 100 (fictional names).
+neighborhoods:
+  - { id: gastown_lane, name: Gastown Lane, income: 3, attention: 70 }
+  - { id: cannery_row, name: Cannery Row, income: 4, attention: 47 }
+  - { id: the_inlet_blocks, name: The Inlet Blocks, income: 4, attention: 39 }
+  - { id: hastings_reach, name: Hastings Reach, income: 2, attention: 30 }
+  - { id: mount_pleasant_alley, name: Mount Pleasant Alley, income: 2, attention: 34 }

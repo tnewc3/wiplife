@@ -1,5 +1,6 @@
 import { emptyHub } from '../engine/hub/query';
 import { emptyDrugs } from '../engine/drugs/query';
+import { emptyOrgs } from '../engine/crime/query';
 import { reconcileHeadcount } from '../engine/business/crew';
 import { craftRole, managerRole } from '../engine/business/headcount';
 import { defaultLines, forecastFromCustomers } from '../engine/business/products';
@@ -631,7 +632,46 @@ export const migrations: readonly Migration[] = [
       'condition from then on. Heir replay snapshots are upgraded the same way.',
     migrate: upgradeDrugsData,
   },
+  {
+    from: 41,
+    description:
+      'O1: organized crime. A life gains the world of organizations (none made until you are in one). A crew you are in keeps its place; a rank in an organization ' +
+      'with fewer ranks (a street gang has four) is moved to the nearest rank that pays and asks the same, and members get a roster when the next year begins. ' +
+      'Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeOrgData,
+  },
 ];
+
+/** O1: the rank in an organization of `ranks` ranks that stands where an old rank (of five) stood: the first one whose tier reaches it. */
+function movedRank(old: number, crewId: unknown, content: ContentBundle): number {
+  const def = typeof crewId === 'string' ? content.crews[crewId] : undefined;
+  const tiers = def ? content.orgKinds[def.kind]?.tiers : undefined;
+  if (!def || !tiers || old < 1) return old;
+  if (old <= def.ranks.length && tiers.length === 5) return old;
+  const at = tiers.findIndex((t) => t >= old);
+  return Math.min(def.ranks.length, at < 0 ? def.ranks.length : at + 1);
+}
+
+/** O1: the world of organizations a save from before organized crime lacks; ranks follow the organization's own count. */
+function upgradeOrgData(data: unknown): unknown {
+  if (!isRecord(data) || !isRecord(data.character)) return data;
+  const content = compiled as ContentBundle;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeOrgData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  let crime = data.crime;
+  if (isRecord(crime)) {
+    const crew = isRecord(crime.crew) ? crime.crew : null;
+    const past = Array.isArray(crime.past) ? crime.past.map((p: unknown) => (isRecord(p) && typeof p.topRank === 'number' ? { ...p, topRank: movedRank(p.topRank, p.crewId, content) } : p)) : crime.past;
+    if (crew && typeof crime.rank === 'number') {
+      const rank = movedRank(crime.rank, crew.defId, content);
+      const peak = typeof crime.peak === 'number' ? Math.max(rank, movedRank(crime.peak, crew.defId, content)) : crime.peak;
+      crime = { ...crime, rank, peak, past };
+    } else crime = { ...crime, past };
+  }
+  return { ...data, inputLog, crime, orgs: data.orgs ?? emptyOrgs() };
+}
 
 /** D1: the drugs record a save from before drugs lacks, with an addiction the life had carried over as a habit. */
 function upgradeDrugsData(data: unknown): unknown {

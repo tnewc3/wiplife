@@ -99,3 +99,14 @@ Actions that are not leisure activities (jobs, school, money, housing, family, t
 | Career → Special careers | Sports, Music, Acting, Social media, Writing & art, Business, Crime | Adds **Dealing** (adults), which opens a sheet with tabs **Overview** (customers, standing, heat, dirty money, price and stock) and **Production** (the grow operations and labs you run, and the ones you can set up) |
 | Career → You | A row per role | A **Dealing** row appears once you deal or run an operation, with its standing bar |
 | Schedule | Eight roles | Nine: **Dealing** takes load like any other role |
+
+## O1: organized crime
+
+| Screen | Before | Now |
+|---|---|---|
+| Career → Special careers → Crime | A sheet with the crime card (crew, rank, standing, heat, people) | In an organization the row opens the **Organization** screen with in-screen tabs **Overview / Members / Territory / Rivals** (no more than two levels below the tab: row, then a bottom sheet of actions). Without one it still opens the crime card. |
+| Overview | n/a | Two row lists (the organization, your place) with 56px rows; the last year's results and the code are collapsible groups that remember if they are open. Your cut and an informant end in three dots (quick action sheet). |
+| Members | The crime card listed names | One 56px row per member (name, rank, job, skill word, loyalty bar); three dots open an action sheet (give a job, promote, put in line, cut loose with a confirm sheet); the job choice is a second bottom sheet. |
+| Territory | n/a | One row per neighborhood (holder, income word, attention word, attention bar); three dots on a neighborhood you do not hold order an attack. |
+| Rivals | n/a | One row per organization (kind, status, attitude word, strength bar); three dots offer a truce or an alliance, or make a cartel your supplier. |
+| God mode → Career | Sports, music, fame | Adds **Crime** (rank, standing, heat, dirty money, your cut, each member's skill and loyalty, end a war). |

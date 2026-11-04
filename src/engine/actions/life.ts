@@ -34,6 +34,7 @@ import { POSSESSION_ACTION_IDS, POSSESSION_ACTIONS } from './possessions';
 import { TEEN_ACTION_IDS, TEEN_ACTIONS } from './teen';
 import { CRIME_ACTION_IDS, CRIME_ACTIONS } from './crime';
 import { DRUG_ACTION_IDS, DRUG_ACTIONS } from './drugs';
+import { ORG_ACTION_IDS, ORG_ACTIONS } from './org';
 import { FAME_ACTION_IDS, FAME_ACTIONS } from './fame';
 import { SOCIAL_ACTION_IDS, SOCIAL_ACTIONS } from './social';
 import { SPORTS_ACTION_IDS, SPORTS_ACTIONS } from './sports';
@@ -51,7 +52,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...LANGUAGE_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...DRUG_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS, ...HUB_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...LANGUAGE_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...DRUG_ACTION_IDS, ...ORG_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS, ...HUB_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'set_body', 'write_will'];
@@ -119,6 +120,12 @@ export interface LifeActionParams {
   amount?: number;
   /** D1: drugs: the drug, where it is bought, how many units, whether it is for resale, the dose, a dealing price, an operation and how it runs. */
   drugId?: string;
+  /** O1: a neighborhood, an organization (null clears the supplier), a cut, a way with an informant and a move toward a rival. */
+  hoodId?: string;
+  orgId?: string | null;
+  cutLevel?: 'low' | 'fair' | 'high';
+  way?: 'confront' | 'pay';
+  move?: 'truce' | 'alliance';
   drugSource?: DrugSource;
   units?: number;
   resale?: boolean;
@@ -380,6 +387,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...TEEN_ACTIONS,
   ...CRIME_ACTIONS,
   ...DRUG_ACTIONS,
+  ...ORG_ACTIONS,
   ...FAME_ACTIONS,
   ...SOCIAL_ACTIONS,
   ...SPORTS_ACTIONS,

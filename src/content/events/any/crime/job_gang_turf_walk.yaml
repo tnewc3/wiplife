@@ -1,0 +1,50 @@
+id: job_gang_turf_walk
+title: Walking the block
+text: >-
+  {member.name} wants you on the street tonight, walking the edge of what
+  {crew} holds. Being seen is the whole job. A pair of strangers has been
+  hanging around the same two corners, and they have not bought anything.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [street_gang] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: walk_it
+    label: Walk the block and make sure they see you
+    check:
+      base: 66
+      stats: [{ key: confidence, weight: 0.3 }, { key: fitness, weight: 0.15 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: >-
+          The strangers are gone by midnight. A shopkeeper presses an envelope
+          into your hand at the end of the week, as thanks.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: crime, action: job, size: small }
+          - { type: relationship, role: member, trust: 3 }
+      failure:
+        text: >-
+          It turns into a standoff and then a shoving match and then a night in
+          an emergency room. The strangers leave. So do two of your own, and
+          nobody is happy with how it went.
+        effects:
+          - { type: crime, action: job, size: small }
+          - { type: crime, action: heat, delta: 6 }
+          - { type: crime, action: standing, delta: -3 }
+          - { type: stat, key: health, delta: -4 }
+  - id: pass
+    label: Tell {member.them} to find someone else
+    outcome:
+      text: '{member.name} shrugs and gets someone else. It is noted that you were not there.'
+      effects:
+        - { type: crime, action: standing, delta: -4 }

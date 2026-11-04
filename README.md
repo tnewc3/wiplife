@@ -6,6 +6,7 @@ A free, mobile-first life simulator that runs entirely on the player's device. E
 - Architecture, data model and roadmap: [docs/technical.md](docs/technical.md)
 - Rules for coding AIs: [AGENTS.md](AGENTS.md)
 - What the UI tightening changed, screen by screen: [docs/ui-audit.md](docs/ui-audit.md)
+- Organized crime (O1): see docs/technical.md (O1) and screenshots in docs/screenshots/o1
 - Playable game: https://wiplife.pages.dev (hosted on Cloudflare Pages)
 
 ## Commands

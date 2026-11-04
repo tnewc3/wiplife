@@ -1,0 +1,49 @@
+id: supply_gang_wants_credit
+title: A gang wants more on credit
+text: >-
+  Someone who runs a gang that buys from {crew} wants twice the usual order and
+  a month to pay for it. {member.name} says they are good for it. {member.They}
+  {member:has|have} been wrong about people before.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [cartel] } }
+    - { crime: { leader: true } }
+    - { crime: { away: false } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: extend_it
+    label: Give them the order on credit
+    check:
+      base: 62
+      stats: [{ key: smarts, weight: 0.25 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          They pay in full a week early and bring a friend with a larger order.
+          The relationship is better than it has ever been.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: strength, delta: 3 }
+      failure:
+        text: >-
+          The month ends and the payment does not. Soon the gang stops answering, and the order is gone with them.
+        effects:
+          - { type: crime, action: strength, delta: -2 }
+          - { type: crime, action: standing, delta: -3 }
+  - id: cash_only
+    label: Cash only, as usual
+    outcome:
+      text: >-
+        They take the smaller order and a longer look at you. Business goes on,
+        a little more coolly than before.
+      effects:
+        - { type: dirtyMoney, gain: small }

@@ -1,0 +1,57 @@
+id: initiation_made
+title: Becoming made
+text: >-
+  {member.name} says that {crew} is ready to decide whether you are a person
+  it will stand behind. That is the whole of what is said. A dinner is
+  arranged. A room is chosen. Everyone you have worked for will be there, and
+  the only way to fail is to say the wrong thing at the right moment.
+tone: serious
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [mafia] } }
+    - { crime: { initiating: true } }
+weight:
+  base: 10
+  modifiers:
+    - { if: { flag: failed_an_initiation }, x: 1.3 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: take_the_oath
+    label: Take the oath
+    check:
+      base: 66
+      stats: [{ key: discipline, weight: 0.3 }, { key: confidence, weight: 0.2 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          It is the quietest ceremony you have ever been part of. You swear
+          what is asked, and from that night you are a soldier in {crew},
+          which is to say you belong to it more than it will ever belong to you.
+        effects:
+          - { type: crime, action: promote }
+          - { type: flag, key: passed_an_initiation, value: true }
+          - { type: relationship, role: member, affection: 6 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          You pause a moment too long before an answer. Nobody says anything.
+          The dinner goes on and you are thanked for coming, and you know you
+          will be asked again later, or never.
+        effects:
+          - { type: crime, action: standing, delta: -10 }
+          - { type: flag, key: failed_an_initiation, value: true }
+  - id: ask_for_time
+    label: Ask for more time
+    outcome:
+      text: >-
+        The room understands, or pretends to. {member.name} tells you that
+        nobody has asked for that before.
+      effects:
+        - { type: crime, action: standing, delta: -5 }

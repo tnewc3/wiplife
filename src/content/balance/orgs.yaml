@@ -1,0 +1,108 @@
+# Organized crime (O1): organizations, members, yearly jobs, territory, rivals and the supply of drugs. Starting
+# proposals; Stage 12 (balancing) tunes them. Takes are dollars at a city pay level of 1 (see balance/crime.yaml sizes).
+
+world:
+  # Generated organizations a city has besides the named ones that work there.
+  generated: { min: 2, max: 3 }
+  kindWeights: { street_gang: 4, mafia: 2, cartel: 1.5, motorcycle_club: 2.5 }
+  strength: { mean: 50, sd: 16 }
+  startHoods: { street_gang: 1, mafia: 1, cartel: 1, motorcycle_club: 1 }
+  # The share of a city's neighborhoods nobody holds at first.
+  unheld: 0.25
+  attitude: { mean: -10, sd: 25 }
+  drift: 4
+
+roster:
+  skill: { mean: 45, sd: 16 }
+  loyalty: { mean: 55, sd: 14 }
+  cap: { street_gang: 10, mafia: 8, cartel: 8, motorcycle_club: 10 }
+  grow: 2
+  idleLoyalty: 4
+  recruitSkill: { mean: 35, sd: 14 }
+
+jobs:
+  success: { base: 0.5, skill: 0.004, loyalty: 0.002, heat: 0.003, min: 0.15, max: 0.92 }
+  danger:
+    low: { arrest: 0.03, injury: 0.03, killed: 0 }
+    medium: { arrest: 0.07, injury: 0.07, killed: 0.002 }
+    high: { arrest: 0.13, injury: 0.13, killed: 0.01 }
+  heatScale: 0.8
+  warScale: 1.0
+  failShare: 0.2
+  noSupplier: 0.5
+  leaderHeat: 0.5
+  memberHeat: { low: 3, medium: 6, high: 10, decay: 4 }
+  lieLow: { you: 6, member: 12 }
+  launder: { keep: 0.8 }
+  recruit: { chance: 0.7, loyalty: 8 }
+  unassignedLoyalty: 3
+  standing: { done: 1.5, bust: 2, max: 8 }
+
+cut:
+  low: { keep: 0.35, loyalty: 4 }
+  fair: { keep: 0.5, loyalty: 0 }
+  high: { keep: 0.7, loyalty: -5 }
+
+territory:
+  income: [1800, 5000, 12000, 30000, 70000]
+  leaderShare: 0.5
+  heatPer10: 0.5
+  strengthPerHood: 5
+  strengthPerMember: 3
+  attack: { base: 0.02, hostile: 1.0, war: 2.2, cap: 0.7 }
+  protect: 0.15
+  luck: 24
+  expandCost: 4000
+  fight: { winHeat: 6, loseHeat: 3, warWin: 18, warLose: 24, hurt: 0.22, killed: 0.03, killedCap: 1 }
+
+war:
+  at: 35
+  decay: 5
+  truceYears: 3
+  truceBreak: 0.25
+  truceOdds:
+    - { at: -100, x: 0.1 }
+    - { at: 0, x: 0.35 }
+    - { at: 100, x: 0.8 }
+  allianceOdds:
+    - { at: -100, x: 0 }
+    - { at: 0, x: 0.1 }
+    - { at: 60, x: 0.55 }
+    - { at: 100, x: 0.8 }
+  betrayal: 0.06
+  allyStrength: 8
+  truceWar: 25
+  attitude: { fight: -18, truce: 12, alliance: 20, peace: 3, betrayal: -60 }
+
+supply:
+  cartelShare: 0.3
+  units: { low: 20, medium: 45, high: 90 }
+  wholesale: 0.45
+  drugs: [cannabis, cocaine, methamphetamine, heroin, ecstasy, painkillers]
+  dealerPrice: 0.8
+
+decisions:
+  promote: { loyalty: 10, standing: 6 }
+  discipline: { loyalty: -6, skill: 3, standing: 4, quitChance: 0.15 }
+  cutLoose: { loyalty: -8, heat: 4 }
+  informant: { confront: 55, heat: 6, silenceLoyalty: -10 }
+  leaderStress: 2
+  informantLoyalty: 35
+
+initiation:
+  standing: 35
+  failStanding: 10
+
+bands:
+  strength: [30, 50, 70, 85]
+  attitude: [-60, -20, 20, 60]
+  member: [30, 55, 80]
+
+events:
+  contest: 0.5
+  war: 0.5
+  truce: 0.35
+  betrayal: 0.5
+  discipline: 0.15
+  supply: 0.2
+  maxQueued: 3

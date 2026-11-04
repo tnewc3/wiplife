@@ -1,0 +1,122 @@
+# The yearly recap lines the organization writes (O1). The player is "you".
+# Values: {crew} the organization, {member} a member, {amount} money (dirty unless said), {hood} a neighborhood,
+# {rival} another organization, {job} a job, {balance} your dirty money now, {count} a number.
+history:
+  yearTake:
+    importance: 2
+    variants:
+      - "{crew} had a year of work: {amount} in dirty money came to you. You now hold {balance}."
+      - "The year's jobs for {crew} paid you {amount} in dirty money. You are holding {balance}."
+  yearQuiet:
+    importance: 1
+    variants:
+      - "{crew} kept its head down this year, and nothing came in."
+  hoodsPay:
+    importance: 2
+    variants:
+      - "Your {count} neighborhoods paid {amount} in dirty money. You are holding {balance}."
+      - "{count} neighborhoods under your hand sent up {amount}, dirty. Your stash is {balance}."
+  hoodGained:
+    importance: 3
+    variants:
+      - "{crew} took {hood}."
+      - "{hood} is under your hand now."
+  hoodLost:
+    importance: 3
+    variants:
+      - "{rival} took {hood} from {crew}."
+      - "You lost {hood} to {rival}."
+  fightWon:
+    importance: 2
+    variants:
+      - "A fight over {hood} with {rival} went your way."
+      - "{rival} came for {hood} and went home without it."
+  fightLost:
+    importance: 2
+    variants:
+      - "A fight over {hood} with {rival} went badly."
+      - "{rival} pushed {crew} back in {hood}."
+  warStarted:
+    importance: 3
+    variants:
+      - "{crew} and {rival} are at war."
+      - "It stopped being a quarrel. You are at war with {rival}."
+  warEnded:
+    importance: 3
+    variants:
+      - "The war with {rival} burned out."
+      - "Nobody had the strength to keep fighting {rival}, and it ended."
+  truceMade:
+    importance: 3
+    variants:
+      - "You made a truce with {rival}."
+      - "{rival} agreed to stop. For now."
+  truceLapsed:
+    importance: 2
+    variants:
+      - "The truce with {rival} ran out."
+  allied:
+    importance: 3
+    variants:
+      - "{crew} and {rival} are allies."
+      - "You shook hands on an alliance with {rival}."
+  betrayed:
+    importance: 3
+    variants:
+      - "{rival} broke its word and turned on {crew}."
+      - "Your ally {rival} betrayed you."
+  memberArrested:
+    importance: 2
+    variants:
+      - "{member} was arrested this year working for {crew}."
+      - "The police took {member}."
+  memberHurt:
+    importance: 2
+    variants:
+      - "{member} was badly hurt on the job."
+      - "{member} came back from work this year with injuries."
+  memberKilled:
+    importance: 3
+    variants:
+      - "{member} was killed. It was work for {crew} that did it."
+      - "{member} did not come home from a job this year."
+  memberTurned:
+    importance: 3
+    variants:
+      - "{member} has been talking to the police."
+  memberPromoted:
+    importance: 2
+    variants:
+      - "You made {member} a {job} in {crew}."
+  memberCut:
+    importance: 2
+    variants:
+      - "You cut {member} loose from {crew}."
+  memberDisciplined:
+    importance: 2
+    variants:
+      - "You put {member} in line."
+  memberQuit:
+    importance: 2
+    variants:
+      - "{member} walked away from {crew}."
+  recruited:
+    importance: 2
+    variants:
+      - "{member} brought {count} new people into {crew}."
+  supplied:
+    importance: 2
+    variants:
+      - "{crew} supplied {count} units to dealers and gangs this year for {amount} in dirty money."
+  laundered:
+    importance: 2
+    variants:
+      - "{amount} of {crew}'s money was cleaned into your savings."
+  codeBroken:
+    importance: 2
+    variants:
+      - "{crew} held you to its code, and it cost you."
+  initiated:
+    importance: 3
+    variants:
+      - "You passed {job} in {crew}."

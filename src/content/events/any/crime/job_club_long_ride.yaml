@@ -1,0 +1,51 @@
+id: job_club_long_ride
+title: A long ride
+text: >-
+  The club is going on a run across three states, and {member.name} says you
+  are riding in the middle of the pack. The saddlebags have something in them.
+  Nobody has said what, and nobody will be glad if you ask.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { kind: [motorcycle_club] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: ride
+    label: Ride with them
+    check:
+      base: 68
+      stats: [{ key: discipline, weight: 0.25 }, { key: fitness, weight: 0.15 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          Two days of road, one stop, and a handshake at the end. {crew} pays
+          you for your share of the miles in cash that has a smell of oil on it.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: crime, action: job, size: small }
+          - { type: relationship, role: member, affection: 4 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: >-
+          A trooper pulls the line over for a taillight and takes an unfriendly
+          interest in the saddlebags. Everyone keeps quiet, and it still leaves the club worse off.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 9 }
+          - { type: crime, action: standing, delta: -4 }
+  - id: stay_home
+    label: Say you cannot get the time
+    outcome:
+      text: >-
+        The club rides without you. It is remembered by the people who note things
+        that you were not there.
+      effects:
+        - { type: crime, action: standing, delta: -4 }

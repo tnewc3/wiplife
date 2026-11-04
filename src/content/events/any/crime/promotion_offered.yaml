@@ -14,6 +14,7 @@ requires:
     - { age: { gte: 18 } }
     - { crime: { member: true } }
     - { crime: { rank: { lte: 4 } } }
+    - { crime: { initiating: false } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
