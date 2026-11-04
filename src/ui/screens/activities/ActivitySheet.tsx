@@ -13,6 +13,7 @@ import { ACTIVITY_TAB_LABELS, HUB_BLOCK_WORDS, money, PASTIME_CATEGORY_NOTES } f
 import { DoctorPanel } from './DoctorPanel';
 import { EntryCards, ReceiptCard } from './EntryCards';
 import { nameParams, type Picks } from './picks';
+import { isShop, ShopScreen } from './ShopScreen';
 
 /**
  * The sheet of one activity of the Activities tab (U3): the option picker. A header with the icon, the title, one line, your
@@ -35,6 +36,7 @@ function Picker({ life, hubId, kind, onClose }: { life: LifeState; hubId: string
   const hub = category?.sections.flatMap((x) => x.activities).find((a) => a.id === hubId);
   const def = content.registries.activities.activities.find((a) => a.id === hubId)!;
   const gold = category?.accent === 'gold';
+  if (hub && isShop(hub)) return <ShopScreen life={life} hubId={hubId} onClose={onClose} />;
   const freshness = kind === 'options' || kind === 'hobbies' || kind === 'vacation' ? { done: hub?.count ?? 0, limit: hub?.limit ?? 1 } : undefined;
   return (
     <OptionPickerSheet open title={def.label} icon={def.icon} line={def.subtitle} balance={money(tab.savings)} freshness={freshness} gold={gold} onClose={onClose} testId={`activity-sheet-${hubId}`}>
