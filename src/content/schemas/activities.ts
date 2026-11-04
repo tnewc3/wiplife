@@ -100,6 +100,8 @@ export const activitiesBalanceSchema = z.strictObject({
   }),
   /** U2: net worths (US prices, scaled to the country's price level) at which a category appears. */
   thresholds: z.record(idSchema, z.number().min(0)),
+  /** U3: a purchase asks "are you sure?" first when it costs at least this share of your savings (and at least `min`, US prices scaled to the country). */
+  confirm: z.strictObject({ share, min: z.number().min(0) }),
   hobbies: z.strictObject({
     /** The skill at which each level begins (the words are interface words, src/ui/labels.ts). Skill is 0 to 100. */
     levels: z.array(z.int().min(1).max(100)).min(2).max(8),
