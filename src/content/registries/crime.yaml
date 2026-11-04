@@ -38,6 +38,9 @@ jobs:
   - job_cartel_new_route
   - job_club_long_ride
   - job_club_rally
+  - youth_job_lookout
+  - youth_job_tag_the_wall
+  - youth_job_after_school_fight
 # deathCauses the causes of death a crew life can end in (src/content/causes)
 # cut         a rank 4-5 member's yearly share of the crew's business, as an event
 # away        the crew reaches out while you live far from it (favors, threats, suspicion)
@@ -46,6 +49,7 @@ jobs:
 # shark       a loan shark's collectors come for a missed payment (Batch 2b; queued by the economy step)
 deathCauses: [crime_job_gone_wrong, crew_war_killing, crew_reprisal, crew_fight]
 triggers:
+  grown: { events: [youth_grown_up, youth_grown_up_moved_on] }
   initiation: { events: [initiation_jumped_in, initiation_made, initiation_first_run, initiation_the_patch] }
   contest: { events: [contest_corner_challenged, contest_scouts_on_your_block] }
   war: { events: [war_ambush_on_the_road, war_the_funeral] }

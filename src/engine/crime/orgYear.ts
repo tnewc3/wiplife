@@ -127,7 +127,8 @@ function memberYear(state: LifeState, content: ContentBundle, id: Id, m: OrgMemb
   const d = b.jobs.danger[job.danger];
   const mult = 1 + (m.heat / 100) * b.jobs.heatScale + (ctx.warActive ? b.jobs.warScale : 0);
   // Death only on a clearly dangerous job, or in a war that has been escalating.
-  const killed = job.danger === 'high' || ctx.warActive ? Math.min(0.5, d.killed * mult) : 0;
+  const kids = crewDef(content, crew.defId)?.youth === true;
+  const killed = !kids && (job.danger === 'high' || ctx.warActive) ? Math.min(0.5, d.killed * mult) : 0;
   const result = (outcome: OrgResult['outcome'], amount = 0): OrgResult => ({ id, name, job: job.id, outcome, amount });
   const rel = state.relationships[id];
 
@@ -292,11 +293,12 @@ function fightRoll(state: LifeState, content: ContentBundle, mine: number, their
 function casualties(state: LifeState, content: ContentBundle, ctx: YearCtx, org: WorldOrg): void {
   const crew = state.crime.crew!;
   const f = content.balance.orgs.territory.fight;
+  const kids = crewDef(content, crew.defId)?.youth === true;
   const ids = Object.keys(crew.roster ?? {}).sort();
   if (ids.length === 0) return;
   const id = pick(state.rng, ids);
   const name = memberName(state, id);
-  if (ctx.escalated.has(org.id) && org.war >= content.balance.orgs.war.at && ctx.recap.results.every((r) => r.outcome !== 'killed') && chance(state.rng, f.killed)) {
+  if (!kids && ctx.escalated.has(org.id) && org.war >= content.balance.orgs.war.at && ctx.recap.results.every((r) => r.outcome !== 'killed') && chance(state.rng, f.killed)) {
     killMember(state, id);
     say(state, 'memberKilled', { member: name }, content);
     ctx.recap.results.push({ id, name, job: '', outcome: 'killed', amount: 0 });
@@ -487,7 +489,11 @@ export function runOrgYear(state: LifeState, content: ContentBundle): OrgYear {
   ensureCity(state, content, crew.cityId);
   ensureHolding(state, content);
   ensureRoster(state, content);
-  const leader = isLeader(state, content);
+  const adult = state.character.age >= content.balance.relationships.adultAge;
+  // (A minor in a youth crew leads it in events only: there is no dirty money, no yearly jobs and no income for a kid.)
+  const youthCrew = crewDef(content, crew.defId)?.youth === true;
+  // (...and a youth crew never runs the jobs of an adult organization, even once its leader is 18: its members are kids.)
+  const leader = isLeader(state, content) && adult && !youthCrew;
   const ctx: YearCtx = {
     recap: { year: state.currentYear, results: [], jobs: 0, hoods: 0, hoodCount: 0, kept: 0, cleaned: 0, units: 0, notes: [] },
     protection: 0,

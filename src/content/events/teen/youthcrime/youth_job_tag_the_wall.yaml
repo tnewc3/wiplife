@@ -1,0 +1,53 @@
+id: youth_job_tag_the_wall
+title: Marking the wall
+text: >-
+  The wall behind the laundromat belongs to another crew, and everyone knows
+  it. {member.name} says {crew} is going to put its name on it tonight, small
+  and fast. It is a dare dressed up as a statement.
+tone: dark
+category: youthcrime
+rarity: common
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: true } }
+    - { crime: { youth: true } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: do_it
+    label: Go along
+    check:
+      base: 62
+      stats: [{ key: confidence, weight: 0.25 }, { key: luck, weight: 0.25 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: >-
+          It is over in two minutes, and the name is there in the morning. People
+          at school talk about it. You pretend to be bored.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: standing, delta: 4 }
+          - { type: crime, action: rivalry, delta: 4 }
+      failure:
+        text: >-
+          A light comes on, a door slams and you run. You get away, but not before
+          someone sees you, and you spend the next week hoping nobody puts a name
+          to what they saw.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 6 }
+          - { type: crime, action: rivalry, delta: 6 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: stay_out
+    label: Stay out of it
+    outcome:
+      text: >-
+        You say you will keep watch from a distance, and it turns out nobody
+        needs you to. It is remembered that you stayed back.
+      effects:
+        - { type: crime, action: standing, delta: -3 }

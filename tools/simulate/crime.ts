@@ -169,7 +169,10 @@ export class CrimeWatcher {
     const { r } = this;
     const adultAge = this.content.balance.relationships.adultAge;
     const k = after.crime;
-    if (after.character.age < adultAge && (k.crew !== null || after.finances.dirty > 0 || k.past.length > 0)) r.underAge++;
+    // (O1 follow-up: a teen from the youth age may be in a youth crew; dirty money and every adult crew are for adults.)
+    const youthMin = this.content.balance.orgs.youth.minAge;
+    const isYouth = (id: string | undefined) => id !== undefined && this.content.crews[id]?.youth === true;
+    if (after.character.age < adultAge && (after.finances.dirty > 0 || (k.crew !== null && (!isYouth(k.crew.defId) || after.character.age < youthMin)) || k.past.some((p) => !isYouth(p.crewId)))) r.underAge++;
     if (k.crew && !this.everIn) {
       this.everIn = true;
       r.entered++;

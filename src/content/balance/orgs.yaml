@@ -93,6 +93,11 @@ initiation:
   standing: 35
   failStanding: 10
 
+# Youth crews (teens from 14): the kids' sets of the street gangs. No dirty money, no killing; the juvenile legal system, parents and school answer.
+youth:
+  minAge: 14
+  memberAge: { min: 14, max: 19 }
+
 bands:
   strength: [30, 50, 70, 85]
   attitude: [-60, -20, 20, 60]

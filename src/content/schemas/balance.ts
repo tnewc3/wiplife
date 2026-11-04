@@ -660,6 +660,7 @@ export const targetsBalanceSchema = z.strictObject({
     leaderDeaths: numberRangeSchema,
     supplied: numberRangeSchema,
     truce: numberRangeSchema,
+    youthJoined: numberRangeSchema,
   }),
   crime: z.strictObject({
     /** Lives of the careful player that entered a crew: none. */

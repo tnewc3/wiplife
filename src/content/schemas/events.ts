@@ -335,6 +335,8 @@ export interface CrimeCondition {
   territory?: Compare;
   /** O1: you are in the rank the organization's initiation opens (the step before it). */
   initiating?: boolean;
+  /** O1 follow-up: you are in a youth crew (a street gang's kids' set). */
+  youth?: boolean;
 }
 
 /**
@@ -1215,6 +1217,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           war: z.boolean().optional(),
           territory: compareSchema.optional(),
           initiating: z.boolean().optional(),
+          youth: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -1889,7 +1892,10 @@ export const effectSchema = z.discriminatedUnion('type', [
       role: roleSchema.optional(),
       /** O1: join an organization of this kind (one that works in your city). */
       kind: orgKindSchema.optional(),
+      /** O1 follow-up: join as its leader (you found the crew), at the top rank. */
+      lead: z.literal(true).optional(),
     })
+    .refine((e) => e.lead === undefined || e.action === 'join', 'only join takes lead')
     .refine((e) => (e.action === 'heat' || e.action === 'standing' || e.action === 'rivalry' || e.action === 'suspicion' || e.action === 'loyalty' || e.action === 'strength' || e.action === 'territory') === (e.delta !== undefined && e.delta !== 0), 'heat, standing, rivalry, suspicion, loyalty, strength and territory need a non-zero delta (and only they have one)')
     .refine((e) => e.kind === undefined || e.action === 'join', 'only join takes kind')
     .refine((e) => (e.action === 'job') === (e.size !== undefined), 'job needs size (and only job has it)')

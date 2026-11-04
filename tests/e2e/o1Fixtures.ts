@@ -12,6 +12,7 @@ import { createLife } from '../../src/engine/life';
 import { lifeStageForAge } from '../../src/engine/systems/aging';
 import { startingTeen } from '../../src/engine/teen/query';
 import type { LifeState } from '../../src/engine/types';
+import { teenLife } from './teenFixtures';
 
 function pack(): ContentBundle {
   return JSON.parse(readFileSync(path.resolve('src/content/compiled/test-content.json'), 'utf8')) as ContentBundle;
@@ -24,10 +25,19 @@ export interface OrgLife {
   rank?: number;
   age?: number;
   dirty?: number;
+  /** A teen in a youth crew (age 14 to 17), with no dirty money. */
+  youth?: boolean;
 }
 
 export function orgLife(options: OrgLife): LifeState {
   const content = pack();
+  // A teen in a youth crew starts from the teen fixture (school, home rules) and joins a youth crew; no dirty money.
+  if (options.youth === true) {
+    return produce(teenLife({ seed: options.seed, age: options.age ?? 16 }), (d) => {
+      joinCrew(d as LifeState, content);
+      d.crime.standing = 55;
+    });
+  }
   const age = options.age ?? 31;
   const kind = options.kind ?? 'mafia';
   const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990, countryId: 'us' }, content);
@@ -49,7 +59,12 @@ export function orgLife(options: OrgLife): LifeState {
     d.finances.savings = 8_000;
     d.character.cityId = 'chicago';
     d.housing = { kind: 'renting', cityId: 'chicago', annualCost: 0, since: d.currentYear - 3 };
-    if (age < 18) return;
+    if (age < 18 && options.youth !== true) return;
+    if (age < 18) {
+      joinCrew(d as LifeState, content);
+      d.crime.standing = 55;
+      return;
+    }
     d.career.job = null;
     joinCrew(d as LifeState, content, undefined, undefined, kind);
     const rank = options.rank ?? 99;

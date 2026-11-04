@@ -1,0 +1,43 @@
+id: youth_grown_up
+title: You are not a kid anymore
+text: >-
+  The kids' set that took you in belongs to people who are younger than you
+  now. {member.name} says it plainly: {crew} is for kids, and you are
+  something else. Older people have noticed you, and the question is what you
+  will become.
+tone: serious
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { youth: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: step_up
+    label: Move up to the older crew
+    outcome:
+      text: >-
+        You go to the older crew with your reputation and not much else. They take
+        you on at the bottom, which is how it works, and the work is bigger and
+        quieter than you are used to.
+      effects:
+        - { type: crime, action: leave, how: left }
+        - { type: crime, action: join, kind: street_gang }
+        - { type: stat, key: stress, delta: 4 }
+  - id: walk_away
+    label: Walk away from all of it
+    outcome:
+      text: >-
+        You say your goodbyes in the stairwell. Nobody makes a speech. It is
+        strange to find that you are relieved, and strange to find that you miss it.
+      effects:
+        - { type: crime, action: leave, how: left }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: discipline, delta: 2 }

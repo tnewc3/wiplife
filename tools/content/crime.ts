@@ -15,7 +15,9 @@ const REGISTRY = 'registries/crime.yaml';
 const BALANCE = 'balance/crime.yaml';
 
 /** Event categories that are about a crime career, whatever they do. */
-const CRIME_CATEGORIES = ['crimeoffers', 'crime', 'crimeaway', 'crimehome', 'crimelaw', 'crimepast'];
+const CRIME_CATEGORIES = ['crimeoffers', 'crime', 'crimeaway', 'crimehome', 'crimelaw', 'crimepast', 'youthoffers', 'youthcrime'];
+/** O1 follow-up: the categories of youth crews (teens from the youth age). */
+const YOUTH_CATEGORIES = ['youthoffers', 'youthcrime'];
 
 function required(condition: Condition | undefined): Condition[] {
   if (!condition) return [];
@@ -160,6 +162,15 @@ export function checkCrime(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
   for (const [kind, n] of Object.entries(o.roster.cap)) if (n < b.entry.members.max) err('balance/orgs.yaml', `roster.cap.${kind}: below the members a crew starts with (${b.entry.members.max})`);
   if (o.world.attitude.mean > 0) err('balance/orgs.yaml', 'world.attitude.mean: rivals start wary or hostile, not friendly');
 
+  // O1 follow-up: youth crews.
+  if (o.youth.memberAge.min < o.youth.minAge) err('balance/orgs.yaml', 'youth.memberAge.min must be at least the youth age: nobody younger is in a youth crew');
+  if (o.youth.minAge >= adultAge) err('balance/orgs.yaml', 'youth.minAge must be below the adult age');
+  for (const city of active(bundle.cities)) {
+    const here = active(bundle.crews).filter((c) => c.cities.includes(city.id));
+    if (here.length > 0 && !here.some((c) => c.youth === true)) err(fileOf('cities', city.id), `${city.id}: has crews but no youth crew for a teen to join`);
+    if (here.length > 0 && !here.some((c) => c.youth !== true)) err(fileOf('cities', city.id), `${city.id}: has only youth crews, and an adult needs one to join`);
+  }
+
   // Crews, rivals and businesses.
   for (const [id, def] of Object.entries(bundle.crews)) {
     const file = fileOf('crews', id);
@@ -288,13 +299,27 @@ export function checkCrime(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
     conditions.forEach(walk);
     if (!usesCrime) continue;
 
-    // Crime is for adults: nobody under the adult age can meet it.
-    const young = new Set(['early', 'child', 'teen']);
-    if (def.lifeStages.some((s) => young.has(s))) e(`crime content is for adults (${adultAge}+): its life stages can't include ${[...young].join(', ')}`);
+    // Crime is for adults, except the youth crews (O1 follow-up): teens from the youth age can be asked in or start a crew, and the
+    // content for them has no dirty money, no death, no laundering and no life stage under the youth age.
     const contract = bundle.registries.categories.categories[def.category]?.requires;
-    if (!requiresAtLeast(def.requires, adultAge) && !requiresAtLeast(contract, adultAge)) e(`crime content is for adults: require { age: { gte: ${adultAge} } }`);
-    for (const x of effects) {
-      if (x.type === 'crime' && x.action === 'join' && !requiresAtLeast(def.requires, adultAge)) e(`joins a crew, so it must require { age: { gte: ${adultAge} } } itself`);
+    const youth = YOUTH_CATEGORIES.includes(def.category);
+    const youthMin = bundle.balance.orgs.youth.minAge;
+    if (youth) {
+      const tooYoung = new Set(['early', 'child']);
+      if (def.lifeStages.some((s) => tooYoung.has(s))) e(`youth crew content is for ${youthMin}+: its life stages can't include ${[...tooYoung].join(', ')}`);
+      if (!requiresAtLeast(def.requires, youthMin) && !requiresAtLeast(contract, youthMin)) e(`youth crew content is for ${youthMin}+: require { age: { gte: ${youthMin} } }`);
+      for (const x of effects) {
+        if (x.type === 'dirtyMoney') e('a youth event never moves dirty money: a kid has none');
+        if (x.type === 'death') e('a youth event never ends in death');
+        if (x.type === 'crime' && x.action === 'join' && !requiresAtLeast(def.requires, youthMin)) e(`joins a youth crew, so it must require { age: { gte: ${youthMin} } } itself`);
+      }
+    } else {
+      const young = new Set(['early', 'child', 'teen']);
+      if (def.lifeStages.some((s) => young.has(s))) e(`crime content is for adults (${adultAge}+): its life stages can't include ${[...young].join(', ')}`);
+      if (!requiresAtLeast(def.requires, adultAge) && !requiresAtLeast(contract, adultAge)) e(`crime content is for adults: require { age: { gte: ${adultAge} } }`);
+      for (const x of effects) {
+        if (x.type === 'crime' && x.action === 'join' && !requiresAtLeast(def.requires, adultAge)) e(`joins a crew, so it must require { age: { gte: ${adultAge} } } itself`);
+      }
     }
 
     // Text values name what the event requires.

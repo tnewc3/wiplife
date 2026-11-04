@@ -1,0 +1,41 @@
+id: youth_grown_up_moved_on
+title: The crew you grew out of
+text: >-
+  Most of {crew} still thinks of you as one of them, but you have started to
+  see it from outside: the games, the rules, the way nobody grows up. {member.name}
+  asks if you are coming to the next thing, and you do not answer right away.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { youth: true } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: drift_off
+    label: Let it fade
+    outcome:
+      text: >-
+        You miss one thing, then another. Nobody calls. After a while it is a
+        story you tell, instead of a place you go.
+      effects:
+        - { type: crime, action: leave, how: drifted }
+        - { type: stat, key: stress, delta: -3 }
+  - id: older_crew
+    label: Look for something bigger
+    outcome:
+      text: >-
+        You ask around, and the answers are polite and not entirely welcoming. You
+        are taken in by {crew}'s older neighbours, at the bottom, and told to
+        prove it.
+      effects:
+        - { type: crime, action: leave, how: left }
+        - { type: crime, action: join, kind: street_gang }
+        - { type: stat, key: stress, delta: 4 }

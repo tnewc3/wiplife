@@ -1,0 +1,49 @@
+id: youth_offer_older_kids
+title: The older kids notice you
+text: >-
+  {kid.name} is a few years older and has a reputation. {kid.They}
+  {kid:stops|stop} to talk to you outside the corner store and treats you like
+  someone worth talking to, which nobody has done lately. {kid.They}
+  {kid:asks|ask} if you would like to come by the building where the crew meets.
+tone: dark
+category: youthoffers
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: false } }
+    - { age: { gte: 15 } }
+    - { crime: { offered: [street_gang] } }
+once: true
+weight:
+  base: 1.2
+  modifiers:
+    - { if: { flag: turned_down_a_crew }, x: 0.6 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.7 }
+    - { if: { trait: confidence, lt: 40 }, x: 1.4 }
+cast:
+  kid: { kind: acquaintance, presence: city, age: { min: 17, max: 19 } }
+choices:
+  - id: come_by
+    label: Come by and see
+    outcome:
+      text: >-
+        It is a stairwell, a speaker and a dozen people who look relieved to
+        see someone new. You are told the rules, which are mostly about
+        loyalty, and you are one of {crew} before you have worked out whether
+        you meant to be.
+      effects:
+        - { type: crime, action: join, kind: street_gang, role: kid }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: stress, delta: 3 }
+  - id: not_today
+    label: Say not today
+    outcome:
+      text: >-
+        {kid.name} nods as if it was the answer {kid.they} {kid:expected|expect}. The
+        invitation, you feel, stays open, which is its own kind of pressure.
+      effects:
+        - { type: flag, key: turned_down_a_crew, value: true }
+        - { type: stat, key: stress, delta: 2 }

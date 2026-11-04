@@ -2753,6 +2753,7 @@ export const ORG_LABELS = {
   },
   blocks: {
     leader: 'Only the leader decides this.',
+    age: 'A kids’ crew has no business to run. That starts with an adult organization, at 18.',
     away: 'You are not in the organization’s city.',
     jail: 'Not from prison.',
     member: 'They are not in the organization.',

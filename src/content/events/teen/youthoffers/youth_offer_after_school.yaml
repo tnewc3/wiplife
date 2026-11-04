@@ -1,0 +1,47 @@
+id: youth_offer_after_school
+title: Somebody saves you a seat
+text: >-
+  {kid.name} has started waiting for you after school. Nothing is said about why.
+  Today {kid.they} {kid:says|say} there is a crew that hangs out behind the bus
+  loop, that they look out for each other, and that there is room if you want
+  it. You can see the others from here, pretending not to look.
+tone: dark
+category: youthoffers
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: false } }
+    - { crime: { offered: [street_gang] } }
+weight:
+  base: 1.6
+  modifiers:
+    - { if: { flag: turned_down_a_crew }, x: 0.6 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.6 }
+    - { if: { trait: sociability, gt: 60 }, x: 1.3 }
+cast:
+  kid: { kind: classmate, presence: city, age: { min: 14, max: 18 } }
+choices:
+  - id: sit_down
+    label: Go and sit with them
+    outcome:
+      text: >-
+        Nobody asks you for anything. They share their food and one of them
+        laughs at your joke, and for the first time in a while you are in on
+        something. By the end of the week you are with {crew}.
+      effects:
+        - { type: crime, action: join, kind: street_gang, role: kid }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: relationship, role: kid, affection: 5 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: walk_home
+    label: Say thanks and walk home
+    outcome:
+      text: >-
+        {kid.name} shrugs. It is fine, and not quite fine. Nobody sits with you
+        at lunch for a few days.
+      effects:
+        - { type: relationship, role: kid, affection: -3 }
+        - { type: flag, key: turned_down_a_crew, value: true }

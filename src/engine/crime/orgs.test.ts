@@ -104,20 +104,28 @@ describe('the four kinds', () => {
 });
 
 describe('adults only', () => {
-  it('nobody under 18 can join, and a roster is never made for one', () => {
+  it('no adult organization can be joined by anyone under 18, and nobody under 14 can join any', () => {
     for (const kind of ORG_KINDS) {
       const teen = apply(lifeAtAge(`teen-${kind}`, 16), (d) => void (d.character.cityId = cityWith(kind)));
-      expect(joinBlock(teen, content, kind)).toBe('age');
-      expect(apply(teen, (d) => void joinCrew(d, content, undefined, undefined, kind)).crime.crew).toBeNull();
+      const block = joinBlock(teen, content, kind);
+      // (A street gang can be joined by a teen only as a youth crew; every other kind not at all.)
+      if (kind === 'street_gang') expect(block).toBeNull();
+      else expect(block).toBe('none');
+      const after = apply(teen, (d) => void joinCrew(d, content, undefined, undefined, kind));
+      if (kind === 'street_gang') expect(content.crews[after.crime.crew!.defId]!.youth).toBe(true);
+      else expect(after.crime.crew).toBeNull();
+      const child = apply(lifeAtAge(`child-${kind}`, 12), (d) => void (d.character.cityId = cityWith(kind)));
+      expect(joinBlock(child, content, kind)).toBe('age');
     }
     const teen = apply(lifeAtAge('teen-roster', 16), (d) => void (d.crime.crew = { defId: 'cinder_row_outfit', cityId: 'chicago', since: d.currentYear, members: [], rivalMembers: [] }));
     expect(checkInvariants(teen, content).join('\n')).toMatch(/under 18/);
   });
 
-  it('every event that joins an organization or moves its world requires an adult', () => {
+  it('every event that joins an organization or moves its world requires an adult, except the youth crews', () => {
     for (const def of Object.values(content.events)) {
       const text = JSON.stringify(def);
       if (!/"type":"crime"|"type":"dirtyMoney"/.test(text)) continue;
+      if (def.category === 'youthoffers' || def.category === 'youthcrime') continue;
       expect(def.lifeStages.some((s) => ['early', 'child', 'teen'].includes(s)), def.id).toBe(false);
     }
   });
@@ -478,5 +486,86 @@ describe('the view', () => {
     expect(view.codes.length).toBeGreaterThan(0);
     expect(view.buys).toBe(true);
     expect(view.suppliers.length).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('youth crews (teens from 14)', () => {
+  const kid = (seed: string, age = 15): LifeState =>
+    apply(lifeAtAge(seed, age), (d) => {
+      d.character.cityId = cityWith('street_gang');
+      expect(joinCrew(d, content)).toBe(true);
+    });
+
+  it('a teen joins a youth crew (a street gang, four ranks) with kids of their own age, and adults can never join one', () => {
+    for (const age of [14, 15, 17]) {
+      const life = kid(`youth-${age}`, age);
+      const crew = life.crime.crew!;
+      const def = content.crews[crew.defId]!;
+      expect(def.youth).toBe(true);
+      expect(def.kind).toBe('street_gang');
+      expect(topRank(content, crew.defId)).toBe(4);
+      for (const id of crew.members) {
+        const years = life.currentYear - life.people[id]!.birthYear;
+        expect(years).toBeGreaterThanOrEqual(content.balance.orgs.youth.memberAge.min);
+        expect(years).toBeLessThanOrEqual(content.balance.orgs.youth.memberAge.max);
+      }
+      ok(life);
+    }
+    const adult = apply(lifeAtAge('youth-adult', 30), (d) => void (d.character.cityId = cityWith('street_gang')));
+    for (let i = 0; i < 5; i++) {
+      const joined = apply(adult, (d) => void joinCrew(d, content));
+      expect(joined.crime.crew === null || content.crews[joined.crime.crew.defId]!.youth !== true).toBe(true);
+    }
+  });
+
+  it('a teen can found a crew and lead it at once, but gets no dirty money, no yearly jobs, no income and no one dies', () => {
+    const founded = apply(lifeAtAge('youth-found', 16), (d) => {
+      d.character.cityId = cityWith('street_gang');
+      expect(joinCrew(d, content, undefined, undefined, undefined, true)).toBe(true);
+    });
+    expect(isLeader(founded, content)).toBe(true);
+    let life = founded;
+    for (let i = 0; i < 2; i++) {
+      life = yearStep(life);
+      expect(life.finances.dirty).toBe(0);
+      expect(life.crime.crew!.recap).toBeUndefined();
+      expect(life.orgs.totals.killed).toBe(0);
+    }
+    expect(isLifeActionAvailable(life, 'org_set_cut', { cutLevel: 'low' }, content)).toBe(false);
+    expect(getOrgView(life, content)!.block).toBe('age');
+    ok(life);
+  });
+
+  it('at 18 a youth crew asks what you will be: it never goes on silently', () => {
+    let life = apply(kid('youth-grow', 16), (d) => void (d.crime.standing = 60));
+    life = yearStep(life);
+    expect(life.scheduled.some((s) => content.registries.crime.triggers.grown.events.includes(s.eventId))).toBe(false);
+    life = yearStep(life);
+    expect(life.character.age).toBe(18);
+    expect(life.scheduled.some((s) => content.registries.crime.triggers.grown.events.includes(s.eventId))).toBe(true);
+    const events = content.registries.crime.triggers.grown.events.map((id) => content.events[id]!);
+    for (const def of events) {
+      const effects = (def.choices ?? []).flatMap((c) => (c.outcome ? c.outcome.effects : [])) as Parameters<typeof applyEffects>[1];
+      const moved = apply(life, (d) => void applyEffects(d, effects.filter((e) => e.type === 'crime'), { def, cast: {}, rng: d.rng, content }));
+      expect(moved.crime.crew === null || content.crews[moved.crime.crew.defId]!.youth !== true).toBe(true);
+    }
+  });
+
+  it('no youth event has dirty money or a death, and they are for teens from 14 (the content build checks it too)', () => {
+    const youth = Object.values(content.events).filter((e) => e.category === 'youthoffers' || e.category === 'youthcrime' || e.id.startsWith('youth_'));
+    expect(youth.length).toBeGreaterThanOrEqual(10);
+    for (const def of youth) {
+      const text = JSON.stringify(def);
+      expect(text, def.id).not.toMatch(/"type":"(dirtyMoney|death)"/);
+    }
+    expect(content.balance.orgs.youth.minAge).toBeGreaterThanOrEqual(14);
+  });
+
+  it('a teen leaves a youth crew and the crew stays a valid past', () => {
+    const life = kid('youth-leave', 16);
+    const out = apply(life, (d) => void applyEffects(d, [{ type: 'crime', action: 'leave', how: 'left' }], { def: content.events.youth_walk_away!, cast: {}, rng: d.rng, content }));
+    expect(out.crime.crew).toBeNull();
+    expect(out.crime.past).toHaveLength(1);
+    ok(out);
   });
 });

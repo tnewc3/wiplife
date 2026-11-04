@@ -45,7 +45,7 @@ function dirtyWanted(condition: Condition | undefined): number | undefined {
 }
 
 export function giveSampleCrime(state: LifeState, def: EventDef, cast: Record<string, Id>, content: ContentBundle): void {
-  const adult = state.character.age >= content.balance.relationships.adultAge;
+  const adult = state.character.age >= content.balance.orgs.youth.minAge;
   const roles = Object.entries(def.cast ?? {}).filter(([, spec]) => spec.crew !== undefined);
   const want = wanted(def.requires);
   const text = JSON.stringify(def);

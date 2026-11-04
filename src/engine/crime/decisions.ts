@@ -16,12 +16,13 @@ import { holdings, memberName, myOrg, worldOrg } from './orgs';
 import { jobsFor, say } from './orgYear';
 import { isLeader, rankTitle, topRank } from './query';
 
-export type LeadBlock = 'leader' | 'away' | 'jail' | 'member' | 'job' | 'rank' | 'money' | 'target' | 'already' | 'tried' | 'none';
+export type LeadBlock = 'leader' | 'age' | 'away' | 'jail' | 'member' | 'job' | 'rank' | 'money' | 'target' | 'already' | 'tried' | 'none';
 
 /** You run the organization, are home and are free. */
 export function leadBlock(state: LifeState, content: ContentBundle): LeadBlock | null {
   const crew = state.crime.crew;
   if (!crew || !isLeader(state, content)) return 'leader';
+  if (state.character.age < content.balance.relationships.adultAge || content.crews[crew.defId]?.youth === true) return 'age';
   if (crew.cityId !== state.character.cityId) return 'away';
   if (isIncarcerated(state)) return 'jail';
   return null;

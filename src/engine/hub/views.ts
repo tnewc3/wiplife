@@ -167,7 +167,7 @@ export function getHubView(state: LifeState, content: ContentBundle): HubView {
       { id: 'social', icon: 'mobile_phone', open: specialOpen('social'), minAge: pathDef(content, 'social')?.minAge ?? 8 },
       { id: 'writing', icon: 'memo', open: specialOpen('arts'), minAge: pathDef(content, 'arts')?.minAge ?? 8 },
       { id: 'business', icon: 'office_building', open: state.character.age >= content.balance.business.limits.minAge, minAge: content.balance.business.limits.minAge },
-      { id: 'crime', icon: 'sunglasses', open: state.character.age >= 18, minAge: 18 },
+      { id: 'crime', icon: 'sunglasses', open: state.character.age >= 18 || (state.crime.crew !== null && state.character.age >= content.balance.orgs.youth.minAge), minAge: 18 },
       { id: 'drugs', icon: 'money_with_wings', open: state.character.age >= content.balance.drugs.ages.adult, minAge: content.balance.drugs.ages.adult },
     ],
   };

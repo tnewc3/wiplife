@@ -1,0 +1,50 @@
+id: youth_start_a_crew
+title: Making something of your own
+text: >-
+  You and {friend.name} are tired of being the ones who get pushed around, and
+  tired of waiting for somebody older to pick you. {friend.They}
+  {friend:says|say} it out loud: there are enough of you on this street to
+  have a crew of your own, with your own rules. It could be a joke. It could
+  also become real.
+tone: dark
+category: youthoffers
+rarity: rare
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: false } }
+    - { age: { gte: 15 } }
+    - { crime: { offered: [street_gang] } }
+once: true
+weight:
+  base: 0.6
+  modifiers:
+    - { if: { trait: ambition, gt: 60 }, x: 1.5 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+    - { if: { trait: confidence, gt: 60 }, x: 1.3 }
+cast:
+  friend: { kind: friend, presence: city, age: { min: 14, max: 18 } }
+choices:
+  - id: start_it
+    label: Start your own crew
+    outcome:
+      text: >-
+        You choose a name on the bus, and by Friday people you hardly know are
+        using it. It is yours now: {crew}, with you at the front of it, and
+        everything that comes with that.
+      effects:
+        - { type: crime, action: join, kind: street_gang, lead: true, role: friend }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: let_it_go
+    label: Tell {friend.them} it is a bad idea
+    outcome:
+      text: >-
+        {friend.name} laughs it off, and the idea does not go anywhere. For a
+        while you both pretend you never said it.
+      effects:
+        - { type: flag, key: turned_down_a_crew, value: true }
+        - { type: stat, key: discipline, delta: 2 }

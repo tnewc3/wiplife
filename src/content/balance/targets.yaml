@@ -348,6 +348,7 @@ orgs:
   leaderDeaths: { min: 0, max: 0.05 }
   supplied: { min: 10000, max: 1000000000 }
   truce: { min: 0.005, max: 0.06 }
+  youthJoined: { min: 0, max: 1 }
 
 # E6a: crime careers. Set from 10,000 criminal-player lives (four runs of 2,500 lives): about four lives in ten reach 30
 # having entered a crew (the criminal player says yes to every offer), a third of those reach the third rank and

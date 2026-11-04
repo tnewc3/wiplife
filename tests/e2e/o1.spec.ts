@@ -98,7 +98,19 @@ test('someone who does not run the organization sees it but cannot decide', asyn
   await expect(page.getByTestId('org-act-promote')).toBeDisabled();
 });
 
-test('nobody under 18 has the screen: the Crime row is closed for a teenager', async ({ page }) => {
+test('a teen in a youth crew has the screen with no decisions to make (a kid has no business to run)', async ({ page }) => {
+  await open(page, { seed: 'e2e-o1-youth', age: 16, youth: true });
+  await openOrg(page);
+  await expect(page.getByText(/A kids’ crew has no business to run|Only the one who runs it makes these decisions/)).toBeVisible();
+  await expect(page.getByTestId('org-row-dirty')).toContainText('$0');
+  await expectNoHorizontalScroll(page);
+  await expectTouchTargets(page);
+  await page.getByTestId('org-tab-members').click();
+  await page.locator('[data-testid^="org-member-more-"]').first().click();
+  await expect(page.getByTestId('org-act-promote')).toBeDisabled();
+});
+
+test('a teen who is in no crew has a closed Crime row: nobody is asked in before 14, and the screen is for members', async ({ page }) => {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, teenLife({ seed: 'e2e-o1-teen', age: 16 }));
   await page.getByRole('button', { name: 'Continue' }).click();

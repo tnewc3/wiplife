@@ -1,0 +1,40 @@
+id: youth_school_calls
+title: A call from the front office
+text: >-
+  A teacher has asked to see you. Someone in your crowd has been talking, and
+  things that happen near the school are being added up. It is not a threat, just
+  a conversation, and you are made to feel that someone has noticed you have
+  changed.
+tone: serious
+category: youthcrime
+rarity: common
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: true } }
+    - { crime: { youth: true } }
+    - { crime: { heat: { gte: 10 } } }
+weight: { base: 6 }
+choices:
+  - id: listen
+    label: Hear them out
+    outcome:
+      text: >-
+        The teacher does not lecture. They ask what you need, and tell you the
+        door stays open. You leave with a
+        number written on a piece of paper and a heavy feeling.
+      effects:
+        - { type: crime, action: heat, delta: -3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: shut_down
+    label: Say nothing
+    outcome:
+      text: >-
+        You sit there until the bell rings, and the teacher lets you go. It
+        gets back to your crew that you were called in, and not what you said.
+      effects:
+        - { type: crime, action: standing, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }

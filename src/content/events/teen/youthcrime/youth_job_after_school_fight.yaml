@@ -1,0 +1,68 @@
+id: youth_job_after_school_fight
+title: A fight after school
+text: >-
+  Someone from {crew} got pushed around by a kid from another crowd, and
+  everyone has heard about it. {member.name} says it will be settled in the
+  lot behind the school at three-thirty, and that being there is not optional.
+tone: dark
+category: youthcrime
+rarity: uncommon
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 17 } }
+    - { crime: { member: true } }
+    - { crime: { youth: true } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: show_up
+    label: Be there
+    check:
+      base: 58
+      stats: [{ key: fitness, weight: 0.25 }, { key: confidence, weight: 0.15 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          It ends faster than anyone expected, with everyone shaken and nobody
+          badly hurt. A teacher breaks it up and nobody gives your name. People
+          at school look at you differently for a while.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: standing, delta: 6 }
+          - { type: crime, action: heat, delta: 4 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          You come away with a split lip, a torn jacket and a call to the front
+          office. Your name is on a list now, and you are not sure which side
+          wrote it.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 7 }
+          - { type: crime, action: standing, delta: -2 }
+          - { type: stat, key: health, delta: -5 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: talk_them_down
+    label: Try to talk everyone out of it
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: 0.15 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          Somehow you get both sides to hear each other out. Nobody calls it a win,
+          but nobody is bleeding, and some of your own crew look at you with a
+          new kind of respect.
+        effects:
+          - { type: crime, action: standing, delta: 3 }
+          - { type: crime, action: rivalry, delta: -4 }
+      failure:
+        text: >-
+          Nobody wants to hear it, and you are called a coward in front of
+          everyone. The fight happens anyway.
+        effects:
+          - { type: crime, action: standing, delta: -5 }
+          - { type: stat, key: stress, delta: 3 }

@@ -170,6 +170,10 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
       if (!queueCrimeEvent(state, 'awayCut', content)) leaveCrew(state, 'drifted', content);
     } else if (room > 0 && chance(state.rng, curveAt(b.away.reachChance, crew.away!.suspicion))) queue('away');
   } else if (crew) {
+    // A youth crew is for kids: at 18 you are asked what you will be, and it never goes on silently.
+    if (content.crews[crew.defId]?.youth === true && state.character.age >= content.balance.relationships.adultAge) {
+      if (!queueCrimeEvent(state, 'grown', content)) leaveCrew(state, 'drifted', content);
+    }
     if (returned) queue('back');
     for (const trigger of orgTriggers) queue(trigger);
     // (A leader's yearly money comes from the organization's year, not from a share paid as an event.)

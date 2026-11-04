@@ -23,7 +23,7 @@ export function applyCrimeEffect(state: LifeState, effect: CrimeEffect, cast: Re
   const role = effect.role === undefined ? undefined : cast[effect.role];
   switch (effect.action) {
     case 'join':
-      joinCrew(state, content, role, undefined, effect.kind);
+      joinCrew(state, content, role, undefined, effect.kind, effect.lead === true);
       return;
     case 'leave':
       leaveCrew(state, effect.how ?? 'left', content);
