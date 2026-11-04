@@ -113,3 +113,23 @@ h3 {
     opacity: 1;
   }
 }
+
+/* U3: a feature screen slides in from the right; a pressed card dips and darkens. */
+@keyframes wl-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@utility wl-press {
+  transition:
+    transform 80ms ease-out,
+    filter 80ms ease-out;
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    transform: scale(0.97);
+    filter: brightness(0.9);
+  }
+}
