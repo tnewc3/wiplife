@@ -40,7 +40,7 @@ export function replayLife(log: readonly InputRecord[], content: ContentBundle):
         state = beginYear(state, content);
         break;
       case 'choice':
-        state = resolveChoice(state, String(p.instanceId), String(p.choiceId), content);
+        state = resolveChoice(state, String(p.instanceId), String(p.choiceId), content, p.play);
         break;
       case 'action':
         state = performAction(state, p.actionId, p.params, content);

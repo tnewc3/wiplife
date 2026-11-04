@@ -18,6 +18,7 @@ import {
   type PastimeQuality,
 } from '../../content/schemas';
 import { evaluate } from '../conditions';
+import type { PlayRecord } from '../minigames/odds';
 import { atLegalAge, countryIdOfCity, legalAgeOf, scaledAmount } from '../country';
 import { wholeDollars } from '../finance';
 import { whereabouts } from '../presence';
@@ -118,6 +119,8 @@ export interface PastimeChoice extends NameChoice {
   chase?: boolean | undefined;
   /** A lawsuit: settle or go to trial. */
   route?: PastimeRoute | undefined;
+  /** G1: the result of the mini-game played for it (without one, Auto plays). */
+  play?: PlayRecord | undefined;
 }
 
 export function pastimeBlock(state: LifeState, def: PastimeDef, choice: PastimeChoice, content: ContentBundle): PastimeBlock | null {

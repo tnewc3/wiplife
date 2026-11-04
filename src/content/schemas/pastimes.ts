@@ -16,7 +16,7 @@
  */
 import { z } from 'zod';
 import { curveSchema } from './balance';
-import { baseDefSchema, dollarsSchema, idSchema, scoreKeySchema } from './common';
+import { baseDefSchema, dollarsSchema, idSchema, MINIGAME_IDS, scoreKeySchema } from './common';
 import { VALUABLE_CLASSES } from './belongings';
 import { countryIdSchema } from './country';
 import { conditionSchema, effectSchema } from './events';
@@ -161,6 +161,8 @@ export const pastimeSchema = baseDefSchema
     mechanic: z.enum(PASTIME_MECHANICS).default('roll'),
     /** Gambling: the game, a key of balance/risk.yaml games (its payout table and house edge). */
     game: idSchema.optional(),
+    /** G1: the mini-game you can play for it (a casino game, a burglary's lockpick); Auto resolves it from your stats. */
+    minigame: z.enum(MINIGAME_IDS).optional(),
     /** Loans: the lender's terms, a key of balance/risk.yaml loans. */
     loan: idSchema.optional(),
     /** Lawsuits: what you have to go on. Each one that holds raises your odds; at least one must hold for the lawsuit to be on offer. The ex you are suing is the role `companion`. */
@@ -213,6 +215,9 @@ export const pastimeSchema = baseDefSchema
     } else {
       for (const t of OUTCOME_TIERS) if (def.tiers[t]?.settle !== undefined) issue(`tiers.${t}.settle is for lawsuits`);
     }
+    if (def.minigame === 'blackjack' || def.minigame === 'slots') {
+      if (m !== 'gamble' || def.game !== def.minigame) issue(`a ${def.minigame} mini-game goes with mechanic: gamble and game: ${def.minigame}`);
+    } else if (def.minigame !== undefined && (m !== 'roll' || def.category !== 'crime')) issue('this mini-game goes with a crime activity (mechanic: roll)');
     if (m === 'gamble' && def.legalAge !== 'gambling') issue('gambling follows the legal gambling age: legalAge: gambling');
     if (def.companion !== 'none' && !def.inPerson && def.mechanic !== 'lawsuit') issue('a companion needs inPerson: true (a lawsuit may be against someone far away)');
     for (const tier of OUTCOME_TIERS) {

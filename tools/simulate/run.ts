@@ -22,6 +22,7 @@ import { canAffordGift } from '../../src/engine/interactions/links';
 import { isInteractionAvailable } from '../../src/engine/interactions/availability';
 import { closeInteraction, performInteraction } from '../../src/engine/interactions/perform';
 import { replayLife } from '../../src/engine/replay';
+import { parsePlay, performanceOf, type Performance } from '../../src/engine/minigames/odds';
 import { isDeepStrictEqual } from 'node:util';
 import {
   finishAction,
@@ -136,6 +137,12 @@ export interface StageYears {
   most: number;
 }
 
+/** G1: plays by mini-game: how many, how many a person played (never, in a simulation), and how they went. */
+export interface MiniGamesReport {
+  games: Record<string, { plays: number; played: number; performance: Record<Performance, number>; accuracy: number }>;
+  played: number;
+}
+
 export interface SimulationReport {
   lives: number;
   player: SimulatedPlayer;
@@ -144,6 +151,8 @@ export interface SimulationReport {
   invariantFailures: number;
   /** G1: god mode edit records in the simulated lives (the simulation never edits a life: this must be zero). */
   editRecords: number;
+  /** G1: the mini-games simulated lives played. Every one is Auto's (a simulated player never plays one), so `played` must be zero. */
+  miniGames: MiniGamesReport;
   failureMessages: string[];
   lifespan: { median: number; p10: number; p90: number; youngest: number; oldest: number; under18: number };
   eventsPerYear: Record<LifeStage, StageYears>;
@@ -676,6 +685,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const failureMessages: string[] = [];
   let invariantFailures = 0;
   let editRecords = 0;
+  const miniGames: MiniGamesReport = { games: {}, played: 0 };
   const ages: number[] = [];
   const perYear = Object.fromEntries(STAGES.map((s) => [s, { years: 0, events: 0, belowMin: 0, most: 0 }])) as Record<
     LifeStage,
@@ -1406,6 +1416,27 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       invariantFailures++;
       if (failureMessages.length < maxMessages) failureMessages.push(`${seed}: a simulated life has ${edits} edit record(s)`);
     }
+    // G1: every mini-game result in the log is Auto's.
+    for (const record of life.inputLog) {
+      const raw = record.kind === 'choice' ? record.payload.play : record.kind === 'action' ? (record.payload.params as { play?: unknown } | undefined)?.play : undefined;
+      if (raw === undefined) continue;
+      const play = parsePlay(raw);
+      if (!play) {
+        invariantFailures++;
+        if (failureMessages.length < maxMessages) failureMessages.push(`${seed}: a mini-game result in the input log is not valid`);
+        continue;
+      }
+      const g = (miniGames.games[play.game] ??= { plays: 0, played: 0, performance: { perfect: 0, good: 0, fair: 0, miss: 0 }, accuracy: 0 });
+      g.plays++;
+      g.accuracy += play.accuracy;
+      g.performance[performanceOf(play.accuracy, content)]++;
+      if (!play.auto) {
+        g.played++;
+        miniGames.played++;
+        invariantFailures++;
+        if (failureMessages.length < maxMessages) failureMessages.push(`${seed}: a simulated life played a mini-game by hand`);
+      }
+    }
     interactions.affection.reachedMaxByInteractions += interactionWatcher.reachedByInteractions.size;
     for (const id of infidelityEvents) interactions.cheating.foundOut += firesThisLife.get(id) ?? 0;
     if (life.flags.unfaithful === true) interactions.cheating.foundOut += firesThisLife.get('affair_discovered') ?? 0;
@@ -1708,6 +1739,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     performance: { years: STAGES.reduce((sum, stage) => sum + perYear[stage].years, 0), ms: performance.now() - startedAt },
     invariantFailures,
     editRecords,
+    miniGames,
     failureMessages,
     lifespan: {
       median: at(0.5),
@@ -1795,6 +1827,15 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(`Simulated ${report.lives} lives.`);
   lines.push(`Invariant failures: ${report.invariantFailures}`);
   lines.push(`Edit records: ${report.editRecords}`);
+  {
+    const entries = Object.entries(report.miniGames.games).sort(([a], [b]) => a.localeCompare(b));
+    const total = entries.reduce((n, [, g]) => n + g.plays, 0);
+    lines.push(`Mini-games (G1): ${total} plays, ${report.miniGames.played} by hand (a simulated player always uses Auto)`);
+    for (const [id, g] of entries) {
+      const share = (n: number) => `${((100 * n) / Math.max(1, g.plays)).toFixed(0)}%`;
+      lines.push(`  ${id}: ${g.plays} plays, mean accuracy ${(g.accuracy / Math.max(1, g.plays)).toFixed(0)}; perfect ${share(g.performance.perfect)}, good ${share(g.performance.good)}, fair ${share(g.performance.fair)}, missed ${share(g.performance.miss)}`);
+    }
+  }
   for (const m of report.failureMessages) lines.push(`  - ${m}`);
   lines.push(
     `Lifespan: median ${lifespan.median}, 10th percentile ${lifespan.p10}, 90th ${lifespan.p90}, youngest ${lifespan.youngest}, ` +

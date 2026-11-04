@@ -19,6 +19,8 @@ followUpOnly: true
 choices:
   - id: take_it
     label: Take the shot yourself
+    minigame:
+      - { game: last_shot }
     check:
       base: 45
       stats: [{ sports: rating, weight: 0.3 }, { key: confidence, weight: 0.2 }, { sports: form, weight: 0.1 }, { key: riskTaking, weight: 0.05 }]

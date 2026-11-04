@@ -7,6 +7,8 @@
  * by ./index.ts like every life action.
  */
 import { PASTIME_QUALITIES, PASTIME_ROUTES, PASTIME_STAKES, type PastimeQuality, type PastimeRoute, type PastimeStake } from '../../content/schemas';
+import { parsePlay } from '../minigames/odds';
+import { playFits } from '../minigames/pastime';
 import { performPastime } from '../pastimes/perform';
 import { pastimeBlock, type PastimeChoice } from '../pastimes/query';
 import { parseLegalName } from '../pastimes/risk';
@@ -29,6 +31,7 @@ const choiceOf = (p: LifeActionParams): PastimeChoice => ({
   last: p.last,
   consentId: p.consentId,
   look: p.look,
+  play: p.play,
 });
 
 export const PASTIME_ACTIONS: Record<PastimeActionId, LifeActionRule> = {
@@ -42,7 +45,10 @@ export const PASTIME_ACTIONS: Record<PastimeActionId, LifeActionRule> = {
       const route = field(params, 'route');
       const consentId = field(params, 'consentId');
       const look = field(params, 'look');
-      if (!only(params, ['pastimeId', 'companionId', 'quality', 'stake', 'chase', 'route', 'first', 'last', 'consentId', 'look'])) return null;
+      const rawPlay = field(params, 'play');
+      const play = rawPlay === undefined ? undefined : parsePlay(rawPlay);
+      if (play === null) return null;
+      if (!only(params, ['pastimeId', 'companionId', 'quality', 'stake', 'chase', 'route', 'first', 'last', 'consentId', 'look', 'play'])) return null;
       if (typeof pastimeId !== 'string' || !content.pastimes[pastimeId]) return null;
       if (companionId !== undefined && (typeof companionId !== 'string' || companionId.length === 0 || companionId.length > 60)) return null;
       if (consentId !== undefined && (typeof consentId !== 'string' || consentId.length === 0 || consentId.length > 60)) return null;
@@ -66,11 +72,12 @@ export const PASTIME_ACTIONS: Record<PastimeActionId, LifeActionRule> = {
         ...(last !== undefined ? { last } : {}),
         ...(consentId !== undefined ? { consentId } : {}),
         ...(look !== undefined ? { look } : {}),
+        ...(play !== undefined ? { play } : {}),
       };
     },
     allowed: (state, p, content) => {
       const def = p.pastimeId === undefined ? undefined : content.pastimes[p.pastimeId];
-      return def !== undefined && !def.retired && pastimeBlock(state, def, choiceOf(p), content) === null;
+      return def !== undefined && !def.retired && pastimeBlock(state, def, choiceOf(p), content) === null && playFits(def, p.play, content);
     },
     apply: (state, p, content) => performPastime(state, content.pastimes[p.pastimeId!]!, choiceOf(p), content),
   },

@@ -5,7 +5,7 @@ import { SURPRISE_CHOICE } from '../../engine/life';
 import type { LifeState } from '../../engine/types';
 import { useAppStore } from '../../store/appStore';
 import { Shuffle } from 'lucide-react';
-import { ageLabel, choiceMoneyLabel, EVENT_CARD_LABELS, familyHelpLabel, housingChangeLabel, outcomeDebtLabel, outcomeDirtyLabel, outcomeMoneyLabel } from '../labels';
+import { ageLabel, choiceMoneyLabel, MINIGAME_LABELS, EVENT_CARD_LABELS, familyHelpLabel, housingChangeLabel, outcomeDebtLabel, outcomeDirtyLabel, outcomeMoneyLabel } from '../labels';
 import { useTeamText } from '../useTeamNames';
 import { CharacterPortrait } from '../portraits/CharacterPortrait';
 import { Button } from './Button';
@@ -75,6 +75,7 @@ export function EventSheet({ life }: { life: LifeState }) {
   const sheet = useAppStore((s) => s.eventSheet);
   const busy = useAppStore((s) => s.aging);
   const choose = useAppStore((s) => s.chooseEvent);
+  const openMiniGame = useAppStore((s) => s.openMiniGame);
   const next = useAppStore((s) => s.continueEvents);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const teamText = useTeamText();
@@ -170,9 +171,14 @@ export function EventSheet({ life }: { life: LifeState }) {
                 <div className="flex flex-col gap-2.5">
                   {card.choices.length > 1 && <p className="font-display text-sm font-semibold tracking-wide text-muted uppercase">{EVENT_CARD_LABELS.whatWillYouDo}</p>}
                   {card.choices.map((choice) => (
-                    <Button key={choice.id} size="lg" block disabled={busy} className="!justify-start !py-2 whitespace-normal text-left" onClick={() => void choose(card.instanceId, choice.id)}>
+                    <Button key={choice.id} size="lg" block disabled={busy} className="!justify-start !py-2 whitespace-normal text-left" onClick={() => (choice.game ? openMiniGame({ game: choice.game, source: { kind: 'event', instanceId: card.instanceId, choiceId: choice.id } }) : void choose(card.instanceId, choice.id))}>
                       <span className="flex w-full flex-col">
                         <span>{teamText(choice.label)}</span>
+                        {choice.game && (
+                          <span className="text-sm font-semibold opacity-80" data-testid="choice-minigame">
+                            {MINIGAME_LABELS.playOrAuto}
+                          </span>
+                        )}
                         {(choice.money !== undefined || choice.familyHelp !== undefined || choice.rent !== undefined) && (
                           <span className="text-sm font-semibold opacity-80" data-testid="choice-money">
                             {choiceMoneyLabel(choice)}

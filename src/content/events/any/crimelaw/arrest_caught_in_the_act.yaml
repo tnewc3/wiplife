@@ -19,6 +19,8 @@ followUpOnly: true
 choices:
   - id: run
     label: Run for it
+    minigame:
+      - { game: getaway }
     check:
       base: 22
       stats: [{ key: fitness, weight: 0.3 }, { key: luck, weight: 0.4 }, { key: riskTaking, weight: 0.1 }]

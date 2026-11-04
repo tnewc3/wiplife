@@ -22,6 +22,8 @@ cast:
 choices:
   - id: run
     label: Run
+    minigame:
+      - { game: getaway }
     check:
       base: 50
       stats: [{ key: fitness, weight: 0.35 }, { key: luck, weight: 0.3 }]

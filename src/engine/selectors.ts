@@ -30,6 +30,8 @@ import {
   type Tone,
   type ConditionKind,
 } from '../content/schemas';
+import { choiceGame } from './minigames/play';
+import type { MiniGameId } from '../content/schemas';
 import { availableActions, isLifeActionAvailable, type AvailableAction } from './actions';
 import { evaluate } from './conditions';
 import {
@@ -1216,7 +1218,7 @@ export interface EventCardView {
    * your savings can't cover, which becomes debt; rent, the change to your
    * yearly housing cost.
    */
-  choices: ({ id: string; label: string } & ChoiceMoney)[];
+  choices: ({ id: string; label: string; /** G1: the mini-game this choice is played as now (Auto plays it from your stats). */ game?: MiniGameId } & ChoiceMoney)[];
   resolved: boolean;
   outcomeText: string | null;
   /** What the chosen outcome did to your money, with the new balance (C1). */
@@ -1303,7 +1305,10 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
   const choices = def.choices
     ? def.choices
         .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict', content }))
-        .map((c) => ({ id: c.id, label: renderText(c.label, ctx), ...knownChoiceMoney(state, c, content) }))
+        .map((c) => {
+          const game = choiceGame(state, c, instance.cast, content);
+          return { id: c.id, label: renderText(c.label, ctx), ...(game ? { game } : {}), ...knownChoiceMoney(state, c, content) };
+        })
     : [{ id: CONTINUE_CHOICE, label: 'Continue' }];
   return { ...base, canSurprise: def.choices !== undefined && choices.length >= 2, title: renderText(def.title, ctx), text: renderText(eventLanguageText(state, def, instance.cast, content), ctx), tone: def.tone, choices };
 }

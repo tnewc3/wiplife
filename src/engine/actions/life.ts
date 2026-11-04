@@ -1,3 +1,4 @@
+import type { PlayRecord } from '../minigames/odds';
 import { onTemporaryStay } from '../migration/query';
 import { TRAVEL_ACTION_IDS, TRAVEL_ACTIONS } from './travel';
 import { LANGUAGE_ACTION_IDS, LANGUAGE_ACTIONS } from './languages';
@@ -193,6 +194,8 @@ export interface LifeActionParams {
   stake?: PastimeStake;
   chase?: true;
   route?: PastimeRoute;
+  /** G1: the result of the mini-game played for an activity. */
+  play?: PlayRecord;
   first?: string;
   last?: string;
   consentId?: string;

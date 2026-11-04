@@ -9,6 +9,7 @@ cost: nothing
 profile: crime_serious
 yearlyLimit: 2
 hub: crime
+minigame: lockpick
 tiers:
   great:
     text:
