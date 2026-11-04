@@ -4,111 +4,109 @@ import type { Commitment, GroupType } from '../../../content/schemas';
 import { getBelongingView, type GroupView, type MembershipView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
-import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { CollapsibleGroup } from '../../components/CollapsibleGroup';
+import { EmptyState } from '../../components/EmptyState';
+import { FactChip } from '../../components/FactChip';
+import { FeatureScreen } from '../../components/FeatureScreen';
+import { FilterChips } from '../../components/FilterChips';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
+import { JoinCard } from '../../components/JoinCard';
 import { ListRow, RowList } from '../../components/ListRow';
-import { SectionHeader } from '../../components/SectionHeader';
+import { OptionCard, OptionPickerSheet } from '../../components/OptionPickerSheet';
+import { SectionLabel } from '../../components/SectionLabel';
 import { SegmentedTabs } from '../../components/SegmentedTabs';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
-import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
 import { GROUPS_FOCUS_TITLES, GROUPS_TAB_LABELS, GROUP_COMMITMENT_BLURBS, GROUP_COMMITMENT_LABELS, FAITH_STRENGTH_WORDS, GROUPS_TITLES, GROUP_TYPE_LABELS, hoursLine, GROUP_JOIN_BLOCK_LABELS, money, RISE_NEEDS_LABELS, roleLine, VALUE_LABELS } from '../../labels';
 
-/** What a group is like, from its own traits. */
-function TraitLine({ group }: { group: GroupView }) {
-  return (
-    <p className="text-sm text-muted">
-      {group.traits.welcome} · {group.traits.strict} · {group.traits.intense}
-    </p>
-  );
-}
+/** How many cards the Join tab shows before "Show N more". */
+const LIMIT = 6;
 
+/** The icon of a kind of group (a content icon). */
+const GROUP_ICONS: Record<GroupType, string> = { club: 'trophy', service: 'red_heart', civic: 'house_with_garden', faith: 'place_of_worship' };
+
+/** Joining (U3): an option picker. Casual or committed, each with its hours and cost as chips; what the group is like is its blurb. */
 function JoinSheet({ group, open, onClose, busy, canAct, onJoin }: { group: GroupView | null; open: boolean; onClose: () => void; busy: boolean; canAct: boolean; onJoin: (level: Commitment) => void }) {
-  if (!group) return <Sheet open={false} title="" onClose={onClose}>{null}</Sheet>;
+  if (!group) return null;
   const levels: Commitment[] = ['casual', 'committed'];
   return (
-    <Sheet open={open} title={group.name} onClose={onClose}>
-      <div className="flex flex-col gap-3" data-testid="join-sheet">
-        <p className="text-sm text-muted">
-          {group.kind}
-          {group.religion ? ` · ${group.religion}${group.tradition ? `, ${group.tradition}` : ''}` : ''}
+    <OptionPickerSheet
+      open={open}
+      title={group.name}
+      icon={GROUP_ICONS[group.type]}
+      line={`${group.kind}${group.religion ? ` · ${group.religion}${group.tradition ? `, ${group.tradition}` : ''}` : ''}`}
+      footnote={`${group.blurb} ${group.traits.welcome} · ${group.traits.strict} · ${group.traits.intense}.`}
+      onClose={onClose}
+      testId="join-sheet"
+    >
+      {group.block !== null && (
+        <p role="status" className="px-1 text-sm font-semibold">
+          {GROUP_JOIN_BLOCK_LABELS[group.block]}
         </p>
-        <p>{group.blurb}</p>
-        <TraitLine group={group} />
-        <p className="text-sm">
-          <span className="font-semibold">What members do: </span>
-          {group.activities.join(', ')}.
-        </p>
-        <p className="text-sm">
-          <span className="font-semibold">Roles: </span>
-          {group.ladder.join(' → ')}
-        </p>
-        {group.block !== null && <p role="status" className="text-sm font-semibold">{GROUP_JOIN_BLOCK_LABELS[group.block]}</p>}
-        <div className="flex flex-col gap-2">
-          {levels.map((level) => {
-            const blocked = group.block !== null || !canAct || (level === 'committed' && !group.canCommit);
-            return (
-              <Button key={level} variant={level === 'committed' ? 'primary' : 'secondary'} block disabled={busy || blocked} data-testid={`join-${level}`} onClick={() => onJoin(level)}>
-                Join · {GROUP_COMMITMENT_LABELS[level]}
-                <span className="block text-sm font-normal">
-                  {GROUP_COMMITMENT_BLURBS[level]} · {hoursLine(group.hours[level])}
-                  {group.cost[level] > 0 ? ` · about ${money(group.cost[level])} a year` : ''}
-                </span>
-              </Button>
-            );
-          })}
-        </div>
-      </div>
-    </Sheet>
+      )}
+      {levels.map((level) => (
+        <OptionCard
+          key={level}
+          name={`Join · ${GROUP_COMMITMENT_LABELS[level]}`}
+          chips={
+            <>
+              <FactChip>{hoursLine(group.hours[level])}</FactChip>
+              <FactChip>{GROUP_COMMITMENT_BLURBS[level]}</FactChip>
+            </>
+          }
+          price={group.cost[level] > 0 ? `${money(group.cost[level])} a year` : 'Free'}
+          reason={busy || !canAct || group.block !== null || (level === 'committed' && !group.canCommit) ? 'Not now' : undefined}
+          testId={`join-${level}`}
+          onClick={() => onJoin(level)}
+        />
+      ))}
+    </OptionPickerSheet>
   );
 }
 
-function MembershipCard({ m, canAct, busy, onCommit, onLeave, onPerson }: { m: MembershipView; canAct: boolean; busy: boolean; onCommit: (level: Commitment) => void; onLeave: () => void; onPerson: (id: string) => void }) {
+/** A group you belong to (U3): its own feature screen. A hero with your role, standing and what it costs; what comes next; the people you know there. Changing how committed you are and leaving are in the ⋯ menu. */
+function GroupScreen({ m, canAct, busy, onBack, onCommit, onLeave, onPerson }: { m: MembershipView; canAct: boolean; busy: boolean; onBack: () => void; onCommit: (level: Commitment) => void; onLeave: () => void; onPerson: (id: string) => void }) {
   const other: Commitment = m.commitment === 'casual' ? 'committed' : 'casual';
   return (
-    <Card data-testid={`membership-${m.group.id}`}>
-      <h4 className="font-bold break-words [overflow-wrap:anywhere]">{m.group.name}</h4>
-      <p className="text-sm text-muted">
-        {m.group.kind} · {GROUP_COMMITMENT_LABELS[m.commitment]} · {hoursLine(m.group.hours[m.commitment])}
-        {m.cost > 0 ? ` · ${money(m.cost)} a year` : ''}
-      </p>
-      <p className="mt-1" data-testid="membership-role">
+    <FeatureScreen
+      open
+      title={m.group.name}
+      onBack={onBack}
+      testId={`membership-${m.group.id}`}
+      info={<p>{m.group.blurb} {m.group.traits.welcome} · {m.group.traits.strict} · {m.group.traits.intense}. Members: {m.group.activities.join(', ')}. Roles: {m.group.ladder.join(' → ')}.</p>}
+      actions={[
+        { id: 'commit', label: `Change to ${GROUP_COMMITMENT_LABELS[other].toLowerCase()}`, disabled: busy || !canAct || (other === 'committed' && !m.canCommit), testId: `commit-${m.group.id}`, onSelect: () => onCommit(other) },
+        { id: 'leave', label: 'Leave', danger: true, disabled: busy || !canAct, testId: `leave-${m.group.id}`, onSelect: onLeave },
+      ]}
+    >
+      <HeroCard lead={<Icon id={GROUP_ICONS[m.group.type]} size={44} />} title={m.group.name} status={`${m.group.kind} · ${GROUP_COMMITMENT_LABELS[m.commitment]}`}>
+        <StatCell label="Standing" value={`${Math.round(m.standing)}%`} bar={m.standing} />
+        <StatCell label="A week" value={hoursLine(m.group.hours[m.commitment])} />
+        {m.cost > 0 && <StatCell label="A year" value={money(m.cost)} />}
+      </HeroCard>
+      <p className="px-1" data-testid="membership-role">
         {roleLine(m.role, m.years)}
         {m.family ? ' · you go with your family' : ''}
       </p>
-      <div className="my-2">
-        <StatBar label="Standing" value={m.standing} />
-      </div>
       {m.next && (
-        <p className="text-sm text-muted">
+        <p className="px-1 text-sm text-muted">
           Next: {m.next.name}
           {m.next.needs ? ` (needs: ${RISE_NEEDS_LABELS[m.next.needs].toLowerCase()})` : ''}
         </p>
       )}
       {m.people.length > 0 && (
-        <details className="mt-2">
-          <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">People you know here ({m.people.length})</summary>
-          <ul className="flex flex-col">
+        <>
+          <SectionLabel trailing={m.people.length}>People you know here</SectionLabel>
+          <RowList label="People you know here">
             {m.people.map((p) => (
-              <li key={p.id}>
-                <button type="button" className="min-h-11 w-full text-left text-sm underline" onClick={() => onPerson(p.id)}>
-                  {p.name}, {p.age}
-                </button>
-              </li>
+              <ListRow key={p.id} title={p.name} subtitle={`${p.age}`} ending="chevron" onClick={() => onPerson(p.id)} />
             ))}
-          </ul>
-        </details>
+          </RowList>
+        </>
       )}
-      <div className="mt-3 flex flex-col gap-2">
-        <Button variant="secondary" block disabled={busy || !canAct || (other === 'committed' && !m.canCommit)} data-testid={`commit-${m.group.id}`} onClick={() => onCommit(other)}>
-          Change to {GROUP_COMMITMENT_LABELS[other].toLowerCase()}
-        </Button>
-        <Button variant="ghost" block disabled={busy || !canAct} data-testid={`leave-${m.group.id}`} onClick={onLeave}>
-          Leave
-        </Button>
-      </div>
-    </Card>
+    </FeatureScreen>
   );
 }
 
@@ -132,6 +130,9 @@ export function GroupsScreen({ life }: { life: LifeState }) {
   const [section, setSection] = useState<'yours' | 'join'>(focus === 'faith_explore' ? 'join' : focus === 'faith' || mine.length > 0 ? 'yours' : 'join');
   const [picked, setPicked] = useState<GroupView | null>(null);
   const [leaving, setLeaving] = useState<MembershipView | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [kind, setKind] = useState<string>('all');
+  const [more, setMore] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const seePerson = (id: string) => {
     setTab('people');
@@ -146,8 +147,15 @@ export function GroupsScreen({ life }: { life: LifeState }) {
       setSection('yours');
     });
   };
+  const filtered = available.filter((g) => kind === 'all' || g.kind === kind);
+  const shownGroups = more ? filtered : filtered.slice(0, LIMIT);
+  const kindChips = [{ id: 'all', label: 'All', testId: 'groups-kind-all' }, ...[...new Set(available.map((g) => g.kind))].map((k) => ({ id: k, label: k, testId: `groups-kind-${k}` }))];
+  const opened = mine.find((m) => m.group.id === openId);
   return (
     <div className="flex flex-col gap-3" data-testid="groups-screen">
+      {opened && (
+        <GroupScreen m={opened} canAct={view.canAct} busy={busy} onBack={() => setOpenId(null)} onPerson={seePerson} onCommit={(level) => void act('set_group_commitment', { groupId: opened.group.id, level })} onLeave={() => setLeaving(opened)} />
+      )}
       <SegmentedTabs
         label={GROUPS_FOCUS_TITLES[focus]}
         value={section}
@@ -184,18 +192,12 @@ export function GroupsScreen({ life }: { life: LifeState }) {
               </p>
             </Card>
           )}
-          {mine.length === 0 && <p className="px-1 text-muted">{GROUPS_TITLES.none}</p>}
-          {mine.map((m) => (
-            <MembershipCard
-              key={m.group.id}
-              m={m}
-              canAct={view.canAct}
-              busy={busy}
-              onPerson={seePerson}
-              onCommit={(level) => void act('set_group_commitment', { groupId: m.group.id, level })}
-              onLeave={() => setLeaving(m)}
-            />
-          ))}
+          {mine.length === 0 && <EmptyState text={GROUPS_TITLES.none} action={faith ? GROUPS_TAB_LABELS.explore : GROUPS_TAB_LABELS.join} onAction={() => setSection('join')} />}
+          <ul className="flex flex-col gap-2" aria-label={GROUPS_TAB_LABELS.yours}>
+            {mine.map((m) => (
+              <JoinCard key={m.group.id} icon={GROUP_ICONS[m.group.type]} name={m.group.name} kind={m.group.kind} role={roleLine(m.role, m.years)} chips={<><FactChip>{hoursLine(m.group.hours[m.commitment])}</FactChip>{m.cost > 0 && <FactChip>{money(m.cost)} a year</FactChip>}<FactChip>{GROUP_COMMITMENT_LABELS[m.commitment]}</FactChip></>} onOpen={() => setOpenId(m.group.id)} testId={`group-yours-${m.group.id}`} />
+            ))}
+          </ul>
           {view.past.length > 0 && !faith && (
             <CollapsibleGroup id="groups.past" title={GROUPS_TITLES.past} count={view.past.length} defaultOpen={false}>
               <ul className="flex flex-col divide-y divide-border">
@@ -211,26 +213,39 @@ export function GroupsScreen({ life }: { life: LifeState }) {
       )}
 
       {section === 'join' && (
-        <section aria-label={`${GROUPS_TITLES.available}: ${view.city}`} data-testid={`groups-${type}`}>
-          <SectionHeader>{`${GROUPS_TITLES.available}: ${view.city}`}</SectionHeader>
+        <section aria-label={`${GROUPS_TITLES.available}: ${view.city}`} data-testid={`groups-${type}`} className="flex flex-col gap-2">
+          <SectionLabel>{`${GROUPS_TITLES.available}: ${view.city}`}</SectionLabel>
+          {kindChips.length > 2 && <FilterChips label="Kind of group" value={kind} onChange={(k) => { setKind(k); setMore(false); }} chips={kindChips} />}
           {available.length === 0 ? (
-            <p className="px-1 text-muted">Nothing of this kind to join in {view.city}.</p>
+            <EmptyState text={`Nothing of this kind to join in ${view.city}.`} />
           ) : (
-            <RowList label={GROUP_TYPE_LABELS[type]}>
-              {available.map((g) => (
-                <ListRow
+            <ul className="flex flex-col gap-2" aria-label={GROUP_TYPE_LABELS[type]}>
+              {shownGroups.map((g) => (
+                <JoinCard
                   key={g.id}
-                  title={g.name}
-                  subtitle={`${g.kind}${g.religion ? ` · ${g.religion}${g.tradition ? `, ${g.tradition}` : ''}` : ''}${g.block !== null ? ` · ${GROUP_JOIN_BLOCK_LABELS[g.block]}` : ''}`}
-                  ending="dots"
-                  moreLabel={`About ${g.name}`}
-                  muted={g.block !== null}
-                  onClick={() => setPicked(g)}
-                  onMore={() => setPicked(g)}
+                  icon={GROUP_ICONS[g.type]}
+                  name={g.name}
+                  kind={`${g.kind}${g.religion ? ` · ${g.religion}${g.tradition ? `, ${g.tradition}` : ''}` : ''}`}
+                  chips={
+                    <>
+                      <FactChip>{hoursLine(g.hours.casual)}</FactChip>
+                      <FactChip>{g.cost.casual > 0 ? `${money(g.cost.casual)} a year` : 'Free'}</FactChip>
+                      {g.activities[0] && <FactChip>{g.activities[0]}</FactChip>}
+                      {g.block !== null && <FactChip>{GROUP_JOIN_BLOCK_LABELS[g.block]}</FactChip>}
+                    </>
+                  }
+                  join={() => setPicked(g)}
+                  joinDisabled={g.block !== null}
                   testId={`group-${g.id}`}
+                  joinTestId={`group-join-${g.id}`}
                 />
               ))}
-            </RowList>
+            </ul>
+          )}
+          {!more && filtered.length > LIMIT && (
+            <button type="button" onClick={() => setMore(true)} data-testid="groups-show-more" className="wl-press min-h-11 rounded-xl border border-border bg-surface px-4 text-sm font-semibold">
+              Show {filtered.length - LIMIT} more
+            </button>
           )}
         </section>
       )}
