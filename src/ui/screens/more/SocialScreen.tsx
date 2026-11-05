@@ -1,3 +1,5 @@
+import { RenameDialog } from '../../components/RenameDialog';
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import type { SocialTone } from '../../../content/schemas';
@@ -6,7 +8,6 @@ import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { TextField } from '../../components/TextField';
 import {
   money,
   postsLeftWords,
@@ -40,14 +41,14 @@ export function SocialScreen({ life }: { life: LifeState }) {
           Your accounts
         </h2>
         {view.accounts.length === 0 ? (
-          <p className="mt-1 text-muted">You have no accounts yet. Open one below, with a handle you choose.</p>
+          <p className="mt-1 text-muted">No accounts yet.</p>
         ) : (
           <p className="mt-1 text-muted" data-testid="social-reach">
             You reach {view.reachWords} across {view.accounts.length} {view.accounts.length === 1 ? 'account' : 'accounts'}.
             {view.career && ` In the career you are ${view.career.title}.`}
           </p>
         )}
-        {view.minor && <p className="mt-2 text-sm">A parent keeps an eye on your accounts and signs for any deal until you are 18.</p>}
+        {view.minor && <PageInfo><p>A parent keeps an eye on your accounts and signs for any deal until you are 18.</p></PageInfo>}
         {view.incomeThisYear > 0 && <p className="mt-2 text-sm">The platforms paid you {money(view.incomeThisYear)} this year, after any cut.</p>}
         {view.sponsor && <p className="mt-1 text-sm">Sponsored by {view.sponsor.company}.</p>}
         {view.controversy && <p className="mt-2 text-sm font-semibold">{SOCIAL_CONTROVERSY_WORDS[view.controversy]}</p>}
@@ -79,7 +80,9 @@ export function SocialScreen({ life }: { life: LifeState }) {
               </button>
             ))}
           </div>
-          <p className="mt-2 text-sm text-muted">{SOCIAL_TONE_NOTES[tone]}</p>
+          <PageInfo>
+            <p>{SOCIAL_TONE_NOTES[tone]}</p>
+          </PageInfo>
         </Card>
       )}
 
@@ -165,7 +168,7 @@ function CrossCard({ view, disabled, act }: { view: SocialView; disabled: boolea
       <h3 id="cross-title" className="text-lg font-bold">
         Cross-promotion
       </h3>
-      <p className="mt-1 text-sm text-muted">Point the followers of one account at another. {view.crossPromos.left} left this year.</p>
+      <p className="mt-1 text-sm text-muted">{view.crossPromos.left} left this year.</p>
       <ul className="mt-2 flex flex-col gap-2" aria-label="Cross-promotion">
         {view.crossPromos.options.map((o) => (
           <li key={`${o.fromId}>${o.toId}`}>
@@ -186,7 +189,7 @@ function CollabCard({ view, disabled, act }: { view: SocialView; disabled: boole
       <h3 id="collab-title" className="text-lg font-bold">
         Make something together
       </h3>
-      <p className="mt-1 text-sm text-muted">People you know who make things. {view.collabs.left} left this year.</p>
+      <p className="mt-1 text-sm text-muted">{view.collabs.left} left this year.</p>
       <ul className="mt-2 flex flex-col gap-3" aria-label="Creators you know">
         {view.collabs.people.map((p) => (
           <li key={p.personId}>
@@ -212,6 +215,7 @@ function OpenCard({ view, disabled, act }: { view: SocialView; disabled: boolean
   const [platform, setPlatform] = useState<string>('');
   const [niche, setNiche] = useState<string>('');
   const [handle, setHandle] = useState('');
+  const [naming, setNaming] = useState(false);
   const [touched, setTouched] = useState(false);
   const options = view.platforms.filter((p) => p.block !== 'have');
   const chosen = view.platforms.find((p) => p.id === platform);
@@ -245,20 +249,12 @@ function OpenCard({ view, disabled, act }: { view: SocialView; disabled: boolean
           ))}
         </div>
       </fieldset>
-      <TextField
-        className="mt-3"
-        label="Handle"
-        value={handle}
-        onChange={(v) => {
-          setHandle(v);
-          setTouched(true);
-        }}
-        autoCapitalize="none"
-        placeholder={view.suggestion}
-        data-testid="handle-input"
-        error={issue ? SOCIAL_HANDLE_ISSUES[issue] : undefined}
-        hint="Letters, numbers, dots and underscores."
-      />
+      <button type="button" onClick={() => setNaming(true)} data-testid="handle-input" className="wl-press mt-3 flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-3 text-left">
+        <span className="text-sm font-semibold text-muted">Handle</span>
+        <span className="min-w-0 font-semibold [overflow-wrap:anywhere]">{handle || view.suggestion}</span>
+      </button>
+      {issue && <p className="text-sm text-danger">{SOCIAL_HANDLE_ISSUES[issue]}</p>}
+      <RenameDialog open={naming} title="Handle" label="Handle" initial={handle || view.suggestion} allowSame testId="handle-dialog-input" hint="Letters, numbers, dots and underscores." error={(t) => { const i = handleIssue(t, content); return i ? SOCIAL_HANDLE_ISSUES[i] : undefined; }} onCancel={() => setNaming(false)} onSave={(t) => { setHandle(t); setTouched(true); setNaming(false); }} />
       <Button variant="ghost" className="mt-1" onClick={() => { setHandle(view.suggestion); setTouched(true); }} data-testid="handle-suggest">
         Suggest one
       </Button>

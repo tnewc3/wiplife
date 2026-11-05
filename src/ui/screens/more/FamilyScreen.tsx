@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { getFamilyLineView, getFamilyView, type FamilyOptionView } from '../../../engine/selectors';
@@ -49,9 +50,10 @@ export function FamilyScreen({ life }: { life: LifeState }) {
             ))}
           </ul>
         )}
-        <p className="mt-3 text-sm text-muted">
-          To try for a baby, open your partner’s page in People. A natural pregnancy needs a couple where one of you can carry one.
-        </p>
+        <PageInfo>
+          <p>To try for a baby, open your partner’s page in People. A natural pregnancy needs a couple where one of you can carry one.</p>
+          <p>Your family’s name goes before you: it shapes how people treat you, and it passes to whoever carries on.</p>
+        </PageInfo>
       </Card>
 
       <Card role="region" aria-labelledby="family-line" data-testid="family-line">
@@ -62,7 +64,6 @@ export function FamilyScreen({ life }: { life: LifeState }) {
           Generation {line.generation} · {reputationWords(line.reputation)}
         </p>
         {line.deeds.length > 0 && <p className="mt-1 text-sm text-muted">Known for {line.deeds.join(', ')}.</p>}
-        <p className="mt-2 text-sm text-muted">Your family’s name goes before you: it shapes how people treat you, and it passes to whoever carries on.</p>
       </Card>
 
       {view.options.map((o) => {

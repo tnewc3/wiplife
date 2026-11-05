@@ -60,7 +60,6 @@ export function HealthScreen({ life }: { life: LifeState }) {
         <h2 id="doctor-title" className="text-lg font-bold">
           See a doctor
         </h2>
-        <p className="mt-1 text-muted">Doctor visits are under Activities.</p>
         <Button block variant="secondary" className="mt-3" data-testid="health-open-doctor" onClick={() => openActivity('doctor')}>
           Go to Activities → Doctor
         </Button>

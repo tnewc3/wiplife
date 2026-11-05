@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { getHomeView, type CityMove } from '../../../engine/selectors';
@@ -76,7 +77,7 @@ export function HousingScreen({ life }: { life: LifeState }) {
             {view.mortgage > 0 ? ` · Mortgage ${money(view.mortgage)}` : ' · Paid off'}
           </p>
         )}
-        {!view.independent && <p className="mt-2">You live with your family until you’re old enough to decide for yourself.</p>}
+        {!view.independent && <PageInfo><p>You live with your family until you’re old enough to decide for yourself.</p></PageInfo>}
       </Card>
 
       {view.independent && (

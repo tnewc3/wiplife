@@ -71,7 +71,9 @@ test('moving out and relocating from More → Home', async ({ page }) => {
   // A child can't choose where to live.
   await openPage(page, 'properties');
   await expect(page.getByTestId('housing-line')).toHaveText(`Living with family in ${city}`);
-  await expect(page.getByText('You live with your family until you’re old enough to decide for yourself.')).toBeVisible();
+  await page.getByRole('button', { name: /^About / }).click();
+  await expect(page.getByRole('dialog').getByText('You live with your family until you’re old enough to decide for yourself.')).toBeVisible();
+  await page.keyboard.press('Escape');
   await expect(page.getByRole('group', { name: 'Home actions' })).toHaveCount(0);
 
   // Save up from gig work while living at home.

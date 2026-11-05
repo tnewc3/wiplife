@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useMemo, useState } from 'react';
 import { content } from '../../../content';
 import { getWillView, type WillRowView } from '../../../engine/selectors';
@@ -94,10 +95,9 @@ export function WillScreen({ life }: { life: LifeState }) {
         <h2 id="will-title" className="text-2xl leading-tight font-bold">
           Write a will
         </h2>
-        <p className="mt-1 text-muted">
-          Choose who gets what share of your estate when you die. Debts and funeral costs are paid first; a home passes with what is still owed on it. Anything a child under 18 inherits is held in
-          trust until they’re 18.
-        </p>
+        <PageInfo>
+          <p>Choose who gets what share of your estate when you die. Debts and funeral costs are paid first; a home passes with what is still owed on it. Anything a child under 18 inherits is held in trust until they’re 18.</p>
+        </PageInfo>
         {!view.hasWill && view.defaults.length > 0 && (
           <p className="mt-2 text-sm" data-testid="will-defaults">
             Without a will: {view.defaults.map((d) => `${d.name} (${ESTATE_RELATION_LABELS[d.relation]}) ${d.percent}%`).join(', ')}.

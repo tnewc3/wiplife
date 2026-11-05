@@ -156,6 +156,10 @@ Effect chips are read from the option's tiers in content (`src/ui/screens/activi
 | Travel, Move abroad | Chips | The dropdowns are chips |
 | Page headers over a tab (Health, Family, Possessions, Teen years, Properties, Will, Later life...) | Header only | They use `ScreenHeader`: the title wraps instead of truncating |
 
-### Not rebuilt in U3
+### The pages over a tab (second pass)
 
-These screens only picked up the new header and the no-truncation rule; their bodies are as they were and are the next candidates (see the report in the pull request): the person and pet pages, Health, Possessions (adopting a pet still has a name field), Properties, Family, Will, Later life, Teen years, Social media (its post text box), Trips (the explanatory blurbs), Move abroad (the explanatory blurbs), the Drug market and Recovery pages, the Money tab (the dirty-money amount field) and the god mode editor.
+Health, Possessions, Properties, Family, Will, Later life, Teen years, Social media, Trips, Move abroad, the Drug market and Recovery keep their layout (they were already full pages with a header), but now follow the copy rules: their explanatory paragraphs moved behind the header's ⓘ (`PageInfo`, `components/PageInfo.tsx`; one ⓘ for all of a page's text); the pet's name, an account's handle and a business name are `RenameDialog` rows; the language to learn is chips. A page's status lines stay.
+
+### Still not on the feature templates
+
+The person and pet pages, Health, Possessions, Properties, Family, Will, Later life, Teen years, Social media, Trips, Move abroad, the Drug market and Recovery have no hero card or action tiles yet. The Money tab's dirty-money amount is still a typed field (it sits in the Assets tab, not below it). The Sports "Big game" tile and "N people you know" on join cards need engine data that does not exist.

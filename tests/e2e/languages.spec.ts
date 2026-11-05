@@ -24,7 +24,7 @@ test('adult classes show their cost, grow skills, save, and cannot be repeated i
   });
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await page.getByRole('button', { name: 'Profile', exact: true }).click();
-  await page.getByLabel('Language to learn').selectOption('fr');
+  await page.getByTestId('language-fr').click();
   const button = page.getByRole('button', { name: /Take language classes/ });
   await expect(button).toContainText('$600');
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
@@ -36,11 +36,11 @@ test('adult classes show their cost, grow skills, save, and cannot be repeated i
   await page.getByRole('button', { name: 'Profile', exact: true }).click();
   await expect(page.getByTestId('profile-languages')).toContainText('French');
   await expect(page.getByTestId('profile-languages')).toContainText('Basic');
-  await page.getByLabel('Language to learn').selectOption('es');
+  await page.getByTestId('language-es').click();
   await expect(page.getByRole('button', { name: /Take language classes/ })).toBeDisabled();
   await page.reload(); await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Profile', exact: true }).click();
   await expect(page.getByTestId('profile-languages')).toContainText('French');
-  await page.getByLabel('Language to learn').selectOption('es');
+  await page.getByTestId('language-es').click();
   await expect(page.getByRole('button', { name: /Take language classes/ })).toBeDisabled();
 });
