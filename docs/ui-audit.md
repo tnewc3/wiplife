@@ -118,3 +118,44 @@ Actions that are not leisure activities (jobs, school, money, housing, family, t
 | Event card | A choice with a chance check resolved at once | A choice that carries a mini-game (a sports big moment, a heist, a run) shows a second line, "A quick game. Play it, or let Auto play.", and opens the mini-game sheet. Choices without a game are unchanged. |
 | Activities → Casino (blackjack, slots), Crime (burglary) | One button per stake or option that resolved at once | The same buttons, with the same line under the blurb; they open the mini-game sheet, and the result comes back with the same stake, quality and companion choices. The receipt is unchanged. |
 | Mini-game sheet (new) | n/a | A bottom sheet over the screen (one level, not a menu): title, one line of how to play, your skill as a bar with its percentage, the game, then how you did (a word, the accuracy and what it does to the odds) and **Continue**. **Auto** and **Not now** sit at the bottom from the first moment (44px or taller). With reduced motion the game is slower and Auto is the primary button. |
+
+## U3: the feature screen overhaul
+
+The plan is `docs/ui-overhaul.md`. U3 changes how every screen below a tab is built, not what it does: no game logic, content effect or balance changed (one new balance number: `confirm` in `balance/activities.yaml`, the share of your savings above which a purchase asks first).
+
+### The templates
+
+| Template | Components (`src/ui/components`) | What it is |
+|---|---|---|
+| **Feature screen** | `FeatureScreen`, `ScreenHeader`, `HeroCard`, `StatCell`, `ActionTile`, `ActionTileRow`, `SegmentedTabs` (`sticky`), `SectionLabel`, `CompactRow`, `CompactList`, `OverflowMenu`, `InfoSheet`, `RenameDialog`, `EmptyState` | A full screen over the tab (it slides in from the right, a back button, swiping right from the left edge goes back, Escape goes back): a header with back, the title (it wraps, it never truncates), ⓘ (the rules, in a sheet) and ⋯ (secondary and destructive actions, in a sheet, with a confirmation when they can't be undone); a hero card with 2 or 3 stat cells; up to four action tiles; sticky tabs only when needed |
+| **Option picker sheet** | `OptionPickerSheet`, `OptionCard`, `EffectChip`, `FactChip`, `FreshnessPips` | One quick decision: a header with the icon, the title, one line, the balance and the freshness; a card for each option (the whole card is the button) with effect chips and a price chip. Holds no tabs, accordions, text fields or other sheets |
+| **Store** | `StoreScreen`, `ItemCard`, `ItemDetailSheet`, `FilterChips` | A feature screen with the balance, filter chips and a two-column grid; a card opens a detail sheet with Buy (or Sell when you own it) |
+| **Join list** | `JoinCard`, `FilterChips` | Tabs Yours and Join, filter chips by kind, cards with fact chips and an inline Join button, "Show N more"; in Yours a card opens the group's own feature screen |
+| **Choice chips** | `ChipSelect`, `FilterChips` | Replaces every dropdown: a label and chips |
+
+Effect chips are read from the option's tiers in content (`src/ui/screens/activities/effectChips.ts`), so they cannot drift from what happens. Freshness pips come from the existing diminishing-returns counters (times done this year, and the most; `components/freshness.ts`). A press state (`wl-press`: a slight scale and darkening) and a light haptic (`src/ui/haptics.ts`) are on every tile, card and chip that acts.
+
+### Screens and the template each now uses
+
+| Screen | Template | What changed |
+|---|---|---|
+| Career → Schedule | Feature screen | Was a sheet. The one place where commitment (holding back, steady, all in) is set; load and burnout in the hero; the rules behind ⓘ |
+| Career → Sports | Feature screen | Was a sheet with four tabs and seven accordions. Hero (role, team; Greatness, Standing, Record); tiles Practice, Try out, Contract (or Offers while there are scholarship offers) and Recover (only when hurt); tabs Season, League, History. Practice, Try out, Position, Contract and Offers are option picker sheets. Switch sport (young players), Quit, Request a trade, Performance enhancers, Leave your team and Retire are in ⋯. Fame, image and fan bars show only once fame is above zero; contract, agent and deal rows only when there is one. Commitment moved to the Schedule |
+| Career → Music / Acting / Writing & art (Fame) | Feature screen | Was a sheet with one long scroll. Hero (rung; fame and fans once there is any); tiles Write, Band, Agent, Scene; tabs Career, Releases and (once you are known) Fame. Break the contract, part with the agent, drop the project and step away are in ⋯ |
+| Band | Feature screen | Was a sheet with four tabs and a rename text box. Hero (genre and members; Strength, Chemistry, Buzz); tiles Rehearse, Write, Play a show; tabs Members, Music, Shows. An open spot shows "Keys · Open spot" with an Audition button that opens a sheet of candidate cards. Rename (a dialog), Go solo and Leave are in ⋯. Without a band: tile Start a band, and join cards for the bands that want you |
+| Shows, tours, sound, practice (inside Fame and Band) | Rows and option pickers | The genre and instrument dropdowns are pickers |
+| Line up a project | Option picker sheet | The title and the track titles are dialogs; the genre is chips; the press run is a toggle chip |
+| Organization (O1) | Feature screen | Was a sheet with four tabs. Hero (Rank, Respect, Heat); tiles Assign jobs, Your cut, Informant (only for the leader, and only while there is one); tabs Members, Territory, Rivals. The record, the year's results and the code are plain lists and ⓘ |
+| Dealing | Feature screen | Was a sheet. Hero (Standing, Heat, Dirty money); tiles Start selling or Price, and Set up; tabs Overview, Stock, Production. Stop selling is in ⋯ |
+| Business | Feature screen | Was a sheet over a card. Hero for the business you pick (chips when you own several); tiles Start one and For sale; tabs Report, Products, Team, Places, Franchise. Sell it and Close it are in ⋯ and ask first. The decision hints are behind ⓘ. The start sheet names the business in a dialog and picks the city with chips |
+| Jobs, Education, Gigs, Time abroad, Crime (no crew) | Feature screen | Were sheets. Gigs and Time abroad have a hero and a tile; the job, school and crime cards sit inside the screen |
+| Social media (Career) | Page | The row opens the Social media page directly (the extra sheet is gone) |
+| Every activity (gym, nightlife, spa, doctor, casino, loans, lawsuits, names...) | Option picker sheet | Was a title, a paragraph, then an outlined button repeating the title. Now option cards with effect chips and a price chip, freshness pips and the balance in the header, and a confirmation above the threshold. A greyed card says why ("Needs $40 more", "Done this year"). Companions, looks, a lawsuit's route and a stake are chips; a name is two rows that open a dialog |
+| Every shop (Stores, Fine goods, Outdoor gear, the black market, Luxury cars, Boats, Aircraft, Jewelry, Private islands) | Store | Was an option sheet. Filter chips (All, kinds of item, I can afford, Owned); the luxury shops use the gold tokens; Sell for something you own |
+| Groups, Faith, Explore other faiths | Join list | Was rows with three dots. Join cards with hours, cost and benefit chips, filter by kind, "Show N more". A group you belong to opens its own feature screen (Standing, the people you know, Change commitment and Leave in ⋯) |
+| Travel, Move abroad | Chips | The dropdowns are chips |
+| Page headers over a tab (Health, Family, Possessions, Teen years, Properties, Will, Later life...) | Header only | They use `ScreenHeader`: the title wraps instead of truncating |
+
+### Not rebuilt in U3
+
+These screens only picked up the new header and the no-truncation rule; their bodies are as they were and are the next candidates (see the report in the pull request): the person and pet pages, Health, Possessions (adopting a pet still has a name field), Properties, Family, Will, Later life, Teen years, Social media (its post text box), Trips (the explanatory blurbs), Move abroad (the explanatory blurbs), the Drug market and Recovery pages, the Money tab (the dirty-money amount field) and the god mode editor.

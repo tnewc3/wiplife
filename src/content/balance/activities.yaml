@@ -15,6 +15,11 @@ returns:
 thresholds:
   luxury: 500000
 
+# U3: an activity that costs this share of your savings (and at least `min`, US prices) asks you to confirm first.
+confirm:
+  share: 0.25
+  min: 500
+
 hobbies:
   # Skill is 0 to 100. These are where the levels begin: beginner, amateur, skilled, expert.
   levels: [10, 25, 45, 70]

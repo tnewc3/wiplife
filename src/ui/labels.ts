@@ -2824,3 +2824,17 @@ export const MINIGAME_LABELS = {
   } as const,
   slots: { reel: (n: number): string => `Reel ${n}`, stopReel: (n: number): string => `Stop reel ${n}` } as const,
 } as const;
+
+/** U3: the tint behind an item's art in a shop, by shop (or, for a shop without its own, by category): the event category colors. */
+export const SHOP_TONES: Record<string, string> = {
+  shopping: 'love',
+  fine_goods: 'work',
+  outdoor_gear: 'travel',
+  black_market: 'crime',
+  lux_cars: 'wonder',
+  lux_boats: 'friends',
+  lux_air: 'people',
+  lux_jewelry: 'fame',
+  lux_islands: 'home',
+  luxury: 'wonder',
+};

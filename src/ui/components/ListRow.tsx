@@ -36,8 +36,8 @@ export function ListRow({ title, subtitle, icon, lead, value, ending = 'none', o
     <>
       {lead ?? (icon && <Icon id={icon} size={28} />)}
       <span className="flex min-w-0 flex-1 flex-col text-left">
-        <span className="font-display truncate text-base leading-tight font-semibold">{title}</span>
-        {subtitle && <span className="truncate text-[13px] leading-tight text-muted">{subtitle}</span>}
+        <span className="font-display text-base leading-tight font-semibold [overflow-wrap:anywhere]">{title}</span>
+        {subtitle && <span className="text-[13px] leading-tight text-muted [overflow-wrap:anywhere]">{subtitle}</span>}
       </span>
       {value !== undefined && value !== null && <span className="shrink-0 text-sm font-semibold tabular-nums">{value}</span>}
       {ending === 'chevron' && <ChevronRight aria-hidden="true" size={20} className="shrink-0 text-muted" />}

@@ -26,7 +26,7 @@ test('the sheets list what is on offer with the price on each button, and fit a 
   await open(page, { seed: 'e2e-act-1' });
   // The price is on the button; a free activity says so.
   await openSheet(page, 'salon');
-  await expect(page.getByTestId('do-haircut')).toContainText('Get a haircut · $');
+  await expect(page.getByTestId('do-haircut')).toContainText(/Get a haircut[\s\S]*\$/);
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.keyboard.press('Escape');
@@ -73,7 +73,7 @@ test('a paid activity shows its receipt: the money change and your new balance, 
   await expect(receipt.getByTestId('receipt-money')).toContainText(`−$${price.toLocaleString('en-US')}`);
   await expect(receipt.getByTestId('receipt-money')).toContainText(`You now have $${(40_000 - price).toLocaleString('en-US')}`);
   // Doing it again costs the full price again but gives less; the screen counts it.
-  await expect(page.getByTestId('activity-haircut')).toContainText('Done 1 of');
+  await expect(page.getByTestId('freshness')).toHaveAttribute('aria-label', /Fine|Stale/);
   await page.keyboard.press('Escape');
   await goTab(page, 'Assets');
   await expect(page.getByTestId('savings')).toHaveText(`$${(40_000 - price).toLocaleString('en-US')}`);
@@ -87,6 +87,6 @@ test('a night out at the bar: the receipt shows the tab and the new balance, and
   await sheet.getByTestId('do-go_to_a_bar').click();
   await expect(page.getByTestId('activity-receipt')).toContainText('You now have $');
   await expect(page.getByTestId('activity-receipt').getByTestId('receipt-money')).toContainText('−$');
-  await expect(page.getByTestId('activity-go_to_a_bar')).toContainText('Done 1 of');
+  await expect(page.getByTestId('freshness')).toHaveAttribute('aria-label', /Fine|Stale/);
   await expectTouchTargets(page);
 });

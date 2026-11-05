@@ -39,8 +39,8 @@ export function WayRow({ title, status, reason, defaultOpen = true, children, te
         className={`flex min-h-row w-full items-center gap-3 rounded-2xl border border-border bg-surface px-3 py-1.5 text-left active:bg-surface-2 ${locked ? 'opacity-60' : ''}`}
       >
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="font-display truncate text-base leading-tight font-semibold">{title}</span>
-          {status && <span className="truncate text-[13px] leading-tight text-muted">{status}</span>}
+          <span className="font-display text-base [overflow-wrap:anywhere] leading-tight font-semibold">{title}</span>
+          {status && <span className="text-[13px] [overflow-wrap:anywhere] leading-tight text-muted">{status}</span>}
         </span>
         {locked ? <Lock aria-hidden="true" size={18} className="shrink-0 text-muted" /> : <ChevronDown aria-hidden="true" size={20} className={`shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`} />}
       </button>

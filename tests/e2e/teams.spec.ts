@@ -57,8 +57,6 @@ test('a team renamed in Settings is the new name in a new life, which keeps its 
   await ageUpTimes(page, 8);
   await goTab(page, 'Job');
   await page.getByTestId('sports-open').click();
-  await expandGroups(page);
-  await page.getByTestId('league-soccer').locator('summary').click();
   await expect(page.getByTestId('league-team-chicago_lakefront_fc')).toContainText('Chicago Lakeshore Rovers');
   await expect(page.getByTestId('league-team-chicago_lakefront_fc')).toContainText('Houston');
   await expectNoHorizontalScroll(page);

@@ -1,3 +1,4 @@
+import { ChipSelect } from '../../components/FilterChips';
 import { useState } from 'react';
 import { content } from '../../../content';
 import type { RouteId, Tier } from '../../../content/schemas';
@@ -8,7 +9,6 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { APPLICATION_KIND_LABELS, APPLICATION_STATUS_LABELS, BASIS_LABELS, ENTRY_BLOCK_LABELS, MOVE_BLOCK_LABELS, money, approvalLabel, PERMIT_LABELS, REMIT_LABELS, ROUTE_BLURBS, ROUTE_LABELS, STATUS_BLOCK_LABELS, STATUS_LABELS } from '../../labels';
 
-const select = 'mt-2 min-h-11 w-full rounded border border-border bg-surface px-2';
 const TIERS: Tier[] = ['community', 'state', 'elite'];
 
 /** More → Move abroad and citizenship (W6). Availability, prices and odds all come from the engine's rules. */
@@ -114,28 +114,13 @@ export function MigrationScreen({ life }: { life: LifeState }) {
       {!app && view.destinations.length > 0 && (
         <Card>
           <h2 className="text-lg font-bold">Move to another country</h2>
-          <label className="mt-2 block" htmlFor="mig-country">Country</label>
-          <select id="mig-country" className={select} value={view.pick.countryId ?? ''} onChange={(e) => { setCountry(e.target.value); setCity(''); }}>
-            {view.destinations.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-          </select>
-          <label className="mt-3 block" htmlFor="mig-route">Route</label>
-          <select id="mig-route" className={select} value={route} onChange={(e) => setRoute(e.target.value as RouteId)}>
-            {view.routes.map((r) => <option key={r.route} value={r.route}>{ROUTE_LABELS[r.route]}</option>)}
-          </select>
-          <label className="mt-3 block" htmlFor="mig-city">City</label>
-          <select id="mig-city" className={select} value={view.pick.cityId} onChange={(e) => setCity(e.target.value)}>
-            {view.cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <ChipSelect label="Country" testId="mig-country" value={view.pick.countryId ?? ''} onChange={(v) => { setCountry(v); setCity(''); }} options={view.destinations.map((d) => ({ id: d.id, label: d.name }))} />
+          <ChipSelect<RouteId> label="Route" testId="mig-route" value={route} onChange={setRoute} options={view.routes.map((r) => ({ id: r.route, label: ROUTE_LABELS[r.route] }))} />
+          <ChipSelect label="City" testId="mig-city" value={view.pick.cityId} onChange={setCity} options={view.cities.map((c) => ({ id: c.id, label: c.name }))} />
           {route === 'study_work' && (
             <>
-              <label className="mt-3 block" htmlFor="mig-major">Program</label>
-              <select id="mig-major" className={select} value={view.pick.majorId} onChange={(e) => setMajor(e.target.value)}>
-                {view.majors.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-              </select>
-              <label className="mt-3 block" htmlFor="mig-tier">Kind of school</label>
-              <select id="mig-tier" className={select} value={tier} onChange={(e) => setTier(e.target.value as Tier)}>
-                {TIERS.map((t) => <option key={t} value={t}>{content.countries[view.pick.countryId ?? 'us']?.words.tiers[t] ?? t}</option>)}
-              </select>
+              <ChipSelect label="Program" testId="mig-major" value={view.pick.majorId} onChange={setMajor} options={view.majors.map((m) => ({ id: m.id, label: m.name }))} />
+              <ChipSelect<Tier> label="Kind of school" testId="mig-tier" value={tier} onChange={setTier} options={TIERS.map((t) => ({ id: t, label: content.countries[view.pick.countryId ?? 'us']?.words.tiers[t] ?? t }))} />
             </>
           )}
           {chosen && (

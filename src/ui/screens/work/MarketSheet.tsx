@@ -7,6 +7,8 @@ import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { ChipSelect } from '../../components/FilterChips';
+import { cityOptions } from '../../cityOptions';
 import { Sheet } from '../../components/Sheet';
 import { BUSINESS_BLOCK_LABELS, BUSINESS_ROLE_BLURBS, BUSINESS_ROLE_LABELS, money } from '../../labels';
 import { FundingPicker } from './FundingPicker';
@@ -71,18 +73,7 @@ export function MarketSheet({ life, open, onClose }: { life: LifeState; open: bo
     <>
       <Sheet open={open && buying === null} title="For sale" onClose={onClose}>
         <div className="flex flex-col gap-3" data-testid="market">
-          <label htmlFor="market-city" className="font-bold">
-            City
-          </label>
-          <select id="market-city" data-testid="market-city" value={cityId} onChange={(e) => setCityId(e.target.value)} className="min-h-11 w-full rounded-xl border border-border bg-surface px-3">
-            {Object.keys(content.cities)
-              .sort()
-              .map((id) => (
-                <option key={id} value={id}>
-                  {content.cities[id]!.name}
-                </option>
-              ))}
-          </select>
+          <ChipSelect label="City" testId="market-city" value={cityId} onChange={setCityId} options={cityOptions()} />
           {listings.length === 0 && <p className="text-muted">Nothing is for sale here right now.</p>}
           <ul className="flex flex-col gap-3">
             {listings.map((l) => (

@@ -2,6 +2,8 @@ import type { LifeActionId, LifeActionParams } from '../../../engine/actions';
 import type { SportsView } from '../../../engine/selectors';
 import { Button } from '../../components/Button';
 import { money, SPORTS_WORLD_WORDS } from '../../labels';
+import { ListRow, RowList } from '../../components/ListRow';
+import { SectionLabel } from '../../components/SectionLabel';
 import { Section } from './SportsGrind';
 
 type TakeAction = (actionId: LifeActionId, params?: LifeActionParams) => Promise<void>;
@@ -112,34 +114,24 @@ export function WorldSection({ view, disabled, act }: { view: SportsView; disabl
 }
 
 /** Batch 6: the teams of the sports you are looking at, by name (the ones you could play for). */
-export function LeaguesSection({ view }: { view: SportsView }) {
-  if (view.leagues.length === 0) return null;
+export function LeaguesSection({ view, skipFirst = false }: { view: SportsView; /** The standings table already shows the first league. */ skipFirst?: boolean }) {
+  const leagues = skipFirst ? view.leagues.slice(1) : view.leagues;
+  if (leagues.length === 0) return null;
   return (
-    <Section title="Teams you could play for" testId="leagues">
-      <div className="mt-1 flex flex-col gap-2">
-        {view.leagues.map((l) => (
-          <details key={l.sportId} className="rounded-xl border border-border px-3 py-2" data-testid={`league-${l.sportId}`}>
-            <summary className="min-h-11 cursor-pointer py-2 font-semibold">
-              {l.sport}: {l.league}
-            </summary>
-            <ul className="mt-1 flex flex-col divide-y divide-border" aria-label={`${l.sport} league teams`}>
-              {l.teams.map((t) => (
-                <li key={t.id} className="flex flex-col py-1.5" data-testid={`league-team-${t.id}`}>
-                  <span className={`break-words ${t.yours ? 'font-semibold' : ''}`}>
-                    {t.name}
-                    {t.yours ? ' (yours)' : ''}
-                  </span>
-                  <span className="text-sm text-muted">
-                    {t.place}
-                    {t.division === 2 ? ' · second league' : ''}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {l.more > 0 && <p className="py-1 text-sm text-muted">…and {l.more} more.</p>}
-          </details>
-        ))}
-      </div>
-    </Section>
+    <div className="flex flex-col gap-3" data-testid="leagues">
+      {leagues.map((l) => (
+        <div key={l.sportId} className="flex flex-col gap-1" data-testid={`league-${l.sportId}`}>
+          <SectionLabel>
+            {l.sport}: {l.league}
+          </SectionLabel>
+          <RowList label={`${l.sport} league teams`}>
+            {l.teams.map((t) => (
+              <ListRow key={t.id} title={`${t.name}${t.yours ? ' (yours)' : ''}`} subtitle={`${t.place}${t.division === 2 ? ' · second league' : ''}`} testId={`league-team-${t.id}`} />
+            ))}
+          </RowList>
+          {l.more > 0 && <p className="px-1 text-sm text-muted">…and {l.more} more.</p>}
+        </div>
+      ))}
+    </div>
   );
 }

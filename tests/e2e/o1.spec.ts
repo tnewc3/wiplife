@@ -58,10 +58,9 @@ test('a leader gives a member a job from the row’s action sheet, and the year 
   await ageUp(page);
   await settle(page);
   await openOrg(page);
-  await page.getByTestId('org-tab-overview').click();
+  await page.getByTestId('org-tab-members').click();
   await expect(page.getByTestId('org-recap')).toBeVisible();
-  await page.getByTestId('org-recap').getByRole('button').click();
-  await expect(page.getByTestId('org-recap-list')).toContainText(/paid you|supplied|Did well|Went badly|Arrested|Hurt|Out of action|Killed/);
+  await expect(page.getByTestId('org-recap')).toContainText(/paid you|supplied|Did well|Went badly|Arrested|Hurt|Out of action|Killed/);
 });
 
 test('your cut changes from a sheet, and an attack on a neighborhood is ordered at a cost', async ({ page }) => {
@@ -74,7 +73,7 @@ test('your cut changes from a sheet, and an attack on a neighborhood is ordered 
   const take = page.locator('[data-testid^="org-hood-more-"]').first();
   await take.click();
   await page.getByTestId('org-act-take').click();
-  await page.getByTestId('org-tab-overview').click();
+  await page.getByTestId('org-tab-members').click();
   await expect(page.getByTestId('org-row-dirty')).toBeVisible();
 });
 
@@ -91,7 +90,9 @@ test('a rival can be offered a truce or an alliance from its row', async ({ page
 test('someone who does not run the organization sees it but cannot decide', async ({ page }) => {
   await open(page, { seed: 'e2e-o1-member', kind: 'mafia', rank: 1 });
   await openOrg(page);
-  await expect(page.getByText(/Only the one who runs it makes these decisions/)).toBeVisible();
+  await page.getByTestId('screen-info').click();
+  await expect(page.getByRole('dialog').getByText(/Only the one who runs it makes these decisions/)).toBeVisible();
+  await page.keyboard.press('Escape');
   await expect(page.getByTestId('org-row-cut')).toHaveCount(0);
   await page.getByTestId('org-tab-members').click();
   await page.locator('[data-testid^="org-member-more-"]').first().click();
@@ -101,7 +102,9 @@ test('someone who does not run the organization sees it but cannot decide', asyn
 test('a teen in a youth crew has the screen with no decisions to make (a kid has no business to run)', async ({ page }) => {
   await open(page, { seed: 'e2e-o1-youth', age: 16, youth: true });
   await openOrg(page);
-  await expect(page.getByText(/A kids’ crew has no business to run|Only the one who runs it makes these decisions/)).toBeVisible();
+  await page.getByTestId('screen-info').click();
+  await expect(page.getByRole('dialog').getByText(/A kids’ crew has no business to run|Only the one who runs it makes these decisions/).first()).toBeVisible();
+  await page.keyboard.press('Escape');
   await expect(page.getByTestId('org-row-dirty')).toContainText('$0');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);

@@ -6,8 +6,10 @@ import { getFundingCheck, getStartOptions } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
+import { ChipSelect } from '../../components/FilterChips';
+import { cityOptions } from '../../cityOptions';
 import { Sheet } from '../../components/Sheet';
-import { TextField } from '../../components/TextField';
+import { RenameDialog } from '../../components/RenameDialog';
 import { BUSINESS_BLOCK_LABELS, BUSINESS_ROLE_BLURBS, BUSINESS_ROLE_LABELS, money } from '../../labels';
 import { FundingPicker } from './FundingPicker';
 
@@ -35,6 +37,7 @@ export function StartBusinessSheet({ life, open, onClose }: { life: LifeState; o
   const [style, setStyle] = useState<BusinessStyle | null>(null);
   const [cityId, setCityId] = useState(life.character.cityId);
   const [name, setName] = useState('');
+  const [naming, setNaming] = useState(false);
   const [role, setRole] = useState<OwnerRole>('self');
   const [plan, setPlan] = useState<FundingPlan>({ source: 'savings' });
   const options = useMemo(() => getStartOptions(life, cityId, content), [life, cityId]);
@@ -65,22 +68,15 @@ export function StartBusinessSheet({ life, open, onClose }: { life: LifeState; o
           </section>
         )}
         <section aria-label="City">
-          <label htmlFor="biz-city" className="mb-1 block font-bold">
-            Which city?
-          </label>
-          <select id="biz-city" data-testid="biz-city" value={cityId} onChange={(e) => setCityId(e.target.value)} className="min-h-11 w-full rounded-xl border border-border bg-surface px-3">
-            {Object.keys(content.cities)
-              .sort()
-              .map((id) => (
-                <option key={id} value={id}>
-                  {content.cities[id]!.name}
-                </option>
-              ))}
-          </select>
+          <ChipSelect label="City" testId="biz-city" value={cityId} onChange={setCityId} options={cityOptions()} />
           {cityId !== life.character.cityId && <p className="mt-1 text-sm text-muted">It is not where you live, so you would not be there day to day. A manager makes more sense.</p>}
         </section>
         <section aria-label="Name">
-          <TextField label="Name it" value={name} onChange={setName} maxLength={content.balance.business.limits.nameLength} data-testid="biz-name" hint="A made-up name, 2 to 40 characters." />
+          <button type="button" onClick={() => setNaming(true)} data-testid="biz-name" className="wl-press flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-3 text-left">
+            <span className="text-sm font-semibold text-muted">Name</span>
+            <span className="min-w-0 font-semibold [overflow-wrap:anywhere]">{name || 'Name it'}</span>
+          </button>
+          <RenameDialog open={naming} title="Name your business" label="Name it" initial={name} allowSame maxLength={content.balance.business.limits.nameLength} hint="A made-up name, 2 to 40 characters." testId="biz-name-input" onCancel={() => setNaming(false)} onSave={(t) => { setName(t); setNaming(false); }} />
           {option && (
             <Button variant="ghost" className="mt-1" onClick={() => setName(option.names.find((n) => !life.business.items.some((b) => b.name === n)) ?? option.names[0]!)} data-testid="biz-suggest">
               Suggest a name

@@ -70,9 +70,9 @@ test('take a honeymoon with the spouse you married: priced, paid with a receipt,
   test.setTimeout(120_000);
   await open(page, newlywedLife());
   await openPage(page, 'trip');
-  await page.getByLabel('Kind of trip').selectOption('honeymoon');
-  await page.getByLabel('Destination', { exact: true }).selectOption('sydney');
-  await page.getByLabel('Budget', { exact: true }).selectOption('comfortable');
+  await page.getByTestId('trip-style-honeymoon').click();
+  await page.getByTestId('trip-destination-sydney').click();
+  await page.getByTestId('trip-budget-comfortable').click();
   await expect(page.getByTestId('honeymoon-with')).toContainText('Sam Spouse');
   // Comfortable ($2,000) at Sydney's price level (1.4) and a honeymoon's 1.2, for two.
   await expect(page.getByText('Total: $5,040', { exact: true })).toBeVisible();
@@ -86,7 +86,7 @@ test('take a honeymoon with the spouse you married: priced, paid with a receipt,
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await openPage(page, 'trip');
-  await page.getByLabel('Kind of trip').selectOption('honeymoon');
+  await page.getByTestId('trip-style-honeymoon').click();
   await expect(page.getByRole('button', { name: 'Take the honeymoon' })).toBeDisabled();
 });
 
@@ -95,14 +95,14 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await open(page, familyStayLife());
   await goTab(page, 'Job');
   await openRow(page, 'find-abroad');
-  await page.getByLabel('Work destination').selectOption('london');
-  await page.getByLabel('Length or route').selectOption('working_holiday');
+  await page.getByTestId('abroad-destination-london').click();
+  await page.getByTestId('abroad-route-working_holiday').click();
   // Children at home keep a solo stay from starting.
   await expect(page.getByRole('button', { name: 'Start temporary work' })).toBeDisabled();
   await page.getByLabel(/Bring my family/).check();
   await expect(page.getByTestId('family-note')).toBeVisible();
   // $1,600 plus $560 for each of three people.
-  await expect(page.getByText(/Up front: \$3,280/)).toBeVisible();
+  await expect(page.getByTestId('abroad-cost')).toContainText('$3,280');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Start temporary work' }).click(); await settle(page);
@@ -110,7 +110,7 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await expect(page.getByTestId('event-money')).toContainText('£2,591');
   await playThroughEvents(page);
   await expect(page.getByTestId('work-residence')).toContainText('London');
-  await expect(page.getByTestId('work-family')).toContainText('Your family is with you.');
+  await expect(page.getByTestId('work-family')).toContainText('With you');
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await goTab(page, 'Job');

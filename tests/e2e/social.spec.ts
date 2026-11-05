@@ -119,12 +119,10 @@ test('creators reach the Social screen from the Work tab and come back to it', a
   await open(page, { seed: 'e2e-social-6', creator: true });
   await goTab(page, 'Job');
   await openRow(page, 'special-social');
-  await expect(page.getByTestId('work-social')).toBeVisible();
-  await page.getByTestId('work-open-social').click();
   await expect(page.getByTestId('social-summary')).toBeVisible();
   await expect(page.getByTestId('account-tiktok')).toBeVisible();
   await expectNoHorizontalScroll(page);
   await page.getByRole('button', { name: 'Back to Career' }).click();
   await openRow(page, 'special-social');
-  await expect(page.getByTestId('work-social')).toBeVisible();
+  await expect(page.getByTestId('social-summary')).toBeVisible();
 });

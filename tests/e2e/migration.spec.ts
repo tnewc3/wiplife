@@ -18,9 +18,9 @@ test('an investor applies, waits, is approved, moves abroad and becomes a perman
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await openPage(page, 'migration');
   await expect(page.getByTestId('migration-citizenships')).toContainText('United States');
-  await page.getByLabel('Country', { exact: true }).selectOption('ca');
-  await page.getByLabel('Route', { exact: true }).selectOption('investment');
-  await page.getByLabel('City', { exact: true }).selectOption('toronto');
+  await page.getByTestId('mig-country-ca').click();
+  await page.getByTestId('mig-route-investment').click();
+  await page.getByTestId('mig-city-toronto').click();
   await expect(page.getByTestId('migration-route')).toContainText('Application cost');
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
   await page.getByTestId('migration-apply').click(); await settle(page);
@@ -54,7 +54,7 @@ test('moving without papers asks for confirmation, costs money, and either arriv
   const life = produce(rich('migration-papers-phone'), (d) => { d.finances.savings = 40_000; d.character.stats.smarts = 40; });
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await openPage(page, 'migration');
-  await page.getByLabel('Country', { exact: true }).selectOption('ca');
+  await page.getByTestId('mig-country-ca').click();
   await page.getByTestId('migration-without-papers').click();
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
   await page.getByTestId('migration-without-papers-confirm').click(); await settle(page);

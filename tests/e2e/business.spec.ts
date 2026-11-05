@@ -21,16 +21,16 @@ async function open(page: Page, options: BusinessLife): Promise<void> {
 
 test('the Work tab offers a business, and starting a café with savings works', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-1' });
-  await expect(page.getByTestId('business-card')).toContainText('Business');
-  await expect(page.getByTestId('business-prompt')).toBeVisible();
-  await page.getByTestId('business-open').click();
+  await expect(page.getByTestId('business-screen')).toBeVisible();
   await expect(page.getByTestId('business-screen')).toContainText('You don’t own a business yet.');
   await page.getByTestId('start-open').click();
   await expect(page.getByTestId('start-business')).toBeVisible();
   await expect(page.getByTestId('start-confirm')).toBeDisabled();
   await page.getByTestId('kind-cafe').click();
   await page.getByTestId('style-budget').click();
-  await page.getByTestId('biz-name').fill('The Grey Heron');
+  await page.getByTestId('biz-name').click();
+  await page.getByTestId('biz-name-input').fill('The Grey Heron');
+  await page.getByTestId('rename-save').click();
   await expect(page.getByTestId('start-need')).toContainText('in all');
   await expect(page.getByTestId('funding-picker')).toBeVisible();
   await expect(page.getByTestId('funding-summary')).toContainText('You pay');
@@ -45,11 +45,12 @@ test('the Work tab offers a business, and starting a café with savings works', 
 
 test('every funding choice is offered, and a loan shows the bank’s terms', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-2' });
-  await page.getByTestId('business-open').click();
   await page.getByTestId('start-open').click();
   await page.getByTestId('kind-bakery').click();
   await page.getByTestId('style-standard').click();
-  await page.getByTestId('biz-name').fill('Sunday Rye');
+  await page.getByTestId('biz-name').click();
+  await page.getByTestId('biz-name-input').fill('Sunday Rye');
+  await page.getByTestId('rename-save').click();
   for (const source of ['savings', 'loan', 'investors', 'cofounder']) await expect(page.getByTestId(`funding-${source}`)).toBeVisible();
   await page.getByTestId('funding-loan').click();
   await expect(page.getByTestId('loan-offer')).toContainText('The bank would lend up to');
@@ -64,11 +65,10 @@ test('every funding choice is offered, and a loan shows the bank’s terms', asy
 test('a year of trading shows the report in words and numbers, and the Money tab shows business money', async ({ page }) => {
   test.setTimeout(120_000);
   await open(page, { seed: 'e2e-biz-3', started: true });
-  await expect(page.getByTestId('business-summary')).toContainText('The Grey Heron');
+  await expect(page.getByTestId('business-screen')).toContainText('The Grey Heron');
   await ageUp(page);
   await goTab(page, 'Job');
   await openRow(page, 'special-business');
-  await page.getByTestId('business-open').click();
   const panel = page.locator('[data-testid^="business-b"]').first();
   await expect(panel).toContainText('The Grey Heron');
   await expect(panel.locator('[data-testid^="report-words-"]')).toBeVisible();
@@ -85,7 +85,6 @@ test('a year of trading shows the report in words and numbers, and the Money tab
 
 test('decisions, who runs it, hiring and letting go', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-4', started: true });
-  await page.getByTestId('business-open').click();
   const id = (await page.locator('[data-testid^="business-b"]').first().getAttribute('data-testid'))!.replace('business-', '');
   await page.getByTestId(`decision-${id}-prices-high`).click();
   await expect(page.getByTestId(`decision-${id}-prices-high`)).toHaveAttribute('aria-checked', 'true');
@@ -108,7 +107,6 @@ test('decisions, who runs it, hiring and letting go', async ({ page }) => {
 
 test('what is for sale: browse a city and buy a business', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-5', savings: 3_000_000 });
-  await page.getByTestId('business-open').click();
   await page.getByTestId('market-open').click();
   await expect(page.getByTestId('market')).toBeVisible();
   const first = page.locator('[data-testid^="listing-open-"]').first();
@@ -119,14 +117,14 @@ test('what is for sale: browse a city and buy a business', async ({ page }) => {
   await expect(page.getByTestId('buy-price')).toContainText('$');
   await expect(page.getByTestId('funding-picker')).toBeVisible();
   await page.getByTestId('buy-confirm').click();
-  await expect(page.getByTestId('business-screen')).toContainText('Worth about');
+  await expect(page.getByTestId('business-screen')).toContainText(/Worth\s*\$/);
   await expect(page.locator('[data-testid^="business-b"]')).toHaveCount(1);
 });
 
 test('selling a business asks first and then it is gone', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-6', started: true });
-  await page.getByTestId('business-open').click();
   const id = (await page.locator('[data-testid^="business-b"]').first().getAttribute('data-testid'))!.replace('business-', '');
+  await page.getByTestId('screen-overflow').click();
   await page.getByTestId(`sell-${id}`).click();
   await expect(page.getByRole('dialog').last()).toContainText('Sell The Grey Heron?');
   await page.getByRole('button', { name: 'Sell it', exact: true }).last().click();
@@ -139,7 +137,6 @@ const firstId = async (page: Page): Promise<string> => (await page.locator('[dat
 test('the products tab sets a line’s price and order level, and next year shows the line’s own result', async ({ page }) => {
   test.setTimeout(120_000);
   await open(page, { seed: 'e2e-biz-7', started: true });
-  await page.getByTestId('business-open').click();
   const id = await firstId(page);
   await page.getByTestId(`tab-${id}-products`).click();
   await expect(page.getByTestId(`products-${id}`)).toContainText('Coffee');
@@ -155,7 +152,6 @@ test('the products tab sets a line’s price and order level, and next year show
   await ageUp(page);
   await goTab(page, 'Job');
   await openRow(page, 'special-business');
-  await page.getByTestId('business-open').click();
   await page.getByTestId(`tab-${id}-products`).click();
   await expect(page.getByTestId(`line-last-${id}-coffee`)).toContainText('Last year');
   await expect(page.getByTestId(`line-price-${id}-coffee-high`)).toHaveAttribute('aria-checked', 'true');
@@ -163,7 +159,6 @@ test('the products tab sets a line’s price and order level, and next year show
 
 test('the screen reads the economy as a word and each supplier as getting dearer, cheaper or steady', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-8', started: true });
-  await page.getByTestId('business-open').click();
   await expect(page.getByTestId('economy-strip')).toBeVisible();
   await expect(page.getByTestId('economy-phase')).toContainText('Economy:');
   await expect(page.getByTestId('supplier-moods')).toContainText(/getting dearer|getting cheaper|steady/);
@@ -173,14 +168,13 @@ test('the screen reads the economy as a word and each supplier as getting dearer
 
 test('hiring goes to the place and the role chosen: a hire to the second location is there', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-9', started: true, places: 2, people: 3, savings: 3_000_000 });
-  await page.getByTestId('business-open').click();
   const id = await firstId(page);
   await page.getByTestId(`tab-${id}-team`).click();
   await expect(page.getByTestId('team-loc-l2')).toBeVisible();
   await expect(page.getByTestId('hc-row-l2-shift_lead')).toContainText('0 named');
   await page.getByTestId(`hire-open-${id}`).click();
-  await page.getByTestId('hire-location').selectOption('l2');
-  await page.getByTestId('hire-role').selectOption('shift_lead');
+  await page.getByTestId('hire-location-l2').click();
+  await page.getByTestId('hire-role-shift_lead').click();
   await expectTouchTargets(page);
   await page.getByTestId('hire-new').click();
   await expect(page.getByTestId('hc-row-l2-shift_lead')).toContainText('1 named');
@@ -189,7 +183,6 @@ test('hiring goes to the place and the role chosen: a hire to the second locatio
 
 test('the steppers change a role’s headcount at a place, within its range', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-10', started: true });
-  await page.getByTestId('business-open').click();
   const id = await firstId(page);
   await page.getByTestId(`tab-${id}-team`).click();
   const count = page.getByTestId('hc-count-l1-barista');
@@ -204,7 +197,6 @@ test('the steppers change a role’s headcount at a place, within its range', as
 
 test('a named person is moved to the other place and made its manager', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-11', started: true, places: 2, named: 1, savings: 3_000_000 });
-  await page.getByTestId('business-open').click();
   const id = await firstId(page);
   await page.getByTestId(`tab-${id}-team`).click();
   await expect(page.getByTestId('hc-row-l1-barista')).toContainText('1 named');
@@ -220,13 +212,12 @@ test('a named person is moved to the other place and made its manager', async ({
 
 test('a business that has earned it sells a franchise and lists the franchisee', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-12', started: true, places: 3, franchiseReady: true, savings: 4_000_000 });
-  await page.getByTestId('business-open').click();
   const id = await firstId(page);
   await page.getByTestId(`tab-${id}-franchise`).click();
   await expect(page.getByTestId(`franchise-conditions-${id}`)).toContainText('✓');
   await page.getByTestId(`franchise-open-${id}`).click();
   await expect(page.getByTestId('franchise-sheet')).toBeVisible();
-  await page.getByTestId('franchise-city').selectOption({ index: 3 });
+  await page.locator('[data-testid^="franchise-city-"]').nth(3).click();
   await page.getByTestId('franchise-royalty-6').click();
   await expect(page.getByTestId('franchise-fee')).toContainText('$');
   await expectTouchTargets(page);
@@ -238,7 +229,6 @@ test('a business that has earned it sells a franchise and lists the franchisee',
 
 test('places lists each location with its people and stock, and opens and closes them', async ({ page }) => {
   await open(page, { seed: 'e2e-biz-13', started: true, places: 2, savings: 3_000_000 });
-  await page.getByTestId('business-open').click();
   const id = await firstId(page);
   await page.getByTestId(`tab-${id}-places`).click();
   await expect(page.getByTestId('place-l2')).toBeVisible();

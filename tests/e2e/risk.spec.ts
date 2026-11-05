@@ -34,6 +34,13 @@ test('a gambling night: the stake is on the button, the receipt shows the money 
   await expect(page.getByTestId('chase-play_the_slots')).toHaveCount(0);
   const stake = dollars((await page.getByTestId('do-play_the_slots-medium').textContent())!);
   await page.getByTestId('do-play_the_slots-medium').click();
+  // G1: the slots open a mini-game first; Auto plays it from your stats.
+  const game = page.getByTestId('minigame');
+  if (await game.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await game.getByRole('button', { name: 'Auto' }).click();
+    const next = page.getByTestId('minigame-continue');
+    if (await next.isVisible({ timeout: 3000 }).catch(() => false)) await next.click();
+  }
   const receipt = page.getByTestId('activity-receipt');
   await expect(receipt).toBeVisible();
   await expect(receipt.getByTestId('receipt-text')).not.toBeEmpty();
@@ -42,7 +49,7 @@ test('a gambling night: the stake is on the button, the receipt shows the money 
   // The balance on the receipt is the savings less the stake plus what came back, and the Money tab agrees.
   const balance = dollars(money.slice(money.indexOf('You now have')));
   expect(balance).toBeGreaterThan(20_000 - stake - 1);
-  await expect(page.getByTestId('activity-play_the_slots')).toContainText('Done 1 of');
+  await expect(page.getByTestId('freshness')).toHaveAttribute('aria-label', /Fine|Stale/);
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.keyboard.press('Escape');
@@ -70,7 +77,7 @@ test('a lawsuit: it is offered with something to go on, settles or goes to trial
   await open(page, { seed: 'e2e-risk-suit', savings: 30_000, flags: ['whistleblower', 'burned_out'] }, 'lawsuits');
   const suit = page.getByTestId('activity-sue_your_employer');
   await expect(suit).toBeVisible();
-  await expect(page.getByTestId('evidence-sue_your_employer')).toContainText('good deal to go on');
+  await expect(page.getByTestId('evidence-sue_your_employer').first()).toContainText('good deal to go on');
   // Nothing to go on against a landlord or a doctor.
   await expect(page.getByTestId('activity-sue_your_doctor')).toHaveCount(0);
   await expect(page.getByTestId('activity-sue_your_landlord')).toHaveCount(0);
@@ -97,13 +104,17 @@ test('a name change checks what is typed, shows the fee, and the new name is use
   const field = page.getByTestId('name-first-change_your_first_name');
   const button = page.getByTestId('do-change_your_first_name');
   await expect(field).toBeVisible();
-  await expect(button).toContainText('Change your first name · $');
-  // Nothing typed, or something that is not a name: the button stays off and says why.
-  await expect(button).toBeDisabled();
-  await field.fill('<b>x</b>');
-  await expect(button).toBeDisabled();
-  await field.fill('Rowan');
-  await expect(button).toBeEnabled();
+  await expect(button).toContainText('Change your first name');
+  // Nothing typed, or something that is not a name: the card stays off and says why (the name is typed in a dialog).
+  await expect(button).toHaveAttribute('aria-disabled', 'true');
+  await field.click();
+  await page.getByTestId('name-input-change_your_first_name').fill('<b>x</b>');
+  await page.getByTestId('rename-save').click();
+  await expect(button).toHaveAttribute('aria-disabled', 'true');
+  await field.click();
+  await page.getByTestId('name-input-change_your_first_name').fill('Rowan');
+  await page.getByTestId('rename-save').click();
+  await expect(button).not.toHaveAttribute('aria-disabled', 'true');
   const fee = dollars((await button.textContent())!);
   await button.click();
   const receipt = page.getByTestId('activity-receipt');
@@ -112,8 +123,7 @@ test('a name change checks what is typed, shows the fee, and the new name is use
   await expect(receipt.getByTestId('receipt-money')).toContainText(`−$${fee.toLocaleString('en-US')}`);
   await expect(receipt.getByTestId('receipt-money')).toContainText(`You now have $${(10_000 - fee).toLocaleString('en-US')}`);
   // Once a year, and the character's name everywhere is the new one.
-  await expect(page.getByTestId('activity-change_your_first_name')).toContainText('Done 1 of 1');
-  await expect(page.getByTestId('do-change_your_first_name')).toBeDisabled();
+  await expect(page.getByTestId('do-change_your_first_name')).toHaveAttribute('aria-disabled', 'true');
   await page.keyboard.press('Escape');
   await goHome(page);
   await expect(page.getByTestId('character-name')).toContainText('Rowan');

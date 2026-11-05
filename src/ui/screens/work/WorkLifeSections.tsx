@@ -1,3 +1,4 @@
+import { ChipSelect } from '../../components/FilterChips';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { getWorkLifeView, type WorkPersonLine } from '../../../engine/work/views';
@@ -80,16 +81,7 @@ export function WorkLifeSections({ life }: { life: LifeState }) {
           {button('party', 'Go to the office party', 'office_party')}
           {view.coworkers.length > 0 && (
             <div>
-              <label className="flex flex-col gap-1 text-sm">
-                Report a coworker
-                <select className="min-h-11 rounded-xl border border-border bg-surface px-3" value={reporting} onChange={(e) => setTarget(e.target.value)} aria-label="Coworker to report" data-testid="work-report-target">
-                  {view.coworkers.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <ChipSelect label="Report a coworker" testId="work-report-target" value={reporting} onChange={setTarget} options={view.coworkers.map((c) => ({ id: c.id, label: c.name }))} />
               <Button className="mt-2" block variant="secondary" disabled={disabled || view.reportBlock !== null} onClick={() => void act('report_coworker', { coworkerId: reporting })} data-testid="work-report">
                 Report to the boss
               </Button>

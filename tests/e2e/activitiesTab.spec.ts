@@ -63,7 +63,7 @@ test('a workout shows its price, then an outcome card with the money and your ne
   await expect(sheet.getByTestId('activity-receipt')).toBeVisible();
   await expect(sheet.getByTestId('receipt-money')).toContainText('You now have $');
   // A second workout the same year counts toward the same activity.
-  await expect(sheet.getByText('Done 1 of').first()).toBeVisible();
+  await expect(sheet.getByTestId('freshness')).toHaveAttribute('aria-label', /Fine|Stale/);
   await expectNoHorizontalScroll(page);
 });
 
@@ -86,9 +86,10 @@ test('Go shopping on the Assets tab opens the shopping options', async ({ page }
   await goTab(page, 'Assets');
   await page.getByTestId('assets-tab-things').click();
   await page.getByTestId('assets-go-shopping').click();
-  const sheet = page.getByRole('dialog', { name: 'Stores' });
-  await expect(sheet.getByTestId('do-buy_a_hat')).toContainText('$');
-  await expect(sheet.getByTestId('activity-buy_a_hat').getByRole('group', { name: 'Choose a hat' })).toBeVisible();
+  const store = page.getByTestId('activity-sheet-shopping');
+  await expect(store.getByTestId('item-buy_a_hat')).toContainText('$');
+  await store.getByTestId('item-buy_a_hat').click();
+  await expect(page.getByRole('dialog').getByRole('group', { name: 'Choose a hat' })).toBeVisible();
   await expectTouchTargets(page);
 });
 

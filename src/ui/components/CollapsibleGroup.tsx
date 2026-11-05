@@ -20,7 +20,7 @@ export function CollapsibleGroup({ id, title, count, defaultOpen = true, childre
         onClick={() => void setGroupOpen(id, !open)}
         className="font-display sticky -top-4 z-10 -mx-4 flex min-h-11 items-center justify-between gap-2 bg-bg px-4 text-left text-base font-semibold active:bg-surface-2"
       >
-        <span className="truncate">{title}</span>
+        <span className="[overflow-wrap:anywhere]">{title}</span>
         <span className="flex shrink-0 items-center gap-2 text-sm text-muted">
           {count !== undefined && <span className="tabular-nums">{count}</span>}
           <ChevronDown aria-hidden="true" size={18} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
