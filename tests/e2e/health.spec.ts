@@ -51,6 +51,7 @@ test('More → Health → Mind and mood names nothing until diagnosed, and lets 
     await ageUp(page);
   }
   await openPage(page, 'health');
+  await page.getByTestId('health-tab-mind').click();
   const mind = page.getByRole('region', { name: 'Mind and mood' });
   await expect(mind).toBeVisible();
   await expect(page.getByTestId('no-mental')).toBeVisible();

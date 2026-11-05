@@ -67,6 +67,7 @@ test('recovery: your habits, and quitting a drug you depend on', async ({ page }
   await expect(page.getByTestId('recovery-screen')).toBeVisible();
   await expect(page.getByTestId('habit-painkillers')).toContainText('Addicted');
   await expectNoHorizontalScroll(page);
+  await page.getByTestId('habit-more-painkillers').click();
   await page.getByTestId('quit-painkillers').click();
   await expect(page.getByTestId('recovery-result')).toBeVisible();
   await expect(page.getByTestId('habit-painkillers')).toContainText('Quitting');

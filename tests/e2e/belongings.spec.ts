@@ -27,7 +27,7 @@ const sheet = (page: Page) => page.getByRole('dialog').last();
 test('Belongings lists what you own with value and condition in words, and fits a phone', async ({ page }) => {
   await open(page, { seed: 'e2e-own-1', owns: true, ownsHome: true });
   await openBelongings(page);
-  await expect(page.getByTestId('belongings-summary')).toContainText('Upkeep each year');
+  await expect(page.getByTestId('belongings-summary')).toContainText('Upkeep a year');
   const pet = page.getByTestId('belongings-pets');
   await expect(pet).toContainText('Pepper the cat');
   await expect(pet).toContainText('Anxious');
@@ -46,7 +46,7 @@ test('Belongings lists what you own with value and condition in words, and fits 
 test('buys a used car with cash: the price comes out of savings and the car is listed', async ({ page }) => {
   await open(page, { seed: 'e2e-own-2' });
   await openBelongings(page);
-  await expect(page.getByTestId('belongings-vehicles')).toContainText('You don’t own a vehicle');
+  await expect(page.getByTestId('belongings-vehicles')).toContainText('No vehicle');
   await page.getByTestId('buy-vehicle').click();
   await sheet(page).getByTestId('vehicle-used-hatchback').click();
   await expect(sheet(page).getByTestId('buy-cash')).toContainText('$');
@@ -76,7 +76,7 @@ test('sells the car after a confirmation that says what it brings in', async ({ 
   await expect(sheet(page)).toContainText('goes to your savings');
   await expect(sheet(page)).toContainText('You now have');
   await sheet(page).getByRole('button', { name: 'Sell it' }).click();
-  await expect(page.getByTestId('belongings-vehicles')).toContainText('You don’t own a vehicle');
+  await expect(page.getByTestId('belongings-vehicles')).toContainText('No vehicle');
 });
 
 test('adopts a pet by name from a shelter, and sees it in the People tab', async ({ page }) => {
@@ -85,7 +85,9 @@ test('adopts a pet by name from a shelter, and sees it in the People tab', async
   await page.getByTestId('adopt-pet').click();
   await sheet(page).getByTestId('species-dog').click();
   await expect(sheet(page).getByTestId('adopt-shelter')).toBeDisabled();
-  await sheet(page).getByTestId('pet-name').fill('Waffles');
+  await sheet(page).getByTestId('pet-name').click();
+  await page.getByTestId('pet-name-input').fill('Waffles');
+  await page.getByTestId('rename-save').click();
   await expectTouchTargets(page);
   await sheet(page).getByTestId('adopt-shelter').click();
   await expect(page.getByTestId('belongings-pets')).toContainText('Waffles the dog');
@@ -99,7 +101,7 @@ test('a pet’s page offers the interaction menu, an outcome card, and costs mon
   await open(page, { seed: 'e2e-own-6', owns: true });
   await goTab(page, 'People');
   await page.getByTestId(/^pet-row-/).first().click();
-  await expect(page.getByTestId('pet-name')).toHaveText('Pepper');
+  await expect(page.getByTestId('pet-name')).toContainText('Pepper');
   await expect(page.getByTestId('pet-line')).toContainText('cat');
   await expect(page.getByTestId('pet-state')).toBeVisible();
   await expectNoHorizontalScroll(page);

@@ -1,10 +1,14 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { getFamilyLineView, getFamilyView, type FamilyOptionView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
-import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
+import { ActionTile, ActionTileRow } from '../../components/ActionTile';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
+import { ListRow, RowList } from '../../components/ListRow';
+import { CompactList, CompactRow, SectionLabel } from '../../components/SectionLabel';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { CUSTODY_LABELS, money, oddsWords, PROCESS_BLOCK_LABELS, PROCESS_LABELS, pregnancyLine, reputationWords, waitWords } from '../../labels';
 
@@ -18,78 +22,57 @@ export function FamilyScreen({ life }: { life: LifeState }) {
   const act = useAppStore((s) => s.takeLifeAction);
   const [confirming, setConfirming] = useState<FamilyOptionView | null>(null);
 
+  const status = view.pregnancy ? pregnancyLine(view.pregnancy, life.currentYear) : view.process ? `${PROCESS_LABELS[view.process.kind].name} is under way. ${view.process.yearsLeft <= 1 ? 'An answer is due next year.' : `An answer is due in ${view.process.yearsLeft} years.`}` : 'Nothing under way right now.';
   return (
-    <div className="flex flex-col gap-4">
-      <Card role="region" aria-labelledby="family-status">
-        <h2 id="family-status" className="text-2xl leading-tight font-bold">
-          Your family
-        </h2>
-        {view.pregnancy ? (
-          <p className="mt-1" data-testid="family-pregnancy">
-            {pregnancyLine(view.pregnancy, life.currentYear)}
-          </p>
-        ) : view.process ? (
-          <p className="mt-1" data-testid="family-process">
-            {PROCESS_LABELS[view.process.kind].name} is under way.{' '}
-            {view.process.yearsLeft <= 1 ? 'An answer is due next year.' : `An answer is due in ${view.process.yearsLeft} years.`}
-          </p>
-        ) : (
-          <p className="mt-1 text-muted">Nothing under way right now.</p>
-        )}
-        {view.attempts > 0 && <p className="mt-1 text-sm text-muted">You’ve been trying for a baby for {view.attempts === 1 ? 'a year' : `${view.attempts} years`}.</p>}
-        {view.children.length > 0 && (
-          <ul className="mt-3 flex flex-col divide-y divide-border" aria-label="Your children">
+    <div className="flex flex-col gap-3">
+      <PageInfo>
+        <p>To try for a baby, open your partner’s page in People. A natural pregnancy needs a couple where one of you can carry one.</p>
+        <p>Your family’s name goes before you: it shapes how people treat you, and it passes to whoever carries on.</p>
+      </PageInfo>
+      <HeroCard lead={<Icon id="hugging_face" size={44} />} title={`The ${line.familyName} family`} status={status} testId="family-line">
+        <StatCell label="Generation" value={line.generation} />
+        <StatCell label="Name" value={reputationWords(line.reputation)} />
+      </HeroCard>
+      <span className="sr-only" data-testid="family-line-facts">
+        Generation {line.generation} · {reputationWords(line.reputation)}
+      </span>
+      {(view.pregnancy || view.process) && (
+        <span className="sr-only" data-testid={view.pregnancy ? 'family-pregnancy' : 'family-process'}>
+          {status}
+        </span>
+      )}
+      {line.deeds.length > 0 && <p className="px-1 text-sm text-muted">Known for {line.deeds.join(', ')}.</p>}
+      <ActionTileRow label="Ways to a family">
+        {view.options.map((o) => {
+          const label = PROCESS_LABELS[o.kind];
+          return (
+            <ActionTile key={o.kind} label={label.name} icon="red_heart" tone="family" status={o.blocks[0] && !o.available ? PROCESS_BLOCK_LABELS[o.blocks[0]] : money(o.cost)} disabled={busy || !o.available} onClick={() => setConfirming(o)} testId={`family-${o.kind}-start`} />
+          );
+        })}
+      </ActionTileRow>
+      {view.options.map((o) => (
+        <span key={o.kind} className="sr-only" data-testid={`family-${o.kind}-facts`}>
+          Costs about {money(o.cost)} in all · takes {waitWords(o.waitYears)}
+          {o.odds !== undefined ? ` · ${oddsWords(o.odds)}` : ''}
+        </span>
+      ))}
+      {view.options.filter((o) => o.blocks.length > 0).map((o) => (
+        <CompactList key={o.kind} label={`Why not ${PROCESS_LABELS[o.kind].name}`}>
+          {o.blocks.map((b) => (
+            <CompactRow key={b} muted label={PROCESS_BLOCK_LABELS[b]} />
+          ))}
+        </CompactList>
+      ))}
+      {view.children.length > 0 && (
+        <>
+          <SectionLabel trailing={view.children.length}>Your children</SectionLabel>
+          <RowList label="Your children">
             {view.children.map((c) => (
-              <li key={c.id} className="flex justify-between gap-3 py-2">
-                <span className="min-w-0 font-semibold break-words">{c.name}</span>
-                <span className="text-sm text-muted">
-                  {c.age <= 0 ? 'Newborn' : `${c.age}`} · {c.stepchild ? 'Stepchild' : CUSTODY_LABELS[c.custody]}
-                </span>
-              </li>
+              <ListRow key={c.id} title={c.name} subtitle={`${c.age <= 0 ? 'Newborn' : c.age} · ${c.stepchild ? 'Stepchild' : CUSTODY_LABELS[c.custody]}`} />
             ))}
-          </ul>
-        )}
-        <p className="mt-3 text-sm text-muted">
-          To try for a baby, open your partner’s page in People. A natural pregnancy needs a couple where one of you can carry one.
-        </p>
-      </Card>
-
-      <Card role="region" aria-labelledby="family-line" data-testid="family-line">
-        <h3 id="family-line" className="text-lg font-bold">
-          The {line.familyName} family
-        </h3>
-        <p className="mt-1" data-testid="family-line-facts">
-          Generation {line.generation} · {reputationWords(line.reputation)}
-        </p>
-        {line.deeds.length > 0 && <p className="mt-1 text-sm text-muted">Known for {line.deeds.join(', ')}.</p>}
-        <p className="mt-2 text-sm text-muted">Your family’s name goes before you: it shapes how people treat you, and it passes to whoever carries on.</p>
-      </Card>
-
-      {view.options.map((o) => {
-        const label = PROCESS_LABELS[o.kind];
-        return (
-          <Card key={o.kind} role="region" aria-labelledby={`family-${o.kind}`}>
-            <h3 id={`family-${o.kind}`} className="text-lg font-bold">
-              {label.name}
-            </h3>
-            <p className="mt-1 text-muted">{label.blurb}</p>
-            <p className="mt-2 text-sm" data-testid={`family-${o.kind}-facts`}>
-              Costs about {money(o.cost)} in all · takes {waitWords(o.waitYears)}
-              {o.odds !== undefined ? ` · ${oddsWords(o.odds)}` : ''}
-            </p>
-            {o.blocks.length > 0 && (
-              <ul className="mt-2 list-disc pl-5 text-sm text-muted" aria-label={`Why not ${label.name}`}>
-                {o.blocks.map((b) => (
-                  <li key={b}>{PROCESS_BLOCK_LABELS[b]}</li>
-                ))}
-              </ul>
-            )}
-            <Button block className="mt-3" disabled={busy || !o.available} data-testid={`family-${o.kind}-start`} onClick={() => setConfirming(o)}>
-              {label.confirm}
-            </Button>
-          </Card>
-        );
-      })}
+          </RowList>
+        </>
+      )}
 
       <ConfirmSheet
         open={confirming !== null}

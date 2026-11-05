@@ -43,7 +43,7 @@ test('pass a certificate exam: the fee has a receipt, the certificate is kept on
   test.setTimeout(120_000);
   await open(page, examLife());
   await page.getByRole('button', { name: 'Profile', exact: true }).click();
-  await page.getByLabel('Language to learn').selectOption('fr');
+  await page.getByTestId('language-fr').click();
   const exam = page.getByRole('button', { name: /Sit the conversational exam/ });
   await expect(exam).toContainText('$220');
   await expect(exam).toContainText('chance');
@@ -62,7 +62,7 @@ test('pass a certificate exam: the fee has a receipt, the certificate is kept on
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Profile', exact: true }).click();
   await expect(page.getByTestId('profile-certificates')).toContainText('French certificate');
-  await page.getByLabel('Language to learn').selectOption('fr');
+  await page.getByTestId('language-fr').click();
   await expect(page.getByRole('button', { name: /Sit the conversational exam/ })).toBeDisabled();
 });
 
@@ -75,7 +75,7 @@ test('take a honeymoon with the spouse you married: priced, paid with a receipt,
   await page.getByTestId('trip-budget-comfortable').click();
   await expect(page.getByTestId('honeymoon-with')).toContainText('Sam Spouse');
   // Comfortable ($2,000) at Sydney's price level (1.4) and a honeymoon's 1.2, for two.
-  await expect(page.getByText('Total: $5,040', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('trip-total')).toContainText('$5,040');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Take the honeymoon' }).click(); await settle(page);

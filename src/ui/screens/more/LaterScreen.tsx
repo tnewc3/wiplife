@@ -1,8 +1,13 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { getLaterView, type LaterPersonView } from '../../../engine/selectors';
 import type { HospiceChoice, Id, LifeState, ServiceStyle } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
+import { ActionTile, ActionTileRow } from '../../components/ActionTile';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
+import { SegmentedTabs } from '../../components/SegmentedTabs';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { OWN_CARE_LABELS, HOSPICE_LABELS, laterPersonLine, LATER_TITLES, money, SERVICE_LABELS } from '../../labels';
@@ -102,6 +107,7 @@ export function LaterScreen({ life }: { life: LifeState }) {
   const setTab = useAppStore((s) => s.setTab);
   const openWill = useAppStore((s) => s.openWill);
   const [message, setMessage] = useState<string | null>(null);
+  const [tab, setTab2] = useState<'family' | 'care' | 'wishes' | null>(null);
   const t = view.terminal;
   const [hospice, setHospice] = useState<HospiceChoice | null>(t?.hospice ?? null);
   const [service, setService] = useState<ServiceStyle | null>(t?.service ?? null);
@@ -126,18 +132,29 @@ export function LaterScreen({ life }: { life: LifeState }) {
 
   if (!view.active) {
     return (
-      <Card role="region" aria-labelledby="later-title">
-        <h2 id="later-title" className="text-2xl leading-tight font-bold">
-          Later life
-        </h2>
-        <p className="mt-2 text-muted">Nothing here yet.</p>
-      </Card>
+      <HeroCard lead={<Icon id="candle" size={44} />} title="Later life" status="Nothing here yet." />
     );
   }
 
+  const tabs = [
+    ...(view.grandchildren.length > 0 || view.raising.length > 0 ? [{ id: 'family' as const, label: 'Family', testId: 'later-tab-family' }] : []),
+    ...(view.care ? [{ id: 'care' as const, label: 'Care', testId: 'later-tab-care' }] : []),
+    ...(t ? [{ id: 'wishes' as const, label: 'Wishes', testId: 'later-tab-wishes' }] : []),
+  ];
+  const fallback = t ? 'wishes' : view.care ? 'care' : 'family';
+  const shown = tab !== null && tabs.some((x) => x.id === tab) ? tab : fallback;
   return (
-    <div className="flex flex-col gap-4">
-      {(view.grandchildren.length > 0 || view.raising.length > 0) && (
+    <div className="flex flex-col gap-3">
+      <HeroCard lead={<Icon id="candle" size={44} />} title="Later life" status={t ? 'Your time is short.' : view.care ? (view.care.option === null ? 'You need looking after.' : 'Your care is arranged.') : 'Family around you.'}>
+        <StatCell label="Grandchildren" value={view.grandchildren.length + view.raising.length} />
+        {t && <StatCell label="Wishes" value={t.wishesSet ? 'Set' : 'Not yet'} />}
+      </HeroCard>
+      <ActionTileRow>
+        {t && <ActionTile label={t.wishesSet ? 'Update wishes' : 'Set wishes'} icon="memo" tone="mind" status="Save" disabled={busy || !t.canSet} onClick={saveWishes} testId="wishes-save" />}
+        {t && <ActionTile label="Your will" icon="memo" tone="money" status={view.hasWill ? (view.willOutOfDate ? 'Out of date' : 'Written') : 'None yet'} onClick={openWill} testId="later-open-will" />}
+      </ActionTileRow>
+      {tabs.length > 1 && <SegmentedTabs sticky tabs={tabs} value={shown} onChange={setTab2} label="Later life" />}
+      {shown === 'family' && (view.grandchildren.length > 0 || view.raising.length > 0) && (
         <Card role="region" aria-labelledby="later-grandchildren">
           <h2 id="later-grandchildren" className="text-lg font-bold">
             {view.raising.length > 0 ? LATER_TITLES.raising : LATER_TITLES.grandchildren}
@@ -155,7 +172,7 @@ export function LaterScreen({ life }: { life: LifeState }) {
         </Card>
       )}
 
-      {view.care && (
+      {shown === 'care' && view.care && (
         <Card role="region" aria-labelledby="later-care" data-testid="later-care">
           <h2 id="later-care" className="text-lg font-bold">
             {LATER_TITLES.care}
@@ -185,14 +202,14 @@ export function LaterScreen({ life }: { life: LifeState }) {
         </Card>
       )}
 
-      {t && (
+      {shown === 'wishes' && t && (
         <Card role="region" aria-labelledby="later-wishes" data-testid="later-wishes">
           <h2 id="later-wishes" className="text-lg font-bold">
             {LATER_TITLES.wishes}
           </h2>
-          <p className="mt-1 text-muted">
-            You were told your time is short. Where you spend it, who is with you and what comes after are yours to decide, and what you choose shapes your funeral and who comes.
-          </p>
+          <PageInfo>
+            <p>You were told your time is short. Where you spend it, who is with you and what comes after are yours to decide, and what you choose shapes your funeral and who comes.</p>
+          </PageInfo>
           <Choice
             label="Where you spend your last months"
             testId="wish-hospice"
@@ -216,14 +233,6 @@ export function LaterScreen({ life }: { life: LifeState }) {
             onChange={setSpeaker}
             options={t.people.filter((p) => p.canSpeak).slice(0, 8).map((p) => ({ id: p.id, name: p.name, blurb: laterPersonLine(p) }))}
           />
-          <div className="mt-4 flex flex-col gap-2">
-            <Button block disabled={busy || !t.canSet} data-testid="wishes-save" onClick={saveWishes}>
-              {t.wishesSet ? 'Update my wishes' : 'Set my wishes'}
-            </Button>
-            <Button variant="secondary" block onClick={openWill} data-testid="later-open-will">
-              {view.hasWill ? (view.willOutOfDate ? 'Update your will (it is out of date)' : 'See your will') : 'Write your will'}
-            </Button>
-          </div>
           {t.visitors.length > 0 && (
             <p className="mt-3 text-sm" data-testid="wish-answers">
               Asked to be with you: {t.visitors.map((v) => `${life.people[v.id]!.name.first} ${v.came ? 'said yes' : 'did not come'}`).join(', ')}.

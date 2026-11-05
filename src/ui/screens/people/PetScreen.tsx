@@ -3,8 +3,9 @@ import { content } from '../../../content';
 import { getPetDetail } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
-import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
+import { ActionTile, ActionTileRow } from '../../components/ActionTile';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { Sheet } from '../../components/Sheet';
 import { bondWords, money, PET_PERSONALITY_LABELS, petHealthWords, yearsOld } from '../../labels';
@@ -24,25 +25,17 @@ export function PetScreen({ life, petId }: { life: LifeState; petId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card>
-        <h2 className="text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="pet-name">
-          {pet.name}
-        </h2>
-        <p className="mt-1 text-muted" data-testid="pet-line">
-          {pet.species} · {PET_PERSONALITY_LABELS[pet.personality]} · {yearsOld(pet.age)}
-        </p>
-        <p className="mt-1 font-semibold" data-testid="pet-state">
-          {petHealthWords(pet.health, pet.ill)} · {bondWords(pet.bond)}
-        </p>
-        {pet.ill && <p className="mt-1 text-sm">{pet.name} isn’t well, and needs to see a vet.</p>}
-      </Card>
-
-      <Button size="lg" block disabled={busy || interactions.length === 0} data-testid="interact-button" onClick={() => openMenu(petId)}>
-        Interact
-      </Button>
-      <Button variant="secondary" block disabled={busy || !pet.canVet} data-testid="pet-vet" onClick={() => setVet(true)}>
-        {pet.vetDone ? 'Seen by the vet this year' : `Take to the vet · ${money(pet.vetCost)}`}
-      </Button>
+      <HeroCard lead={<Icon id="paw_prints" size={44} />} title={pet.name} status={`${pet.species} · ${PET_PERSONALITY_LABELS[pet.personality]} · ${yearsOld(pet.age)}`} testId="pet-name">
+        <StatCell label="Health" value={petHealthWords(pet.health, pet.ill)} testId="pet-state" />
+        <StatCell label="Bond" value={bondWords(pet.bond)} />
+      </HeroCard>
+      <span className="sr-only" data-testid="pet-line">
+        {pet.species} · {PET_PERSONALITY_LABELS[pet.personality]} · {yearsOld(pet.age)}
+      </span>
+      <ActionTileRow>
+        <ActionTile label="Interact" icon="red_heart" tone="family" status={interactions.length === 0 ? 'Nothing now' : 'Spend time'} disabled={busy || interactions.length === 0} onClick={() => openMenu(petId)} testId="interact-button" />
+        <ActionTile label="Vet" icon="stethoscope" tone="health" status={pet.vetDone ? 'Seen' : pet.ill ? `Needs one · ${money(pet.vetCost)}` : money(pet.vetCost)} disabled={busy || !pet.canVet} onClick={() => setVet(true)} testId="pet-vet" />
+      </ActionTileRow>
 
       <Sheet open={sheet?.personId === petId} title={`Spend time with ${pet.name}`} onClose={close}>
         <ul className="flex flex-col gap-1" aria-label="Things to do" data-testid="interact-sheet">

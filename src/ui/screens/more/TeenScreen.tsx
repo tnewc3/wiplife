@@ -1,8 +1,11 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { getTeenView, type TeenView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
@@ -81,7 +84,9 @@ export function TeenScreen({ life }: { life: LifeState }) {
 
   return (
     <div className="flex flex-col gap-3">
-      {!view.canAct && <Card className="text-muted">Teen choices are made between years.</Card>}
+      <HeroCard lead={<Icon id="graduation_cap" size={44} />} title="Teen years" status={view.canAct ? (view.focus.thisYear ? `This year: ${FOCUS_LABELS[view.focus.thisYear].label.toLowerCase()}` : 'Choose where your energy goes') : 'Choices wait until the year is over'} testId="teen-hero">
+        <StatCell label="Focus next" value={view.focus.next ? FOCUS_LABELS[view.focus.next].label : '–'} />
+      </HeroCard>
       {view.caught && (
         <Card className="border-danger" data-testid="teen-caught">
           A parent caught you breaking a rule.
@@ -100,7 +105,9 @@ export function TeenScreen({ life }: { life: LifeState }) {
 
       <Card data-testid="teen-focus">
         <Heading>This year’s focus</Heading>
-        <p className="mb-2 text-sm text-muted">Where most of your energy goes shifts your grades, your friendships, your money and your talent.</p>
+        <PageInfo>
+          <p>Where most of your energy goes shifts your grades, your friendships, your money and your talent.</p>
+        </PageInfo>
         <div className="flex flex-col gap-2">
           {view.focus.options.map((id) => {
             const chosen = view.focus.next === id;

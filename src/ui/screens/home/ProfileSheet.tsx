@@ -1,3 +1,4 @@
+import { ChipSelect } from '../../components/FilterChips';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { GENDER_CATEGORIES } from '../../../content/schemas';
@@ -323,12 +324,7 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
             )}
             {life.character.age >= content.balance.languages.classes.minAge && view.languageClasses.length > 0 && (
               <div className="mt-3 flex flex-col gap-3">
-                <label className="flex flex-col gap-1">Language to learn
-                  <select className="min-h-11 rounded border border-border bg-surface px-3" value={languageChoice} onChange={(e) => setLanguageChoice(e.target.value)}>
-                    <option value="">Choose a language</option>
-                    {view.languageClasses.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-                  </select>
-                </label>
+                <ChipSelect label="Language to learn" testId="language" value={languageChoice} onChange={setLanguageChoice} options={view.languageClasses.map((l) => ({ id: l.id, label: l.name }))} />
                 <p className="text-sm text-muted">One course each year. School and everyday use also build your skills.</p>
                 <Button block disabled={busy || !view.languageClasses.some((l) => l.id === languageChoice && l.available)} onClick={() => { close(); void act('take_language_classes', { languageId: languageChoice }); }}>Take language classes · {money(view.languageClassCost)}</Button>
                 <p className="text-sm text-muted">An app is cheap and slow; a tutor costs more and is fast. Each can be used once a year, besides a class.</p>

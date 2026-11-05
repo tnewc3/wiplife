@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RenameDialog } from '../../components/RenameDialog';
 import { content } from '../../../content';
 import { getDirtyView, getLaunderBlock, getSpendBlock, type FrontView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
@@ -25,6 +26,7 @@ export function DirtyMoneyCard({ life }: { life: LifeState }) {
   const busy = useAppStore((s) => s.aging);
   const act = useAppStore((s) => s.takeLifeAction);
   const [text, setText] = useState('');
+  const [asking, setAsking] = useState(false);
   const [confirm, setConfirm] = useState<{ kind: 'launder'; front: FrontView; amount: number } | { kind: 'spend'; amount: number } | null>(null);
   const [result, setResult] = useState<string | null>(null);
   if (!view.show) return null;
@@ -64,18 +66,11 @@ export function DirtyMoneyCard({ life }: { life: LifeState }) {
       </p>
       {view.balance > 0 && (
         <>
-          <label className="mt-3 flex flex-col gap-1">
-            <span className="text-sm font-semibold">How much (dollars)</span>
-            <input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              inputMode="numeric"
-              autoComplete="off"
-              data-testid="dirty-amount"
-              aria-label="How much dirty money"
-              className="min-h-11 w-full min-w-0 rounded-xl border border-border bg-bg px-3 text-base"
-            />
-          </label>
+          <button type="button" onClick={() => setAsking(true)} data-testid="dirty-amount" aria-label="How much dirty money" className="wl-press mt-3 flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-3 text-left">
+            <span className="text-sm font-semibold text-muted">How much</span>
+            <span className="font-semibold tabular-nums">{text.trim() === '' ? 'Choose an amount' : money(Number.isNaN(amount) ? 0 : amount)}</span>
+          </button>
+          <RenameDialog open={asking} title="How much" label="Dollars" initial={text} allowSame maxLength={12} testId="dirty-amount-input" error={(t) => (Number.isNaN(dollars(t)) ? dirtyBlockLabel('amount') : undefined)} onCancel={() => setAsking(false)} onSave={(t) => { setText(t); setAsking(false); }} />
           <div className="mt-2 flex gap-2">
             {[0.25, 0.5, 1].map((share) => (
               <Button key={share} variant="secondary" className="flex-1" disabled={busy} onClick={() => setText(String(Math.max(1, Math.floor(view.balance * share))))}>
