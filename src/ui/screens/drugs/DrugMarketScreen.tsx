@@ -6,6 +6,8 @@ import { getDrugMarketView, type DrugMarketView, type DrugRowView } from '../../
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { ActionSheet, type SheetAction } from '../../components/ActionSheet';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
 import { Button } from '../../components/Button';
 import { ListRow, RowList } from '../../components/ListRow';
 import { MiniBar } from '../../components/MiniBar';
@@ -118,7 +120,11 @@ export function DrugMarketScreen({ life }: { life: LifeState }) {
     : [];
   return (
     <div className="flex flex-col gap-3" data-testid="drug-market">
-      <SegmentedTabs
+      <HeroCard lead={<Icon id="syringe" size={44} />} title="The market" status={view.dealing ? 'You deal' : 'A dealer, a contact, the club or the market'}>
+        <StatCell label="Savings" value={money(view.savings)} />
+        <StatCell label="Used this year" value={`${view.used} of ${view.limit}`} />
+      </HeroCard>
+      <SegmentedTabs sticky
         label="Drug market"
         value={tab}
         onChange={setTab}

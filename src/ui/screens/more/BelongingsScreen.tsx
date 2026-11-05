@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { ActionTile, ActionTileRow } from '../../components/ActionTile';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
+import { PageInfo } from '../../components/PageInfo';
 import { RenameDialog } from '../../components/RenameDialog';
 import { content } from '../../../content';
 import { getBelongingsView, type AdoptOption, type BelongingsView, type RenovationOption, type VacationOption, type VehicleOption } from '../../../engine/selectors';
@@ -41,15 +45,6 @@ type Confirming =
   | null;
 
 const btn = 'flex min-h-11 w-full min-w-0 flex-col rounded-xl border border-border bg-surface px-4 py-2 text-left active:bg-surface-2 disabled:opacity-50';
-
-function Line({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 py-1">
-      <dt className="min-w-0 break-words text-muted">{label}</dt>
-      <dd className="shrink-0 text-right tabular-nums">{value}</dd>
-    </div>
-  );
-}
 
 /** More → Belongings: everything you own, with its value and condition in words, and what you can buy, sell, care for and renovate. */
 export function BelongingsScreen({ life }: { life: LifeState }) {
@@ -149,33 +144,17 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card role="region" aria-labelledby="belongings-title" data-testid="belongings-summary">
-        <h2 id="belongings-title" className="text-2xl leading-tight font-bold">
-          What you own
-        </h2>
-        {view.empty ? (
-          <p className="mt-1 text-muted">Nothing yet beyond your home.</p>
-        ) : (
-          <dl className="mt-2 flex flex-col" aria-label="What your belongings cost">
-            {view.worth > 0 && <Line label="What you own is worth" value={money(view.worth)} />}
-            <Line label="Upkeep each year" value={money(view.upkeep)} />
-            <Line label="Insurance each year" value={money(view.insurance)} />
-          </dl>
-        )}
-        {view.recentClaims > 0 && <p className="mt-1 text-sm text-muted">You made {view.recentClaims === 1 ? 'an insurance claim' : `${view.recentClaims} insurance claims`} recently, which raises what you pay.</p>}
-        {view.hasInsurable && (
-          <Button
-            variant="secondary"
-            block
-            className="mt-3"
-            disabled={disabled}
-            data-testid="insurance-toggle"
-            onClick={() => (view.allInsured ? setConfirming({ kind: 'insurance_off' }) : void act('set_insurance', { insured: true }))}
-          >
-            {view.allInsured ? 'Cancel your insurance' : 'Insure everything again'}
-          </Button>
-        )}
-      </Card>
+      <HeroCard lead={<Icon id="key" size={44} />} title="What you own" status={view.empty ? 'Nothing yet beyond your home.' : undefined} testId="belongings-summary">
+        {view.worth > 0 && <StatCell label="Worth" value={money(view.worth)} />}
+        <StatCell label="Upkeep a year" value={money(view.upkeep)} />
+        <StatCell label="Insurance a year" value={money(view.insurance)} />
+      </HeroCard>
+      {view.recentClaims > 0 && <PageInfo><p>You made {view.recentClaims === 1 ? 'an insurance claim' : `${view.recentClaims} insurance claims`} recently, which raises what you pay.</p></PageInfo>}
+      <ActionTileRow>
+        <ActionTile label="Buy a vehicle" icon="sport_utility_vehicle" tone="travel" status={`${view.vehicles.length} owned`} disabled={disabled} onClick={() => setSheet({ kind: 'vehicle' })} testId="buy-vehicle" />
+        <ActionTile label="Adopt a pet" icon="paw_prints" tone="family" status={view.canAdopt ? 'Ready' : 'Too young'} disabled={disabled || !view.canAdopt} onClick={() => setSheet({ kind: 'adopt' })} testId="adopt-tile" />
+        {view.hasInsurable && <ActionTile label={view.allInsured ? 'Cancel insurance' : 'Insure all'} icon="key" tone="money" status={view.allInsured ? 'Insured' : 'Not insured'} disabled={disabled} onClick={() => (view.allInsured ? setConfirming({ kind: 'insurance_off' }) : void act('set_insurance', { insured: true }))} testId="insurance-toggle" />}
+      </ActionTileRow>
 
       <PetsCard view={view} disabled={disabled} onOpenPet={(id) => { setTab('people'); openPet(id); }} onAdopt={() => setSheet({ kind: 'adopt' })} onVet={(p) => setConfirming({ kind: 'vet', id: p.id, name: p.name, cost: p.vetCost })} />
 
@@ -210,9 +189,6 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
             ))}
           </ul>
         )}
-        <Button block className="mt-2" disabled={disabled} data-testid="buy-vehicle" onClick={() => setSheet({ kind: 'vehicle' })}>
-          Buy a vehicle
-        </Button>
       </Card>
 
       {stash.length > 0 && (

@@ -6,6 +6,8 @@ import type { SocialTone } from '../../../content/schemas';
 import { getSocialView, handleIssue, type AccountView, type SocialView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import {
@@ -36,29 +38,19 @@ export function SocialScreen({ life }: { life: LifeState }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card role="region" aria-labelledby="social-title" data-testid="social-summary">
-        <h2 id="social-title" className="text-2xl leading-tight font-bold">
-          Your accounts
-        </h2>
-        {view.accounts.length === 0 ? (
-          <p className="mt-1 text-muted">No accounts yet.</p>
-        ) : (
-          <p className="mt-1 text-muted" data-testid="social-reach">
-            You reach {view.reachWords} across {view.accounts.length} {view.accounts.length === 1 ? 'account' : 'accounts'}.
-            {view.career && ` In the career you are ${view.career.title}.`}
-          </p>
-        )}
-        {view.minor && <PageInfo><p>A parent keeps an eye on your accounts and signs for any deal until you are 18.</p></PageInfo>}
-        {view.incomeThisYear > 0 && <p className="mt-2 text-sm">The platforms paid you {money(view.incomeThisYear)} this year, after any cut.</p>}
-        {view.sponsor && <p className="mt-1 text-sm">Sponsored by {view.sponsor.company}.</p>}
-        {view.controversy && <p className="mt-2 text-sm font-semibold">{SOCIAL_CONTROVERSY_WORDS[view.controversy]}</p>}
-        {view.algorithm.map((a) => (
-          <p key={a.platformName} className="mt-1 text-sm text-muted">
-            {a.mood === 'up' ? `${a.platformName}'s algorithm is favouring you this year.` : `${a.platformName}'s algorithm is not favouring you this year.`}
-          </p>
-        ))}
-        {view.inPrison && <p className="mt-2 text-sm">You cannot post from where you are.</p>}
-      </Card>
+      <HeroCard lead={<Icon id="mobile_phone" size={44} />} title="Your accounts" status={view.accounts.length === 0 ? 'No accounts yet.' : `${view.accounts.length} ${view.accounts.length === 1 ? 'account' : 'accounts'}${view.career ? ` · ${view.career.title}` : ''}`} testId="social-summary">
+        {view.accounts.length > 0 && <StatCell label="You reach" value={view.reachWords} testId="social-reach" />}
+        {view.incomeThisYear > 0 && <StatCell label="Paid this year" value={money(view.incomeThisYear)} />}
+        {view.sponsor && <StatCell label="Sponsor" value={view.sponsor.company} />}
+      </HeroCard>
+      {view.minor && <PageInfo><p>A parent keeps an eye on your accounts and signs for any deal until you are 18.</p></PageInfo>}
+      {view.controversy && <p className="px-1 text-sm font-semibold">{SOCIAL_CONTROVERSY_WORDS[view.controversy]}</p>}
+      {view.algorithm.map((a) => (
+        <p key={a.platformName} className="px-1 text-sm text-muted">
+          {a.mood === 'up' ? `${a.platformName}: the algorithm favours you` : `${a.platformName}: the algorithm does not favour you`}
+        </p>
+      ))}
+      {view.inPrison && <p className="px-1 text-sm">You cannot post from where you are.</p>}
 
       {view.accounts.length > 0 && (
         <Card role="region" aria-labelledby="tone-title">

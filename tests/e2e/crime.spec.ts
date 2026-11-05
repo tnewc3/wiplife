@@ -68,7 +68,9 @@ test('dirty money sits apart from savings and can be laundered through a busines
   // Nothing can be laundered until an amount is entered.
   const launder = card.getByTestId(/^launder-/).first();
   await expect(launder).toBeDisabled();
-  await card.getByTestId('dirty-amount').fill('4000');
+  await card.getByTestId('dirty-amount').click();
+  await page.getByTestId('dirty-amount-input').fill('4000');
+  await page.getByTestId('rename-save').click();
   await expect(launder).toBeEnabled();
   await launder.click();
   await page.getByRole('dialog').getByRole('button', { name: 'Launder it' }).click();
@@ -96,9 +98,13 @@ test('spending dirty money asks first, and cannot be done for more than you hold
   await goTab(page, 'Assets');
   const card = page.getByTestId('dirty-card');
   const spend = card.getByTestId('spend-dirty');
-  await card.getByTestId('dirty-amount').fill('999999');
+  await card.getByTestId('dirty-amount').click();
+  await page.getByTestId('dirty-amount-input').fill('999999');
+  await page.getByTestId('rename-save').click();
   await expect(spend).toBeDisabled();
-  await card.getByTestId('dirty-amount').fill('2000');
+  await card.getByTestId('dirty-amount').click();
+  await page.getByTestId('dirty-amount-input').fill('2000');
+  await page.getByTestId('rename-save').click();
   await expect(spend).toBeEnabled();
   await spend.click();
   await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();

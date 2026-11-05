@@ -4,8 +4,12 @@ import { content } from '../../../content';
 import { getHomeView, type CityMove } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
-import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
+import { ActionSheet } from '../../components/ActionSheet';
+import { ActionTile, ActionTileRow } from '../../components/ActionTile';
+import { FactChip } from '../../components/FactChip';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
+import { OptionCard, OptionPickerSheet } from '../../components/OptionPickerSheet';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { homeConfirmation, housingLine, money, PURCHASE_BLOCK_LABELS } from '../../labels';
 
@@ -19,6 +23,8 @@ export function HousingScreen({ life }: { life: LifeState }) {
   const busy = useAppStore((s) => s.aging);
   const act = useAppStore((s) => s.takeLifeAction);
   const [pending, setPending] = useState<Pending | null>(null);
+  const [more, setMore] = useState(false);
+  const [cities, setCities] = useState(false);
   const disabled = busy || !view.between;
 
   const confirmation = (() => {
@@ -57,102 +63,33 @@ export function HousingScreen({ life }: { life: LifeState }) {
               : 'A cell, a bunk and a locker, until your release'
             : 'No rent, no roof';
 
+  const homeActions = [
+    ...(view.moveHome ? [{ id: 'movehome', label: `Move back in with ${view.moveHome.name}`, disabled, testId: 'home-move-back', onSelect: () => setPending({ action: 'move_home' }) }] : []),
+    ...(view.roommateAction ? [{ id: 'roommate', label: view.roommateAction === 'find' ? 'Find a roommate' : 'Live alone again', disabled, testId: 'home-roommate', onSelect: () => void act(view.roommateAction === 'find' ? 'find_roommate' : 'live_alone') }] : []),
+    ...(view.sell !== null ? [{ id: 'sell', label: 'Sell your home', danger: true, disabled, testId: 'home-sell', onSelect: () => setPending({ action: 'sell_home' }) }] : []),
+  ];
   return (
-    <div className="flex flex-col gap-4">
-      <Card role="region" aria-labelledby="home-title">
-        <h2 id="home-title" className="text-2xl leading-tight font-bold break-words" data-testid="housing-line">
-          {housingLine(view.kind, view.cityName)}
-        </h2>
-        <p className="mt-1 text-muted">{costLine}</p>
-        {view.partnerName && (
-          <p className="mt-1 text-muted" data-testid="partner-line">
-            {view.kind === 'incarcerated'
-              ? `${view.partnerName} still lives there and pays their share`
-              : `Living with ${view.partnerName}, who pays their share`}
-          </p>
-        )}
-        {view.homeValue !== null && (
-          <p className="mt-1 text-muted">
-            Worth about {money(view.homeValue)}
-            {view.mortgage > 0 ? ` · Mortgage ${money(view.mortgage)}` : ' · Paid off'}
-          </p>
-        )}
-        {!view.independent && <PageInfo><p>You live with your family until you’re old enough to decide for yourself.</p></PageInfo>}
-      </Card>
-
+    <div className="flex flex-col gap-3">
+      <HeroCard lead={<Icon id="house_with_garden" size={44} />} title={housingLine(view.kind, view.cityName)} status={costLine} testId="housing-line">
+        {view.homeValue !== null && <StatCell label="Worth" value={money(view.homeValue)} />}
+        {view.homeValue !== null && <StatCell label="Mortgage" value={view.mortgage > 0 ? money(view.mortgage) : 'Paid off'} />}
+        {view.partnerName && <StatCell label="Lives with you" value={view.partnerName} testId="partner-line" />}
+      </HeroCard>
+      {!view.independent && <PageInfo><p>You live with your family until you’re old enough to decide for yourself.</p></PageInfo>}
       {view.independent && (
-        <div className="flex flex-col gap-2" role="group" aria-label="Home actions">
-          {view.rent && (
-            <>
-              <Button block variant="secondary" disabled={disabled || !view.rent.affordable} onClick={() => setPending({ action: 'rent_home' })}>
-                {view.kind === 'with_parents' ? 'Move out' : 'Rent a place'} · {money(view.rent.moveInCost)} up front
-              </Button>
-              {!view.rent.affordable && <p className="text-sm text-muted">You need {money(view.rent.moveInCost)} saved for moving and a deposit.</p>}
-            </>
-          )}
-          {view.moveHome && (
-            <Button block variant="secondary" disabled={disabled} onClick={() => setPending({ action: 'move_home' })}>
-              Move back in with {view.moveHome.name}
-            </Button>
-          )}
-          {view.roommateAction && (
-            <Button block variant="secondary" disabled={disabled} onClick={() => void act(view.roommateAction === 'find' ? 'find_roommate' : 'live_alone')}>
-              {view.roommateAction === 'find' ? 'Find a roommate' : 'Live alone again'}
-            </Button>
-          )}
-          {view.sell !== null && (
-            <Button block variant="secondary" disabled={disabled} onClick={() => setPending({ action: 'sell_home' })}>
-              Sell your home
-            </Button>
-          )}
-        </div>
+        <ActionTileRow label="Home actions">
+          {view.rent && <ActionTile label={view.kind === 'with_parents' ? 'Move out' : 'Rent'} icon="key" tone="home" status={view.rent.affordable ? `${money(view.rent.moveInCost)} up front` : `Needs ${money(view.rent.moveInCost)}`} disabled={disabled || !view.rent.affordable} onClick={() => setPending({ action: 'rent_home' })} testId="home-rent" />}
+          {view.buy && <ActionTile label="Buy" icon="house_with_garden" tone="money" status={view.buy.blocked ? PURCHASE_BLOCK_LABELS[view.buy.blocked] : money(view.buy.price)} disabled={disabled || !view.buy.available} onClick={() => setPending({ action: 'buy_home' })} testId="home-buy" />}
+          {view.cities.length > 0 && <ActionTile label="Move city" icon="airplane" tone="travel" status={`${view.cities.length} cities`} onClick={() => setCities(true)} testId="home-cities" />}
+          {homeActions.length > 0 && <ActionTile label="More" icon="key" tone="people" status={`${homeActions.length} options`} onClick={() => setMore(true)} testId="home-more" />}
+        </ActionTileRow>
       )}
-
-      {view.buy && (
-        <Card role="region" aria-labelledby="buy-title">
-          <h2 id="buy-title" className="text-lg font-bold">
-            Buy a home
-          </h2>
-          <p className="mt-1 text-muted">
-            A starter home in {view.cityName} costs about {money(view.buy.price)}. You need {money(view.buy.cashNeeded)} for the down payment and
-            closing costs.
-          </p>
-          {view.buy.blocked ? (
-            <p className="mt-2">{PURCHASE_BLOCK_LABELS[view.buy.blocked]}</p>
-          ) : (
-            <Button block className="mt-3" disabled={disabled || !view.buy.available} onClick={() => setPending({ action: 'buy_home' })}>
-              Buy a home
-            </Button>
-          )}
-        </Card>
-      )}
-
-      {view.cities.length > 0 && (
-        <Card role="region" aria-labelledby="move-title">
-          <h2 id="move-title" className="text-lg font-bold">
-            Move to another city
-          </h2>
-          <ul className="mt-1 flex flex-col divide-y divide-border" aria-label="Cities">
-            {view.cities.map((c) => (
-              <li key={c.cityId}>
-                <button
-                  type="button"
-                  disabled={disabled || !c.affordable}
-                  onClick={() => setPending({ action: 'relocate', city: c })}
-                  className="flex min-h-11 w-full min-w-0 flex-col py-3 text-left active:bg-surface-2 disabled:opacity-60"
-                >
-                  <span className="font-semibold">{c.name}</span>
-                  <span className="text-sm text-muted">{c.blurb}</span>
-                  <span className="text-sm text-muted">
-                    Rent {money(c.rent)} a year · Moving {money(c.moveInCost)}
-                    {c.affordable ? '' : ' · You can’t afford the move yet'}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
+      <ActionSheet open={more} title="Home" actions={homeActions} onClose={() => setMore(false)} />
+      <OptionPickerSheet open={cities} title="Move to another city" icon="airplane" onClose={() => setCities(false)} testId="home-cities-picker">
+        {view.cities.map((c) => (
+          <OptionCard key={c.cityId} name={c.name} chips={<><FactChip>Rent {money(c.rent)} a year</FactChip><FactChip>{c.blurb}</FactChip></>} price={money(c.moveInCost)} reason={disabled ? 'Not now' : c.affordable ? undefined : `Needs ${money(c.moveInCost)}`} testId={`city-${c.cityId}`} onClick={() => { setCities(false); setPending({ action: 'relocate', city: c }); }} />
+        ))}
+      </OptionPickerSheet>
 
       <ConfirmSheet
         open={confirmation !== null}

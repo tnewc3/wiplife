@@ -6,6 +6,8 @@ import type { RouteId, Tier } from '../../../content/schemas';
 import { getMigrationView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { APPLICATION_KIND_LABELS, APPLICATION_STATUS_LABELS, BASIS_LABELS, ENTRY_BLOCK_LABELS, MOVE_BLOCK_LABELS, money, approvalLabel, PERMIT_LABELS, REMIT_LABELS, ROUTE_BLURBS, ROUTE_LABELS, STATUS_BLOCK_LABELS, STATUS_LABELS } from '../../labels';
@@ -29,10 +31,12 @@ export function MigrationScreen({ life }: { life: LifeState }) {
   const permit = view.permit;
   return (
     <div className="flex flex-col gap-4" data-testid="migration-screen">
+      <HeroCard lead={<Icon id="airplane" size={44} />} title={`Living in ${view.country}`} status={STATUS_LABELS[view.status]}>
+        <StatCell label="Citizen of" value={view.citizenships.join(' and ')} />
+      </HeroCard>
+      <span className="sr-only" data-testid="migration-citizenships">Citizen of {view.citizenships.join(' and ')}</span>
+      <span className="sr-only" data-testid="migration-status">Living in {view.country} · {STATUS_LABELS[view.status]}</span>
       <Card>
-        <h2 className="text-lg font-bold">Where you stand</h2>
-        <p data-testid="migration-citizenships">Citizen of {view.citizenships.join(' and ')}</p>
-        <p data-testid="migration-status">Living in {view.country} · {STATUS_LABELS[view.status]}</p>
         {permit && permit.type !== 'permanent_resident' && permit.type !== 'undocumented' && <p>{PERMIT_LABELS[permit.type]} until {permit.endYear}</p>}
         {view.undocumented && <PageInfo><p>Without papers since {view.undocumented.since}. Regular jobs, loans and licenses are closed to you; informal work pays less. There is a risk each year that you are made to leave{view.undocumented.risk >= 0.08 ? ', and it is higher now' : ''}.</p></PageInfo>}
         {view.removed.map((r) => <p key={r.country} className="mt-1 text-sm">{r.country} will not take an application from you until {r.until}.</p>)}

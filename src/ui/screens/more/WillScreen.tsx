@@ -5,7 +5,11 @@ import { getWillView, type WillRowView } from '../../../engine/selectors';
 import type { LifeState, WillShare } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
+import { ActionTile, ActionTileRow } from '../../components/ActionTile';
+import { HeroCard, StatCell } from '../../components/HeroCard';
+import { Icon } from '../../components/Icon';
+import { ListRow, RowList } from '../../components/ListRow';
+import { SectionLabel } from '../../components/SectionLabel';
 import { ESTATE_RELATION_LABELS } from '../../labels';
 
 /** How much one tap of + or − moves a share. */
@@ -80,50 +84,46 @@ export function WillScreen({ life }: { life: LifeState }) {
 
   if (!view.canWrite) {
     return (
-      <Card role="region" aria-labelledby="will-title">
-        <h2 id="will-title" className="text-2xl leading-tight font-bold">
-          Write a will
-        </h2>
-        <p className="mt-2 text-muted">You can write a will once you’re an adult, between years.</p>
-      </Card>
+      <div className="flex flex-col gap-3">
+        <HeroCard lead={<Icon id="memo" size={44} />} title="Write a will" status="Once you’re an adult, between years." />
+      </div>
     );
   }
 
+  const without = !view.hasWill ? (view.defaults.length > 0 ? `Without a will: ${view.defaults.map((d) => `${d.name} (${ESTATE_RELATION_LABELS[d.relation]}) ${d.percent}%`).join(', ')}.` : 'Without a will, nobody inherits.') : 'Your will is written.';
   return (
-    <div className="flex flex-col gap-4">
-      <Card role="region" aria-labelledby="will-title">
-        <h2 id="will-title" className="text-2xl leading-tight font-bold">
-          Write a will
-        </h2>
-        <PageInfo>
-          <p>Choose who gets what share of your estate when you die. Debts and funeral costs are paid first; a home passes with what is still owed on it. Anything a child under 18 inherits is held in trust until they’re 18.</p>
-        </PageInfo>
-        {!view.hasWill && view.defaults.length > 0 && (
-          <p className="mt-2 text-sm" data-testid="will-defaults">
-            Without a will: {view.defaults.map((d) => `${d.name} (${ESTATE_RELATION_LABELS[d.relation]}) ${d.percent}%`).join(', ')}.
-          </p>
-        )}
-        {!view.hasWill && view.defaults.length === 0 && <p className="mt-2 text-sm text-muted">Without a will, nobody inherits: there is no one in your family to share it.</p>}
-      </Card>
-
-      <Card role="region" aria-labelledby="will-shares">
-        <h3 id="will-shares" className="text-lg font-bold">
-          Shares
-        </h3>
-        <ul className="mt-2 flex flex-col divide-y divide-border" aria-label="Who could inherit">
-          {view.rows.map((row) => {
-            const percent = percents[keyOf(row)] ?? 0;
-            const canAdd = percent > 0 || chosen < view.maxShares;
-            return (
-              <li key={keyOf(row)} className="flex items-center justify-between gap-3 py-2" data-testid={`will-row-${row.id}`}>
-                <span className="min-w-0">
-                  <span className="block font-semibold break-words [overflow-wrap:anywhere]">{row.name}</span>
-                  <span className="block text-sm text-muted">
-                    {ESTATE_RELATION_LABELS[row.relation]}
-                    {row.minor ? ' · under 18, held in trust' : ''}
-                  </span>
-                </span>
-                <span className="flex shrink-0 items-center gap-1">
+    <div className="flex flex-col gap-3">
+      <PageInfo>
+        <p>Choose who gets what share of your estate when you die. Debts and funeral costs are paid first; a home passes with what is still owed on it. Anything a child under 18 inherits is held in trust until they’re 18.</p>
+      </PageInfo>
+      <HeroCard lead={<Icon id="memo" size={44} />} title="Your will" status={without} testId="will-defaults">
+        <StatCell label="Given out" value={`${total}%`} bar={total} testId="will-total" />
+        <StatCell label="People" value={`${chosen} of ${view.maxShares}`} />
+      </HeroCard>
+      <ActionTileRow>
+        <ActionTile label="Save" icon="memo" tone="money" status={valid ? 'Ready' : total < 100 ? `${100 - total}% to give` : 'Over 100%'} disabled={busy || !valid} onClick={save} testId="will-save" />
+        <ActionTile label="Split evenly" icon="handshake" tone="people" status="Those chosen" disabled={busy || chosen < 2} onClick={splitEvenly} testId="will-split" />
+        {view.hasWill && <ActionTile label="Clear" icon="alarm_clock" tone="crime" status="Back to defaults" disabled={busy} onClick={clear} testId="will-clear" />}
+      </ActionTileRow>
+      {chosen > view.maxShares && <p className="px-1 text-sm text-danger">A will can name at most {view.maxShares} people or causes.</p>}
+      {message && (
+        <p role="status" className="px-1 text-sm" data-testid="will-message">
+          {message}
+        </p>
+      )}
+      <SectionLabel>Shares</SectionLabel>
+      <RowList label="Who could inherit">
+        {view.rows.map((row) => {
+          const percent = percents[keyOf(row)] ?? 0;
+          const canAdd = percent > 0 || chosen < view.maxShares;
+          return (
+            <ListRow
+              key={keyOf(row)}
+              title={row.name}
+              subtitle={`${ESTATE_RELATION_LABELS[row.relation]}${row.minor ? ' · under 18, held in trust' : ''}`}
+              testId={`will-row-${row.id}`}
+              value={
+                <span className="flex items-center gap-1">
                   <Button variant="secondary" aria-label={`Less for ${row.name}`} disabled={busy || percent === 0} onClick={() => change(row, -STEP)} className="w-11 px-0">
                     −
                   </Button>
@@ -134,33 +134,11 @@ export function WillScreen({ life }: { life: LifeState }) {
                     +
                   </Button>
                 </span>
-              </li>
-            );
-          })}
-        </ul>
-        <p className={`mt-3 font-semibold ${valid ? '' : 'text-danger'}`} data-testid="will-total" role="status">
-          Total: {total}%{valid ? '' : total === 0 ? ' · choose who gets a share' : total < 100 ? ` · ${100 - total}% still to give out` : ' · more than 100%'}
-        </p>
-        {chosen > view.maxShares && <p className="text-sm text-danger">A will can name at most {view.maxShares} people or causes.</p>}
-        <div className="mt-3 flex flex-col gap-2">
-          <Button block disabled={busy || !valid} data-testid="will-save" onClick={save}>
-            Save will
-          </Button>
-          <Button variant="secondary" block disabled={busy || chosen < 2} onClick={splitEvenly}>
-            Split evenly between those chosen
-          </Button>
-          {view.hasWill && (
-            <Button variant="ghost" block disabled={busy} onClick={clear} data-testid="will-clear">
-              Clear my will
-            </Button>
-          )}
-        </div>
-        {message && (
-          <p role="status" className="mt-2 text-sm" data-testid="will-message">
-            {message}
-          </p>
-        )}
-      </Card>
+              }
+            />
+          );
+        })}
+      </RowList>
     </div>
   );
 }

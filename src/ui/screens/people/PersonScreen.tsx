@@ -5,7 +5,9 @@ import { getPersonDetail, getPortrait } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { BondBars } from '../../components/BondBars';
+import { ActionTile, ActionTileRow } from '../../components/ActionTile';
 import { Button } from '../../components/Button';
+import { HeroCard } from '../../components/HeroCard';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { InteractSheet } from '../../components/InteractSheet';
@@ -63,27 +65,30 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
 
   return (
     <div className="flex flex-col gap-3">
-      <Card>
-        <div className="flex items-center gap-3">
-          <CharacterPortrait portrait={getPortrait(life, personId, content)} size={64} label={`Portrait of ${row.fullName}`} />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <h2 className="text-xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="person-name">
-              {row.fullName}
-            </h2>
-            <p className="text-sm text-muted" data-testid="person-line">
-              {personLine(row)} · {detail.pronounLabel}
-            </p>
-            {row.mood && (
-              <p className="text-sm font-semibold" data-testid="person-mood">
-                {firstName} is {moodPhrase(row.mood)}.
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="mt-3">
+      <HeroCard
+        lead={<CharacterPortrait portrait={getPortrait(life, personId, content)} size={64} label={`Portrait of ${row.fullName}`} />}
+        title={row.fullName}
+        status={`${personLine(row)} · ${detail.pronounLabel}${row.mood ? ` · ${firstName} is ${moodPhrase(row.mood)}` : ''}`}
+        testId="person-name"
+      >
+        <div className="min-w-0 flex-1">
           <BondBars affection={row.affection} trust={row.trust} label={`How ${row.fullName} feels about you`} />
         </div>
-      </Card>
+      </HeroCard>
+      <span className="sr-only" data-testid="person-line">
+        {personLine(row)} · {detail.pronounLabel}
+      </span>
+      {row.mood && (
+        <span className="sr-only" data-testid="person-mood">
+          {firstName} is {moodPhrase(row.mood)}.
+        </span>
+      )}
+      <ActionTileRow>
+        <ActionTile label="Interact" icon="speech_balloon" tone="people" status={detail.canInteract ? 'Spend time' : 'Not now'} disabled={busy || !detail.canInteract} onClick={() => openInteractions(personId)} testId="interact-tile" />
+        {detail.actions.slice(0, 3).map((a) => (
+          <ActionTile key={a.id} label={ACTION_LABELS[a.id]} icon="red_heart" tone="love" status={a.irreversible ? 'Asks first' : 'Ready'} disabled={busy} onClick={() => act(a.id, a.irreversible)} testId={`tile-${a.id}`} />
+        ))}
+      </ActionTileRow>
 
       <SegmentedTabs
         label={`About ${firstName}`}
