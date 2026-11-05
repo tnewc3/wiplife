@@ -8,7 +8,7 @@ import { ActionTile, ActionTileRow } from '../../components/ActionTile';
 import { HeroCard, StatCell } from '../../components/HeroCard';
 import { Icon } from '../../components/Icon';
 import { ListRow, RowList } from '../../components/ListRow';
-import { SectionLabel } from '../../components/SectionLabel';
+import { CompactList, CompactRow, SectionLabel } from '../../components/SectionLabel';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { CUSTODY_LABELS, money, oddsWords, PROCESS_BLOCK_LABELS, PROCESS_LABELS, pregnancyLine, reputationWords, waitWords } from '../../labels';
 
@@ -31,11 +31,16 @@ export function FamilyScreen({ life }: { life: LifeState }) {
       </PageInfo>
       <HeroCard lead={<Icon id="hugging_face" size={44} />} title={`The ${line.familyName} family`} status={status} testId="family-line">
         <StatCell label="Generation" value={line.generation} />
-        <StatCell label="Name" value={reputationWords(line.reputation)} testId="family-line-facts" />
+        <StatCell label="Name" value={reputationWords(line.reputation)} />
       </HeroCard>
-      <span className="sr-only" data-testid={view.pregnancy ? 'family-pregnancy' : 'family-process'}>
-        {status}
+      <span className="sr-only" data-testid="family-line-facts">
+        Generation {line.generation} · {reputationWords(line.reputation)}
       </span>
+      {(view.pregnancy || view.process) && (
+        <span className="sr-only" data-testid={view.pregnancy ? 'family-pregnancy' : 'family-process'}>
+          {status}
+        </span>
+      )}
       {line.deeds.length > 0 && <p className="px-1 text-sm text-muted">Known for {line.deeds.join(', ')}.</p>}
       <ActionTileRow label="Ways to a family">
         {view.options.map((o) => {
@@ -50,6 +55,13 @@ export function FamilyScreen({ life }: { life: LifeState }) {
           Costs about {money(o.cost)} in all · takes {waitWords(o.waitYears)}
           {o.odds !== undefined ? ` · ${oddsWords(o.odds)}` : ''}
         </span>
+      ))}
+      {view.options.filter((o) => o.blocks.length > 0).map((o) => (
+        <CompactList key={o.kind} label={`Why not ${PROCESS_LABELS[o.kind].name}`}>
+          {o.blocks.map((b) => (
+            <CompactRow key={b} muted label={PROCESS_BLOCK_LABELS[b]} />
+          ))}
+        </CompactList>
       ))}
       {view.children.length > 0 && (
         <>

@@ -96,8 +96,9 @@ export function WillScreen({ life }: { life: LifeState }) {
       <PageInfo>
         <p>Choose who gets what share of your estate when you die. Debts and funeral costs are paid first; a home passes with what is still owed on it. Anything a child under 18 inherits is held in trust until they’re 18.</p>
       </PageInfo>
-      <HeroCard lead={<Icon id="memo" size={44} />} title="Your will" status={without} testId="will-defaults">
-        <StatCell label="Given out" value={`${total}%`} bar={total} testId="will-total" />
+      <HeroCard lead={<Icon id="memo" size={44} />} title="Your estate" status={without} {...(!view.hasWill ? { testId: "will-defaults" } : {})}>
+        <StatCell label="Given out" value={`${total}%`} bar={total} />
+        <span className="sr-only" data-testid="will-total" role="status">Total: {total}%{valid ? '' : total === 0 ? ' · choose who gets a share' : total < 100 ? ` · ${100 - total}% still to give out` : ' · more than 100%'}</span>
         <StatCell label="People" value={`${chosen} of ${view.maxShares}`} />
       </HeroCard>
       <ActionTileRow>

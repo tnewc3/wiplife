@@ -70,7 +70,7 @@ test('moving out and relocating from More → Home', async ({ page }) => {
 
   // A child can't choose where to live.
   await openPage(page, 'properties');
-  await expect(page.getByTestId('housing-line')).toHaveText(`Living with family in ${city}`);
+  await expect(page.getByTestId('housing-line')).toContainText(`Living with family in ${city}`);
   await page.getByRole('button', { name: /^About / }).click();
   await expect(page.getByRole('dialog').getByText('You live with your family until you’re old enough to decide for yourself.')).toBeVisible();
   await page.keyboard.press('Escape');
@@ -87,21 +87,24 @@ test('moving out and relocating from More → Home', async ({ page }) => {
   await openPage(page, 'properties');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
-  await page.getByRole('button', { name: /^Move out · \$[\d,]+ up front$/ }).click();
+  await page.getByTestId('home-rent').click();
   const confirm = page.getByRole('dialog', { name: `Rent a place in ${city}?` });
   await expect(confirm).toBeVisible();
   await confirm.getByRole('button', { name: 'Rent a place' }).click();
-  await expect(page.getByTestId('housing-line')).toHaveText(`Renting in ${city}`);
+  await expect(page.getByTestId('housing-line')).toContainText(`Renting in ${city}`);
+  await page.getByTestId('home-more').click();
   await expect(page.getByRole('button', { name: 'Find a roommate' })).toBeVisible();
+  await page.keyboard.press('Escape');
 
   // Relocate to another city.
-  const target = page.getByRole('list', { name: 'Cities' }).getByRole('button').first();
-  const newCity = ((await target.locator('span').first().textContent()) ?? '').trim();
+  await page.getByTestId('home-cities').click();
+  const target = page.getByTestId('home-cities-picker').locator('[data-testid^="city-"]').first();
+  const newCity = ((await target.locator('span.font-display').first().textContent()) ?? '').trim();
   await target.click();
   const move = page.getByRole('dialog', { name: `Move to ${newCity}?` });
   await expect(move).toContainText('your costs change from next year');
   await move.getByRole('button', { name: `Move to ${newCity}` }).click();
-  await expect(page.getByTestId('housing-line')).toHaveText(`Renting in ${newCity}`);
+  await expect(page.getByTestId('housing-line')).toContainText(`Renting in ${newCity}`);
 
   // The Life tab and the story show the move, and it all survives a reload.
   await goHome(page);
@@ -110,7 +113,7 @@ test('moving out and relocating from More → Home', async ({ page }) => {
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
   await openPage(page, 'properties');
-  await expect(page.getByTestId('housing-line')).toHaveText(`Renting in ${newCity}`);
+  await expect(page.getByTestId('housing-line')).toContainText(`Renting in ${newCity}`);
   await page.getByRole('button', { name: 'Back to Assets' }).click();
   await expect(page.getByTestId('assets-properties')).toBeVisible();
 });

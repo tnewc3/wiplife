@@ -14,7 +14,7 @@ test('More trip planner has a destination, budget and companions; costs and skil
   await openPage(page, 'trip');
   await page.getByTestId('trip-destination-kyoto').click();
   await page.getByTestId('trip-budget-budget').click();
-  await expect(page.getByText('Total: $1,040', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('trip-total')).toContainText('$1,040');
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Take this trip' }).click(); await settle(page);
   // Reload during the saved trip, with visitor residence and both cards still pending.

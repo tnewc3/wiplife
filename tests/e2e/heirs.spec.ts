@@ -14,7 +14,7 @@ test('write a will under More: shares in steps of 5, a total that must reach 100
   await loadSavedLife(page, familyLife({ seed: 'e2e-heir-will', kids: [9, 30], spouse: true }));
   await page.getByRole('button', { name: 'Continue' }).click();
   await openPage(page, 'will');
-  await expect(page.getByRole('heading', { name: 'Write a will' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your will', level: 1 })).toBeVisible();
   await expect(page.getByTestId('will-defaults')).toContainText('Without a will:');
   await expect(page.getByTestId('will-total')).toContainText('Total: 0%');
   await expect(page.getByTestId('will-save')).toBeDisabled();
@@ -28,7 +28,7 @@ test('write a will under More: shares in steps of 5, a total that must reach 100
   for (let i = 0; i < 2; i++) await kids.nth(i).getByRole('button', { name: /^More for/ }).click();
   await expect(page.getByTestId('will-total')).toContainText('Total: 15%');
   await expect(page.getByTestId('will-total')).toContainText('85% still to give out');
-  await page.getByRole('button', { name: 'Split evenly between those chosen' }).click();
+  await page.getByTestId('will-split').click();
   await expect(page.getByTestId('will-total')).toHaveText('Total: 100%');
   await expect(page.getByTestId('will-save')).toBeEnabled();
   // A minor's share is marked as held in trust.

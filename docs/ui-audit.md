@@ -156,10 +156,29 @@ Effect chips are read from the option's tiers in content (`src/ui/screens/activi
 | Travel, Move abroad | Chips | The dropdowns are chips |
 | Page headers over a tab (Health, Family, Possessions, Teen years, Properties, Will, Later life...) | Header only | They use `ScreenHeader`: the title wraps instead of truncating |
 
-### The pages over a tab (second pass)
+### U3b: the pages over a tab on hero and tiles
 
-Health, Possessions, Properties, Family, Will, Later life, Teen years, Social media, Trips, Move abroad, the Drug market and Recovery keep their layout (they were already full pages with a header), but now follow the copy rules: their explanatory paragraphs moved behind the header's ⓘ (`PageInfo`, `components/PageInfo.tsx`; one ⓘ for all of a page's text); the pet's name, an account's handle and a business name are `RenameDialog` rows; the language to learn is chips. A page's status lines stay.
+These pages open over a tab with the shared page header, so they use the feature screen's parts (`HeroCard`, `StatCell`, `ActionTileRow`, `SegmentedTabs`, `RowList`, option pickers) without a second header. Their explanatory text is behind the header's ⓘ (`PageInfo`, `components/PageInfo.tsx`; one ⓘ for all of a page's text), and a typed name is a `RenameDialog` row.
 
-### Still not on the feature templates
+| Page | What it is now |
+|---|---|
+| Health | Hero (Health, Fitness, medical debt), tiles Doctor and Therapist, tabs Conditions and Mind |
+| Recovery | Hero (habits, years clean), tile Support; a habit's three dots open Quit |
+| Pet | Hero (health, bond), tiles Interact and Vet |
+| Person | Hero (portrait, mood, bond bars), tiles Interact and up to three actions; tabs Overview, Interact, History as before |
+| Properties | Hero (where you live, cost, worth, mortgage), tiles Rent or Move out, Buy, Move city (a picker of cities), More (roommate, move back in, sell) |
+| Family | Hero (family name, generation, what is under way), tiles Adopt, IVF, Surrogacy (cost or the reason), your children as rows |
+| Will | Hero (how much is given out), tiles Save, Split evenly, Clear; shares as rows with a stepper |
+| Later life | Hero, tiles Set wishes and Your will; tabs Family, Care, Wishes |
+| Trips | Hero (the kind of trip, total, per diem), tile Take this trip, chips for the choices |
+| Move abroad | Hero (where you live, status, citizenships); the sections keep their buttons |
+| Drug market | Hero (savings, used this year); tabs Buy and Stash as before |
+| Possessions | Hero (worth, upkeep, insurance), tiles Buy a vehicle, Adopt a pet, Insurance; the lists below keep their rows |
+| Social media | Hero (reach, income, sponsor); the accounts below keep their sections; the handle is a dialog |
+| Teen years | Hero (this year's focus); the sections below keep their cards |
+| Money tab, dirty money | The amount is a dialog row |
 
-The person and pet pages, Health, Possessions, Properties, Family, Will, Later life, Teen years, Social media, Trips, Move abroad, the Drug market and Recovery have no hero card or action tiles yet. The Money tab's dirty-money amount is still a typed field (it sits in the Assets tab, not below it). The Sports "Big game" tile and "N people you know" on join cards need engine data that does not exist.
+### Still open
+
+- The Sports "Big game" tile and "N people you know" on join cards need engine data that does not exist.
+- Move abroad, Social media, Teen years and Possessions keep card sections below their hero; they are not yet split into tabs.

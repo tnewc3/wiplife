@@ -75,7 +75,7 @@ test('take a honeymoon with the spouse you married: priced, paid with a receipt,
   await page.getByTestId('trip-budget-comfortable').click();
   await expect(page.getByTestId('honeymoon-with')).toContainText('Sam Spouse');
   // Comfortable ($2,000) at Sydney's price level (1.4) and a honeymoon's 1.2, for two.
-  await expect(page.getByText('Total: $5,040', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('trip-total')).toContainText('$5,040');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Take the honeymoon' }).click(); await settle(page);

@@ -73,8 +73,9 @@ export function HousingScreen({ life }: { life: LifeState }) {
       <HeroCard lead={<Icon id="house_with_garden" size={44} />} title={housingLine(view.kind, view.cityName)} status={costLine} testId="housing-line">
         {view.homeValue !== null && <StatCell label="Worth" value={money(view.homeValue)} />}
         {view.homeValue !== null && <StatCell label="Mortgage" value={view.mortgage > 0 ? money(view.mortgage) : 'Paid off'} />}
-        {view.partnerName && <StatCell label="Lives with you" value={view.partnerName} testId="partner-line" />}
+        {view.partnerName && <StatCell label="Lives with you" value={view.partnerName} />}
       </HeroCard>
+      {view.partnerName && <span className="sr-only" data-testid="partner-line">{view.kind === 'incarcerated' ? `${view.partnerName} still lives there and pays their share` : `Living with ${view.partnerName}, who pays their share`}</span>}
       {!view.independent && <PageInfo><p>You live with your family until you’re old enough to decide for yourself.</p></PageInfo>}
       {view.independent && (
         <ActionTileRow label="Home actions">

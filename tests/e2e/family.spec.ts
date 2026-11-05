@@ -91,7 +91,7 @@ test('More → Family shows adoption, IVF and surrogacy with costs, odds and why
   await startRandomLife(page, LOVE);
   await ageUpTimes(page, 19);
   await openPage(page, 'family');
-  await expect(page.getByRole('heading', { name: 'Your family' })).toBeVisible();
+  await expect(page.getByTestId('family-line')).toContainText('family');
   await expect(page.getByText('Nothing under way right now.')).toBeVisible();
   for (const kind of ['adoption', 'ivf', 'surrogacy']) {
     await expect(page.getByTestId(`family-${kind}-facts`)).toContainText(/Costs about \$[\d,]+ in all · takes /);
@@ -100,7 +100,7 @@ test('More → Family shows adoption, IVF and surrogacy with costs, odds and why
   }
   await expect(page.getByTestId('family-ivf-facts')).toContainText(/odds/);
   await expect(page.getByTestId('family-surrogacy-facts')).toContainText(/odds/);
-  await expect(page.getByRole('list', { name: 'Why not Adopt a child' })).toContainText('You don’t have enough saved.');
+  await expect(page.getByRole('group', { name: 'Why not Adopt a child' })).toContainText('You don’t have enough saved.');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Back to People' }).click();

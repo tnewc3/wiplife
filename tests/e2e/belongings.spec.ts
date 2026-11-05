@@ -27,7 +27,7 @@ const sheet = (page: Page) => page.getByRole('dialog').last();
 test('Belongings lists what you own with value and condition in words, and fits a phone', async ({ page }) => {
   await open(page, { seed: 'e2e-own-1', owns: true, ownsHome: true });
   await openBelongings(page);
-  await expect(page.getByTestId('belongings-summary')).toContainText('Upkeep each year');
+  await expect(page.getByTestId('belongings-summary')).toContainText('Upkeep a year');
   const pet = page.getByTestId('belongings-pets');
   await expect(pet).toContainText('Pepper the cat');
   await expect(pet).toContainText('Anxious');
@@ -101,7 +101,7 @@ test('a pet’s page offers the interaction menu, an outcome card, and costs mon
   await open(page, { seed: 'e2e-own-6', owns: true });
   await goTab(page, 'People');
   await page.getByTestId(/^pet-row-/).first().click();
-  await expect(page.getByTestId('pet-name')).toHaveText('Pepper');
+  await expect(page.getByTestId('pet-name')).toContainText('Pepper');
   await expect(page.getByTestId('pet-line')).toContainText('cat');
   await expect(page.getByTestId('pet-state')).toBeVisible();
   await expectNoHorizontalScroll(page);

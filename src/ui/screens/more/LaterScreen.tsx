@@ -107,7 +107,7 @@ export function LaterScreen({ life }: { life: LifeState }) {
   const setTab = useAppStore((s) => s.setTab);
   const openWill = useAppStore((s) => s.openWill);
   const [message, setMessage] = useState<string | null>(null);
-  const [tab, setTab2] = useState<'family' | 'care' | 'wishes'>('family');
+  const [tab, setTab2] = useState<'family' | 'care' | 'wishes' | null>(null);
   const t = view.terminal;
   const [hospice, setHospice] = useState<HospiceChoice | null>(t?.hospice ?? null);
   const [service, setService] = useState<ServiceStyle | null>(t?.service ?? null);
@@ -141,7 +141,8 @@ export function LaterScreen({ life }: { life: LifeState }) {
     ...(view.care ? [{ id: 'care' as const, label: 'Care', testId: 'later-tab-care' }] : []),
     ...(t ? [{ id: 'wishes' as const, label: 'Wishes', testId: 'later-tab-wishes' }] : []),
   ];
-  const shown = tabs.some((x) => x.id === tab) ? tab : (tabs[0]?.id ?? 'family');
+  const fallback = t ? 'wishes' : view.care ? 'care' : 'family';
+  const shown = tab !== null && tabs.some((x) => x.id === tab) ? tab : fallback;
   return (
     <div className="flex flex-col gap-3">
       <HeroCard lead={<Icon id="candle" size={44} />} title="Later life" status={t ? 'Your time is short.' : view.care ? (view.care.option === null ? 'You need looking after.' : 'Your care is arranged.') : 'Family around you.'}>
