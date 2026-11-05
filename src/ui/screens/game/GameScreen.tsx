@@ -7,6 +7,8 @@ import { EventSheet } from '../../components/EventSheet';
 import { GameNav } from '../../components/GameNav';
 import { InteractionCard } from '../../components/InteractionCard';
 import { LegalBanner } from '../../components/LegalBanner';
+import { InfoSheet } from '../../components/InfoSheet';
+import { usePageInfo } from '../../components/pageInfoStore';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { ACTIVITY_TAB_LABELS, GROUPS_FOCUS_TITLES, TAB_LABELS } from '../../labels';
 import { ActivitiesTab } from '../activities/ActivitiesTab';
@@ -54,7 +56,18 @@ const PAGE_TITLES = {
 } as const;
 
 function PageHeader({ title, onBack, backLabel }: { title: string; onBack: () => void; backLabel: string }) {
-  return <ScreenHeader title={title} onBack={onBack} backLabel={backLabel} tone="raised" />;
+  const info = usePageInfo();
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <ScreenHeader title={title} onBack={onBack} backLabel={backLabel} tone="raised" onInfo={info ? () => setOpen(true) : undefined} />
+      {info && (
+        <InfoSheet open={open} title={title} onClose={() => setOpen(false)}>
+          {info}
+        </InfoSheet>
+      )}
+    </>
+  );
 }
 
 /** The in-game layout (U1): a header, the page, and at the bottom the tabs around the Age button (and on Home the stat panel). */

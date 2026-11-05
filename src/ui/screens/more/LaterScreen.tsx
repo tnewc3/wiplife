@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { getLaterView, type LaterPersonView } from '../../../engine/selectors';
@@ -190,9 +191,9 @@ export function LaterScreen({ life }: { life: LifeState }) {
           <h2 id="later-wishes" className="text-lg font-bold">
             {LATER_TITLES.wishes}
           </h2>
-          <p className="mt-1 text-muted">
-            You were told your time is short. Where you spend it, who is with you and what comes after are yours to decide, and what you choose shapes your funeral and who comes.
-          </p>
+          <PageInfo>
+            <p>You were told your time is short. Where you spend it, who is with you and what comes after are yours to decide, and what you choose shapes your funeral and who comes.</p>
+          </PageInfo>
           <Choice
             label="Where you spend your last months"
             testId="wish-hospice"

@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import { getTeenView, type TeenView } from '../../../engine/selectors';
@@ -100,7 +101,9 @@ export function TeenScreen({ life }: { life: LifeState }) {
 
       <Card data-testid="teen-focus">
         <Heading>This year’s focus</Heading>
-        <p className="mb-2 text-sm text-muted">Where most of your energy goes shifts your grades, your friendships, your money and your talent.</p>
+        <PageInfo>
+          <p>Where most of your energy goes shifts your grades, your friendships, your money and your talent.</p>
+        </PageInfo>
         <div className="flex flex-col gap-2">
           {view.focus.options.map((id) => {
             const chosen = view.focus.next === id;

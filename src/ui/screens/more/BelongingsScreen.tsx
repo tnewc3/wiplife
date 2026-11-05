@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RenameDialog } from '../../components/RenameDialog';
 import { content } from '../../../content';
 import { getBelongingsView, type AdoptOption, type BelongingsView, type RenovationOption, type VacationOption, type VehicleOption } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
@@ -153,7 +154,7 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
           What you own
         </h2>
         {view.empty ? (
-          <p className="mt-1 text-muted">Nothing yet beyond what you live in. Pets, cars, a place to get away to and valuables all start here.</p>
+          <p className="mt-1 text-muted">Nothing yet beyond your home.</p>
         ) : (
           <dl className="mt-2 flex flex-col" aria-label="What your belongings cost">
             {view.worth > 0 && <Line label="What you own is worth" value={money(view.worth)} />}
@@ -183,7 +184,7 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
           Vehicles
         </h3>
         {view.vehicles.length === 0 ? (
-          <p className="mt-1 text-muted">You don’t own a vehicle. Some jobs need one, and how much depends on the city.</p>
+          <p className="mt-1 text-muted">No vehicle.</p>
         ) : (
           <ul className="mt-1 flex flex-col divide-y divide-border" aria-label="Your vehicles">
             {view.vehicles.map((v) => (
@@ -240,7 +241,7 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
           Valuables
         </h3>
         {view.valuables.length === 0 ? (
-          <p className="mt-1 text-muted">Jewelry, designer goods, art and boats are bought under Luxury in More → Activities.</p>
+          <p className="mt-1 text-muted">Bought under Luxury in Activities.</p>
         ) : (
           <ul className="mt-1 flex flex-col divide-y divide-border" aria-label="Your valuables">
             {view.valuables.map((v) => (
@@ -271,7 +272,7 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
             <p className="text-sm text-muted">{view.mainHome.renovations.length === 0 ? 'No renovations that still count.' : `Renovated: ${view.mainHome.renovations.join(', ')}.`}</p>
           </div>
         ) : (
-          <p className="mt-1 text-muted">You don’t own the home you live in, so there is nothing to renovate there.</p>
+          <p className="mt-1 text-muted">Nothing to renovate: you don’t own your home.</p>
         )}
         {view.vacationHomes.length > 0 && (
           <ul className="mt-2 flex flex-col divide-y divide-border" aria-label="Your vacation homes">
@@ -307,7 +308,7 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
       <VehicleSheet view={view} sheet={sheet} close={close} act={act} busy={busy} setSheet={setSheet} />
 
       <Sheet open={sheet?.kind === 'vacation'} title="Buy a vacation home" onClose={close}>
-        <p className="mb-3 text-muted">A place to get away to, in any city. It has upkeep and insurance, and a mortgage if you need one. You have {money(life.finances.savings)} saved.</p>
+        <p className="mb-3 text-muted">You have {money(life.finances.savings)} saved.</p>
         <ul className="flex flex-col gap-2" aria-label="Cities">
           {view.vacationOptions.map((o) => (
             <li key={o.cityId}>
@@ -327,7 +328,7 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
       </Sheet>
 
       <Sheet open={sheet?.kind === 'renovate'} title="Renovate" onClose={close}>
-        <p className="mb-3 text-muted">Work done to a home you own raises its value and makes it nicer to live in. You have {money(life.finances.savings)} saved.</p>
+        <p className="mb-3 text-muted">You have {money(life.finances.savings)} saved.</p>
         <ul className="flex flex-col gap-2" aria-label="Renovations">
           {view.renovationOptions.map((o) => (
             <li key={o.id} className="flex flex-col gap-1">
@@ -414,6 +415,7 @@ function PetsCard({
 
 function AdoptSheet({ view, sheet, close, act, busy, setSheet }: { view: BelongingsView; sheet: Sheeted; close: () => void; act: ReturnType<typeof useAppStore.getState>['takeLifeAction']; busy: boolean; setSheet: (s: Sheeted) => void }) {
   const [name, setName] = useState('');
+  const [naming, setNaming] = useState(false);
   const species = sheet?.kind === 'adopt' ? sheet.species : undefined;
   const clean = name.trim();
   const nameOk = /^[\p{L}][\p{L}' -]{0,19}$/u.test(clean);
@@ -443,18 +445,11 @@ function AdoptSheet({ view, sheet, close, act, busy, setSheet }: { view: Belongi
         </ul>
       ) : (
         <div className="flex flex-col gap-3">
-          <p className="text-muted">{species.blurb}</p>
-          <label className="flex flex-col gap-1">
+          <button type="button" onClick={() => setNaming(true)} data-testid="pet-name" className="wl-press flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-3 text-left">
             <span className="font-semibold">Its name</span>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={20}
-              data-testid="pet-name"
-              className="min-h-11 rounded-xl border border-border bg-bg px-3"
-              autoComplete="off"
-            />
-          </label>
+            <span className="min-w-0 [overflow-wrap:anywhere]">{clean || 'Choose a name'}</span>
+          </button>
+          <RenameDialog open={naming} title="Its name" label="Name" initial={name} allowSame maxLength={20} testId="pet-name-input" onCancel={() => setNaming(false)} onSave={(t) => { setName(t); setNaming(false); }} />
           {(['shelter', 'breeder'] as const).map((source) => {
             const o = species[source];
             return (
@@ -475,7 +470,6 @@ function AdoptSheet({ view, sheet, close, act, busy, setSheet }: { view: Belongi
             );
           })}
           {species.shelter.block && <p className="text-sm text-muted">{PET_BLOCK_LABELS[species.shelter.block]}</p>}
-          {!nameOk && clean.length > 0 && <p className="text-sm text-muted">A name is letters, spaces, hyphens and apostrophes.</p>}
         </div>
       )}
     </Sheet>

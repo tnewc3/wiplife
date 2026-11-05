@@ -29,13 +29,15 @@ test('creates an account with a typed handle: the handle is checked as you type,
   await expect(page.getByTestId('social-open')).toBeVisible();
   await page.getByTestId('platform-tiktok').click();
   await page.getByTestId('niche-gaming').click();
-  const input = page.getByTestId('handle-input');
+  const input = page.getByTestId('handle-dialog-input');
+  await page.getByTestId('handle-input').click();
   await input.fill('no good!');
   await expect(page.getByText('Use only letters, numbers, dots and underscores.', { exact: true })).toBeVisible();
-  await expect(page.getByTestId('open-account')).toBeDisabled();
+  await expect(page.getByTestId('rename-save')).toBeDisabled();
   await input.fill('admin');
   await expect(page.getByText('That handle is kept for the platform.')).toBeVisible();
   await input.fill('@Quiet_Fox');
+  await page.getByTestId('rename-save').click();
   await expect(page.getByTestId('open-account')).toBeEnabled();
   await page.getByTestId('open-account').click();
   const account = page.getByTestId('account-tiktok');
@@ -108,10 +110,14 @@ test('under 18 an account starts private and a parent is in it', async ({ page }
   await openSocial(page);
   await page.getByTestId('platform-instagram').click();
   await page.getByTestId('niche-music').click();
-  await page.getByTestId('handle-input').fill('teen_fox');
+  await page.getByTestId('handle-input').click();
+  await page.getByTestId('handle-dialog-input').fill('teen_fox');
+  await page.getByTestId('rename-save').click();
   await page.getByTestId('open-account').click();
   await expect(page.getByTestId('account-instagram')).toContainText('Private.');
-  await expect(page.getByTestId('social-summary')).toContainText('A parent keeps an eye on your accounts');
+  await page.getByRole('button', { name: /^About / }).click();
+  await expect(page.getByRole('dialog')).toContainText('A parent keeps an eye on your accounts');
+  await page.keyboard.press('Escape');
   await expectNoHorizontalScroll(page);
 });
 

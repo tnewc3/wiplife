@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import { content } from '../../../content';
 import type { DrugSource } from '../../../content/schemas';
@@ -168,7 +169,7 @@ export function DrugMarketScreen({ life }: { life: LifeState }) {
       ) : (
         <section aria-labelledby="stash-list" className="flex flex-col gap-1.5">
           <SectionHeader id="stash-list">{DRUG_LABELS.tabs.stash}</SectionHeader>
-          <p className="text-sm text-muted">{DRUG_LABELS.stashNote}</p>
+          <PageInfo><p>{DRUG_LABELS.stashNote}</p></PageInfo>
           <p className="text-sm text-muted">{DRUG_LABELS.used(view.used, view.limit)}</p>
           {held.length === 0 ? <p className="text-muted" data-testid="stash-empty">{DRUG_LABELS.nothingHeld}</p> : (
             <RowList label={DRUG_LABELS.tabs.stash}>

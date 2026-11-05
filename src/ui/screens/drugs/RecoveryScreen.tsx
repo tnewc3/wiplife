@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { content } from '../../../content';
 import { getRecoveryView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
@@ -19,7 +20,10 @@ export function RecoveryScreen({ life }: { life: LifeState }) {
   const R = DRUG_LABELS.recovery;
   return (
     <div className="flex flex-col gap-3" data-testid="recovery-screen">
-      <p className="text-sm text-muted">{R.intro}</p>
+      <PageInfo>
+        <p>{R.intro}</p>
+        <p>{R.notes}</p>
+      </PageInfo>
       {last && (last.action === 'quit') && (
         <p role="status" data-testid="recovery-result" className="rounded-2xl bg-surface-2 px-3 py-2 text-sm">
           {DRUG_LABELS.result(last.note, last.amount, `balance ${money(last.balance)}`, money(Math.abs(last.amount)))}
@@ -50,7 +54,6 @@ export function RecoveryScreen({ life }: { life: LifeState }) {
           </Button>
         ))}
       </section>
-      <p className="text-sm text-muted">{R.notes}</p>
       <Button
         variant="secondary"
         block

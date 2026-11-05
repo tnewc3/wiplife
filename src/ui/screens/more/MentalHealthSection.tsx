@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { useState } from 'react';
 import type { MentalCareId } from '../../../content/schemas';
 import type { CareOption, MentalConditionView, MentalView } from '../../../engine/mental/views';
@@ -107,7 +108,7 @@ export function MentalHealthSection({ mental }: { mental: MentalView }) {
                     </li>
                   ))}
                 </ul>
-                <p className="text-sm text-muted">Doing nothing costs nothing now, and can cost more later.</p>
+                <PageInfo><p>Doing nothing costs nothing now, and can cost more later.</p></PageInfo>
               </li>
             ))}
           </ul>

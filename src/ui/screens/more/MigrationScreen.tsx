@@ -1,3 +1,4 @@
+import { PageInfo } from '../../components/PageInfo';
 import { ChipSelect } from '../../components/FilterChips';
 import { useState } from 'react';
 import { content } from '../../../content';
@@ -33,7 +34,7 @@ export function MigrationScreen({ life }: { life: LifeState }) {
         <p data-testid="migration-citizenships">Citizen of {view.citizenships.join(' and ')}</p>
         <p data-testid="migration-status">Living in {view.country} · {STATUS_LABELS[view.status]}</p>
         {permit && permit.type !== 'permanent_resident' && permit.type !== 'undocumented' && <p>{PERMIT_LABELS[permit.type]} until {permit.endYear}</p>}
-        {view.undocumented && <p className="mt-1 text-sm">Without papers since {view.undocumented.since}. Regular jobs, loans and licenses are closed to you; informal work pays less. There is a risk each year that you are made to leave{view.undocumented.risk >= 0.08 ? ', and it is higher now' : ''}.</p>}
+        {view.undocumented && <PageInfo><p>Without papers since {view.undocumented.since}. Regular jobs, loans and licenses are closed to you; informal work pays less. There is a risk each year that you are made to leave{view.undocumented.risk >= 0.08 ? ', and it is higher now' : ''}.</p></PageInfo>}
         {view.removed.map((r) => <p key={r.country} className="mt-1 text-sm">{r.country} will not take an application from you until {r.until}.</p>)}
       </Card>
 
@@ -50,7 +51,7 @@ export function MigrationScreen({ life }: { life: LifeState }) {
       {view.move && (
         <Card>
           <h2 className="text-lg font-bold">Move to {view.move.cityName}</h2>
-          <p className="text-sm">Moving costs about {money(view.move.cost)}. Your partner and children who live with you come too; everyone else stays where they are.</p>
+          <PageInfo><p>Moving costs about {money(view.move.cost)}. Your partner and children who live with you come too; everyone else stays where they are.</p></PageInfo>
           <Button className="mt-3" block disabled={busy || !view.move.can} onClick={() => void act('move_abroad', {})} data-testid="migration-move">Move now</Button>
           {view.move.block && <p className="mt-2 text-sm">{MOVE_BLOCK_LABELS[view.move.block] ?? view.move.block}</p>}
         </Card>
@@ -59,7 +60,7 @@ export function MigrationScreen({ life }: { life: LifeState }) {
       {view.permanent && (
         <Card>
           <h2 className="text-lg font-bold">Stay for good</h2>
-          <p className="text-sm">Permanent residence has no end date. Cost {money(view.permanent.fee)} · {approvalLabel(view.permanent.odds)}.</p>
+          <PageInfo><p>Permanent residence has no end date. Cost {money(view.permanent.fee)} · {approvalLabel(view.permanent.odds)}.</p></PageInfo>
           <Button className="mt-3" block disabled={busy || !view.permanent.can} onClick={() => void act('apply_status', { status: { kind: 'permanent' } })} data-testid="migration-permanent">Ask for permanent residence</Button>
           {view.permanent.block && <p className="mt-2 text-sm">{STATUS_BLOCK_LABELS[view.permanent.block]}</p>}
         </Card>
@@ -68,7 +69,7 @@ export function MigrationScreen({ life }: { life: LifeState }) {
       {view.citizenship && (
         <Card>
           <h2 className="text-lg font-bold">Citizenship</h2>
-          <p className="text-sm">After {view.citizenship.years} years, with enough of the language, a clean record and a test. Cost {money(view.citizenship.fee)}. Holding another citizenship is allowed.</p>
+          <PageInfo><p>After {view.citizenship.years} years, with enough of the language, a clean record and a test. Cost {money(view.citizenship.fee)}. Holding another citizenship is allowed.</p></PageInfo>
           <Button className="mt-3" block disabled={busy || !view.citizenship.can} onClick={() => void act('apply_status', { status: { kind: 'naturalization' } })} data-testid="migration-citizenship">Apply for citizenship</Button>
           {view.citizenship.block && <p className="mt-2 text-sm">{STATUS_BLOCK_LABELS[view.citizenship.block]}</p>}
         </Card>
@@ -77,7 +78,7 @@ export function MigrationScreen({ life }: { life: LifeState }) {
       {view.regular.length > 0 && (
         <Card>
           <h2 className="text-lg font-bold">Routes to status</h2>
-          <p className="text-sm">None is certain, and applying draws attention to you. A refusal can raise the risk you are made to leave.</p>
+          <PageInfo><p>None is certain, and applying draws attention to you. A refusal can raise the risk you are made to leave.</p></PageInfo>
           {view.regular.map((r) => (
             <div key={r.basis} className="mt-3">
               <p className="font-medium">{BASIS_LABELS[r.basis]}</p>
@@ -92,7 +93,7 @@ export function MigrationScreen({ life }: { life: LifeState }) {
       {view.settled && (
         <Card>
           <h2 className="text-lg font-bold">Money sent home</h2>
-          <p className="text-sm">{view.remit.relatives > 0 ? 'A share of your income goes to relatives in another country each year, from what is left after housing and living costs.' : 'No relatives of yours live in another country.'}{view.remit.sent > 0 ? ` Sent so far: ${money(view.remit.sent)}.` : ''}</p>
+          <PageInfo><p>{view.remit.relatives > 0 ? 'A share of your income goes to relatives in another country each year, from what is left after housing and living costs.' : 'No relatives of yours live in another country.'}{view.remit.sent > 0 ? ` Sent so far: ${money(view.remit.sent)}.` : ''}</p></PageInfo>
           <div className="mt-2 flex gap-2">
             {view.remit.options.map((o) => (
               <Button key={o.id} variant={view.remit.level === o.id ? 'primary' : 'secondary'} disabled={busy || !o.can} onClick={() => void act('set_remittance', { remit: o.id })}>{REMIT_LABELS[o.id]}</Button>
@@ -104,7 +105,7 @@ export function MigrationScreen({ life }: { life: LifeState }) {
       {view.returnCities.length > 0 && (
         <Card>
           <h2 className="text-lg font-bold">Go home</h2>
-          <p className="text-sm">You can always return to a country whose citizen you are.</p>
+          <PageInfo><p>You can always return to a country whose citizen you are.</p></PageInfo>
           {view.returnCities.slice(0, 4).map((c) => (
             <Button key={c.id} className="mt-2" variant="secondary" block disabled={busy || !view.canReturn(c.id)} onClick={() => void act('return_home', { cityId: c.id })}>Return to {c.name}, {c.country}</Button>
           ))}
@@ -135,7 +136,7 @@ export function MigrationScreen({ life }: { life: LifeState }) {
           {view.withoutPapers && (
             <div className="mt-5 border-t border-border pt-4">
               <p className="font-medium">Without papers</p>
-              <p className="text-sm">You can go without permission to stay. It costs about {money(view.withoutPapers.cost)} and you may be turned back. If you arrive, you cannot hold a regular job, borrow or get licenses, informal work pays less, and each year there is a risk you will be made to leave. You may find help in a community group.</p>
+              <PageInfo><p>You can go without permission to stay. It costs about {money(view.withoutPapers.cost)} and you may be turned back. If you arrive, you cannot hold a regular job, borrow or get licenses, informal work pays less, and each year there is a risk you will be made to leave. You may find help in a community group.</p></PageInfo>
               {!confirmEntry ? (
                 <Button className="mt-3" variant="secondary" block disabled={busy || !view.withoutPapers.can} onClick={() => setConfirmEntry(true)} data-testid="migration-without-papers">Think about going without papers</Button>
               ) : (
