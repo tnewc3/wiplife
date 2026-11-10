@@ -1,0 +1,58 @@
+id: start_a_crew_of_your_own
+category: social
+label: "Start a crew of your own"
+blurb: "Pull together the people on your street and give it a name."
+minAge: 15
+inPerson: true
+companion: none
+cost: nothing
+profile: crew_founding
+yearlyLimit: 1
+hub: find_crews
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { crime: { member: false } }
+    - { crime: { local: true } }
+tiers:
+  great:
+    text:
+      - "You pick a name on the bus, and by Friday people you hardly know are using it. It is yours now, with you at the front of it, and everything that comes with that."
+      - "Nobody argues when you say it out loud. Within a week there are enough of you to call it something, and you are the one they look to."
+    effects:
+      - { type: crime, action: join, lead: true }
+      - { type: flag, key: joined_a_crew, value: true }
+      - { type: stat, key: confidence, delta: 3 }
+      - { type: stat, key: stress, delta: 3 }
+  good:
+    text:
+      - "It starts as a joke and a few names on a list, and then it is not a joke. You end up running a crew of your own, and it is a lot heavier than it sounded."
+      - "A handful of people say yes, mostly because nobody else asked them. You become the leader of a crew of your own."
+    effects:
+      - { type: crime, action: join, lead: true }
+      - { type: flag, key: joined_a_crew, value: true }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: stress, delta: 4 }
+  neutral:
+    text:
+      - "Everyone loves the idea until it needs a time and a place. It fizzles out before it has a name."
+      - "You get a few maybes and one real yes. It is not enough to call it anything."
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+  bad:
+    text:
+      - "The word gets back to the wrong people, who find it funny. For a while the whole school quotes you to your face."
+      - "A teacher finds the list. There is a call home, a long talk, and a name that follows you down the hall."
+    effects:
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: stat, key: happiness, delta: -2 }
+  backfire:
+    text:
+      - "An older crew hears that somebody is using their street. They find you, and they are not friendly about it."
+      - "You push too hard, too loud. The people you wanted fall out with you, and one of them makes sure you carry it."
+    effects:
+      - { type: stat, key: health, delta: -4 }
+      - { type: stat, key: reputation, delta: -6 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: stat, key: happiness, delta: -4 }

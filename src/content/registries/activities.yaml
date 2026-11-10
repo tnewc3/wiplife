@@ -92,6 +92,7 @@ activities:
   # ---------------------------------------------------------------- Black market and crime
   - { id: drug_market, category: black_market, label: Drug market, subtitle: "A dealer, a contact, the club or the market. Prices and risks vary.", icon: syringe, kind: link, opens: drug_market, minAge: 18, limit: 1, adultsOnly: true }
   - { id: black_market, category: black_market, label: The market, subtitle: "Goods, papers and pills. Trouble comes with them.", icon: money_with_wings, kind: options, minAge: 16, limit: 24, sharedRepeats: false }
+  - { id: find_crews, category: crime, label: Find the local crews, subtitle: "Ask around, or start a crew of your own. It can go wrong.", icon: police_car_light, kind: options, minAge: 14, limit: 2, sharedRepeats: true }
   - { id: crime, category: crime, label: Crimes, subtitle: "Teens only get the small ones. A juvenile record is sealed at 18.", icon: police_car_light, kind: options, minAge: 13, limit: 40, sharedRepeats: false }
 
   # ---------------------------------------------------------------- Law & life

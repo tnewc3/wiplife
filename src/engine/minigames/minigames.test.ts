@@ -333,7 +333,7 @@ describe('mini-games in events', () => {
     for (let i = 0; i < n; i++) {
       const life = withEvent('big_game_soccer', 'soccer', `g1:ev:${i}`);
       const win = (acc: number) => resolveChoice(life, 'x1', 'take_it', content, { game: 'penalty_kick', auto: false, accuracy: acc }).pending[0]!.outcomeText?.startsWith('You pick your corner and you do not');
-      if (win(100)) perfectWins++;
+      if (win(70)) perfectWins++; // a good play (below perfect) only moves the odds
       if (win(0)) missWins++;
       const auto = resolveChoice(life, 'x1', 'take_it', content);
       expect((auto.inputLog.at(-1)!.payload.play as { auto: boolean }).auto).toBe(true);
@@ -341,6 +341,23 @@ describe('mini-games in events', () => {
     expect(perfectWins).toBeGreaterThan(missWins);
     // The gap is bounded: skill pushes the odds, it does not replace them.
     expect((perfectWins - missWins) / n).toBeLessThan((mini.shift.perfect - mini.shift.miss) / 100 + 0.08);
+  });
+
+  it('a perfect play you made yourself always passes the check; a perfect Auto draw only moves the odds', () => {
+    const win = (life: LifeState, record: { game: 'last_shot'; auto: boolean; accuracy: number }) =>
+      resolveChoice(life, 'x1', 'take_it', content, record).pending[0]!.outcomeText?.startsWith('The ball leaves your fingers');
+    let autoPerfectLosses = 0;
+    for (let i = 0; i < 300; i++) {
+      // A weak shooter, so the plain odds are far from certain.
+      const life = produce(withEvent('big_game_basketball', 'basketball', `g1:sure:${i}`), (d) => {
+        d.character.personality.confidence = 5;
+        d.character.stats.fitness = 5;
+      });
+      expect(win(life, { game: 'last_shot', auto: false, accuracy: 100 })).toBe(true);
+      expect(win(life, { game: 'last_shot', auto: false, accuracy: mini.tiers.perfect })).toBe(true);
+      if (!win(life, { game: 'last_shot', auto: true, accuracy: 100 })) autoPerfectLosses++;
+    }
+    expect(autoPerfectLosses).toBeGreaterThan(0);
   });
 
   it('refuses a result for a choice with no game, the wrong game or an invalid result', () => {
