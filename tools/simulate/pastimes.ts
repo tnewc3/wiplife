@@ -161,6 +161,8 @@ export function choosePastimePlans(life: LifeState, content: ContentBundle, rng:
     for (const def of defs) {
       // (Batch 2b: crime, gambling, lawsuits, names and loans are chosen by ./risk.ts.)
       if (['surgery', 'luxury', 'love'].includes(def.category) || (RISK_CATEGORIES as readonly string[]).includes(def.category)) continue;
+      // (Finding a crew is the criminal player's, chosen in ./risk.ts.)
+      if (def.hub === 'find_crews') continue;
       const plan = options(def, false);
       if (!plan) continue;
       const price = pastimePrice(life, def, plan, content);

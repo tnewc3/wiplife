@@ -178,6 +178,10 @@ These pages open over a tab with the shared page header, so they use the feature
 | Teen years | Hero (this year's focus); the sections below keep their cards |
 | Money tab, dirty money | The amount is a dialog row |
 
+### Find the local crews (follow-up to O1 youth crews)
+
+Activities → Crime has a new row, **Find the local crews** (a row of option cards, like the other activities, no new screen): *Ask around for a crew* (14 and up, not in a crew, one works where you live; can lead to a crew, a shove or a bad name) and *Start a crew of your own* (15 to 17, you lead a kids' crew). Outcomes read the same odds model and effect chips as every other activity. Adults can ask around; founding a crew stays for teens (adult crews are joined by initiation).
+
 ### Still open
 
 - The Sports "Big game" tile and "N people you know" on join cards need engine data that does not exist.

@@ -373,7 +373,7 @@ Meet every O1 acceptance criterion. Run all checks and a 10,000-life simulation,
 ### Rules for every mini-game
 
 - **Always optional:** every mini-game has an **Auto** button that resolves it from stats. Simulated test players always use Auto.
-- **Stats shape difficulty:** a strong shooter gets a bigger, slower timing window; a weak one gets a small, fast one. Skill can push the odds, not replace them.
+- **Stats shape difficulty:** a strong shooter gets a bigger, slower timing window; a weak one gets a small, fast one. Skill can push the odds, not replace them. **Exception (playtest fix):** a perfect play you make yourself (not Auto) always passes the event check it was played for (`playedPerfectSure` in balance/minigames.yaml); Auto's perfect still only moves the odds.
 - **Saved for replay:** the result is recorded in the input log; replays use the stored result.
 - **No grinding:** mini-games tied to activities follow the diminishing-returns rule.
 - **Loaded only when used,** to keep the game fast to open.

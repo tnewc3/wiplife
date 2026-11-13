@@ -569,3 +569,49 @@ describe('youth crews (teens from 14)', () => {
     ok(out);
   });
 });
+
+describe('finding a crew yourself (Activities → Crime → Find the local crews)', () => {
+  const teen = (seed: string, age = 16): LifeState => apply(lifeAtAge(seed, age), (d) => void (d.character.cityId = cityWith('street_gang')));
+  const available = (life: LifeState, id: string) => isLifeActionAvailable(life, 'do_activity', { pastimeId: id }, content);
+  const tryIt = (life: LifeState, id: string) => performAction(life, 'do_activity', { pastimeId: id }, content);
+
+  it('is open to teens from 14 and adults who are in no crew and have one nearby, and closed otherwise', () => {
+    expect(available(teen('find-14', 14), 'ask_around_for_a_crew')).toBe(true);
+    expect(available(teen('find-30', 30), 'ask_around_for_a_crew')).toBe(true);
+    expect(available(lifeAtAge('find-13', 13), 'ask_around_for_a_crew')).toBe(false);
+    expect(available(member('street_gang', 'find'), 'ask_around_for_a_crew')).toBe(false);
+  });
+
+  it('a teen who asks around sometimes joins a youth crew, sometimes comes away with nothing or with trouble', () => {
+    let joined = 0;
+    let none = 0;
+    for (let i = 0; i < 60; i++) {
+      const after = tryIt(teen(`find-ask-${i}`), 'ask_around_for_a_crew');
+      if (after.crime.crew) {
+        joined++;
+        expect(content.crews[after.crime.crew.defId]!.youth).toBe(true);
+        expect(isLeader(after, content)).toBe(false);
+        ok(after);
+      } else none++;
+    }
+    expect(joined).toBeGreaterThan(0);
+    expect(none).toBeGreaterThan(0);
+  });
+
+  it('a teen from 15 can start a crew and lead it; an adult cannot, and neither can a 14-year-old', () => {
+    expect(available(teen('found-15', 15), 'start_a_crew_of_your_own')).toBe(true);
+    expect(available(teen('found-14', 14), 'start_a_crew_of_your_own')).toBe(false);
+    expect(available(teen('found-18', 18), 'start_a_crew_of_your_own')).toBe(false);
+    let led = 0;
+    for (let i = 0; i < 60; i++) {
+      const after = tryIt(teen(`found-${i}`, 16), 'start_a_crew_of_your_own');
+      if (after.crime.crew) {
+        led++;
+        expect(isLeader(after, content)).toBe(true);
+        expect(after.finances.dirty).toBe(0);
+        ok(after);
+      }
+    }
+    expect(led).toBeGreaterThan(0);
+  });
+});

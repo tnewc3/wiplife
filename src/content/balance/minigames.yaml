@@ -10,6 +10,9 @@ tiers: { perfect: 85, good: 60, fair: 35 }
 # game after `tiltScale`). The most a play can move any chance is the largest of these.
 shift: { perfect: 12, good: 5, fair: 0, miss: -10 }
 
+# A perfect play you made yourself (not Auto) always passes the check it was played for. Auto's perfect still only moves the odds.
+playedPerfectSure: true
+
 # What Auto plays like: the accuracy it draws is centered between these by your skill (0 to 100), with this spread. The
 # same skill sizes the window and speed when you play, so a typical play at a given skill lands where Auto does.
 auto: { meanWeak: 34, meanStrong: 72, spread: 22 }

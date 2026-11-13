@@ -26,6 +26,8 @@ export const minigamesBalanceSchema = z
     tiers: z.strictObject({ perfect: z.int().min(1).max(100), good: z.int().min(1).max(100), fair: z.int().min(1).max(100) }),
     /** What a performance does to a chance (percentage points). */
     shift: z.strictObject({ perfect: z.number().min(0).max(30), good: z.number().min(0).max(30), fair: z.number().min(-30).max(30), miss: z.number().min(-30).max(0) }),
+    /** True: a perfect play you made yourself (not Auto) always passes the check it was played for. */
+    playedPerfectSure: z.boolean(),
     /** Auto draws an accuracy centered between these by your skill, with this spread. */
     auto: z.strictObject({ meanWeak: z.number().min(0).max(100), meanStrong: z.number().min(0).max(100), spread: z.number().min(0).max(100) }),
     /** Reduced motion slows every game by this factor. */

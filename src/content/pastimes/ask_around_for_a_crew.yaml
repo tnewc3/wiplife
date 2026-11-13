@@ -1,0 +1,55 @@
+id: ask_around_for_a_crew
+category: social
+label: "Ask around for a crew"
+blurb: "Find out who runs things where you live, and whether they would have you."
+minAge: 14
+inPerson: true
+companion: none
+cost: nothing
+profile: crew_search
+yearlyLimit: 2
+hub: find_crews
+requires:
+  all:
+    - { crime: { member: false } }
+    - { crime: { local: true } }
+tiers:
+  great:
+    text:
+      - "You ask the right person in the right tone. By the end of the week somebody has saved you a seat, and you are in with a crew."
+      - "Word travels ahead of you. Somebody you have never met nods at you outside, and before the month is out you are in with a crew."
+    effects:
+      - { type: crime, action: join }
+      - { type: flag, key: joined_a_crew, value: true }
+      - { type: stat, key: stress, delta: 2 }
+  good:
+    text:
+      - "It takes a few awkward conversations and a long wait on a cold step. Then somebody lets you in, and you are in with a crew."
+      - "Nobody promises anything. A few days later a message arrives with a time and a place, and after that you are in with a crew."
+    effects:
+      - { type: crime, action: join }
+      - { type: flag, key: joined_a_crew, value: true }
+      - { type: stat, key: stress, delta: 3 }
+  neutral:
+    text:
+      - "Everyone you ask shrugs or changes the subject. Whoever you are looking for does not want to be found yet."
+      - "You get a name, then a different name, then nothing. Either nobody trusts you or nobody is there."
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+  bad:
+    text:
+      - "You ask the wrong person. They laugh, repeat it to others, and for weeks people look at you as if they know something."
+      - "A stranger takes the question badly and puts you against a wall to find out why you are asking. You walk away shaken and with a reputation you did not want."
+    effects:
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: stat, key: happiness, delta: -2 }
+  backfire:
+    text:
+      - "It goes wrong fast. A group takes your questions as a challenge, and you end up on the pavement with your pockets turned out and a story that follows you around."
+      - "Somebody decides you are a snitch, or a fool, or both. A shove becomes a beating, and the only help is a bus ride home."
+    effects:
+      - { type: stat, key: health, delta: -5 }
+      - { type: stat, key: reputation, delta: -6 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: stat, key: happiness, delta: -4 }

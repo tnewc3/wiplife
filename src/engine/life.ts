@@ -467,6 +467,7 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
           if (play !== undefined && play.game !== game) throw new InvalidInputError([{ path: 'play', message: `"${choice.id}" is not played as ${play.game}.` }]);
           const settled = settlePlay(draft as LifeState, game, play, content);
           odds = chanceAfter(odds, settled.performance, content);
+          if (content.balance.minigames.playedPerfectSure && !settled.record.auto && settled.performance === 'perfect') odds = 1;
           logged.payload.play = settled.record;
         } else if (play !== undefined) {
           throw new InvalidInputError([{ path: 'play', message: `"${choice.id}" has no mini-game.` }]);

@@ -170,6 +170,11 @@ profiles:
     { great: 1, good: 4, neutral: 2.5, bad: 2.2, backfire: 0.3, tilt: [{ key: luck, weight: 0.3 }, { key: smarts, weight: 0.15 }, { key: confidence, weight: 0.1 }] }
   crime_serious:
     { great: 0.8, good: 3, neutral: 2, bad: 3.2, backfire: 1.1, tilt: [{ key: luck, weight: 0.3 }, { key: smarts, weight: 0.3 }, { key: confidence, weight: 0.1 }] }
+  # Asking around for a crew: being known, bold and easy to talk to opens doors; the bad tiers are a shove and a name that gets around.
+  crew_search:
+    { great: 1.2, good: 3, neutral: 3, bad: 1.6, backfire: 0.4, tilt: [{ key: riskTaking, weight: 0.3 }, { key: sociability, weight: 0.25 }, { key: confidence, weight: 0.25 }] }
+  crew_founding:
+    { great: 1.4, good: 3, neutral: 3, bad: 1.4, backfire: 0.3, tilt: [{ key: ambition, weight: 0.3 }, { key: confidence, weight: 0.3 }, { key: sociability, weight: 0.2 }] }
   market_goods:
     { great: 1.4, good: 4, neutral: 2, bad: 2, backfire: 0.5, tilt: [{ key: smarts, weight: 0.25 }, { key: luck, weight: 0.15 }] }
   market_papers:

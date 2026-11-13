@@ -35,7 +35,7 @@ const BAD_NAMES = ['', '  ', '12345', 'x'.repeat(60), '<b>Zed</b>', 'Anna{name}'
 export const RISK_POLICY = {
   careful: { gamble: 0.05, lawsuit: 0.12, partnerName: 0.3, nameChange: 0.004, loanWhenShort: 0.25, shortBelow: 800 },
   // A criminal life is mostly the crew's (E6a's targets judge it): the solo crimes, the black market and the loans come now and then.
-  criminal: { teenPetty: 0.05, crime: 0.03, extraCrime: 0.05, market: 0.03, fakeId: 0.08, nightWithFakeId: 0.5, gamble: 0.12, chase: 0.5, payday: 0.1, shark: 0.05 },
+  criminal: { askAround: 0.15, startCrew: 0.04, teenPetty: 0.05, crime: 0.03, extraCrime: 0.05, market: 0.03, fakeId: 0.08, nightWithFakeId: 0.5, gamble: 0.12, chase: 0.5, payday: 0.1, shark: 0.05 },
   /** A teenager asks a parent about a new first name now and then (every player but the spammer). */
   teenName: 0.012,
   carelessMax: 4,
@@ -108,6 +108,9 @@ export function chooseRiskPlans(life: LifeState, content: ContentBundle, rng: Rn
   if (player === 'criminal') {
     const p = RISK_POLICY.criminal;
     const crimes = byCategory('crime');
+    // The criminal player asks around for a crew now and then (the teen start one of their own, rarely).
+    if (!life.crime.crew && chance(rng, p.askAround)) add(content.pastimes.ask_around_for_a_crew, 'bold');
+    if (!adult && !life.crime.crew && chance(rng, p.startCrew)) add(content.pastimes.start_a_crew_of_your_own, 'bold');
     if (!adult && chance(rng, p.teenPetty)) add(pick(rng, crimes.filter((d) => d.minAge < content.balance.relationships.adultAge)), 'bold');
     if (adult && chance(rng, p.crime)) {
       add(pick(rng, crimes), 'bold');
